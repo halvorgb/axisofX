@@ -1,0 +1,57 @@
+module Console where
+
+import System.Console.ANSI
+import Level 
+import Types
+
+import qualified Data.Map as M
+import Data.Maybe
+
+coordToChar coord (World _ hero level _)
+  | hCurrPos hero == coord = '@'
+  | isWater coord level = '~'
+  | isDoor coord level = '|'
+  | isFloor coord level = '#'
+  | isVillain coord level = 'v'
+  | isArmor coord level = 'a'
+  | isWeapon coord level = 'w'
+  | isGold  coord level  = '.'
+  | isPotion coord level = 'p'
+  | otherwise = ' '
+
+tileColors = M.fromList [('@', (Vivid, Blue)), ('#', (Vivid, Black)), ('~', (Vivid, Cyan)), ('|', (Dull, Yellow)), ('v', (Vivid, Red)), ('a', (Dull, Green)), ('w', (Dull, Green)), ('.', (Dull, Yellow)), ('p', (Vivid, Magenta)), (' ', (Vivid, Black))]
+
+drawChar :: Char -> IO ()
+drawChar c = do
+  setSGR [SetConsoleIntensity BoldIntensity,
+          SetColor Background Dull Black,
+          SetColor Foreground (fst tileColor) (snd tileColor)]
+  putChar c
+  where
+    isMapped = M.lookup c tileColors
+    tileColor
+      | isMapped == Nothing = (Vivid, Black)
+      | otherwise = fromJust isMapped
+
+drawCoord world coord = do
+  uncurry (flip setCursorPosition) coord
+  drawChar (coordToChar coord world)
+
+drawHero world
+  | newPos == oldPos = return ()
+  | otherwise = do
+    drawCoord world newPos
+    drawCoord world oldPos
+  where
+    hero = wHero world
+    newPos = hCurrPos hero
+    oldPos = hOldPos hero
+
+drawWorld world = do
+  setCursorPosition 0 0
+  mapM_ drawChar (unlines chars)
+    where
+      lvl = wLevel world
+      (x', y') = (lSize lvl, 1) --1?2?
+      chars = [[coordToChar (x,y) world | x <- [0..x']]
+                                        | y <- [0..y']]
