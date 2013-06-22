@@ -1,9 +1,0 @@
-module Main where
-
-import Prelude hiding (Either(..))
-import System.Console.ANSI
-import System.IO
-
-type Position = Int
-
-data World = World { wHero :: Position }
