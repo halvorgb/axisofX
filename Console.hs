@@ -8,7 +8,7 @@ import qualified Data.Map as M
 import Data.Maybe
 
 coordToChar coord (World _ hero level _)
-  | hCurrPos hero == coord = '@'
+  | eCurrPos hero == coord = '@'
   | isWater coord level = '~'
   | isDoor coord level = '|'
   | isFloor coord level = '#'
@@ -18,6 +18,7 @@ coordToChar coord (World _ hero level _)
   | isGold  coord level  = '.'
   | isPotion coord level = 'p'
   | otherwise = ' '
+    
 
 tileColors = M.fromList [
   ('@', (Vivid, Blue)), 
@@ -58,8 +59,21 @@ drawHero world
     drawCoord world oldPos
   where
     hero = wHero world
-    newPos = hCurrPos hero
-    oldPos = hOldPos hero
+    newPos = eCurrPos hero
+    oldPos = eOldPos hero
+
+drawEntities world
+  | newPos == oldPos = return ()
+  | otherwise = do
+    drawCoord world newPos
+    drawCoord world oldPos
+  where
+    hero = wHero world
+    newPos = eCurrPos hero
+    oldPos = eOldPos hero
+
+
+
 
 drawWorld world = do
   setCursorPosition 0 0

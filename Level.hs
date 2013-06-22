@@ -34,7 +34,11 @@ isFloor coord lvl = case M.lookup coord (lTiles lvl) of
   _ -> False
 
 isGold coord lvl = M.member coord (lGold lvl)
-isMonster coord lvl = M.member coord (lMonsters lvl)
+
+isMonster coord lvl = case M.lookup coord (lEntities lvl) of 
+  Just ((Entity _ _ (Monster _ _ _) _ _):_) -> True
+  _ -> False
+
 
 isArmor coord lvl = case M.lookup coord (lItems lvl) of
   Just ((Arm _):_) -> True
