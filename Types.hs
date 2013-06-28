@@ -51,7 +51,17 @@ data Effect = Heal | Harm
 data Weapon = Weapon { wDamage :: Int,
                        wDesc :: String,
                        wToHit :: Int }
-data Tile = Water | Floor | Door
+--data Wall = Door deriving (Eq, Ord)
+data Tile = Door | Floor | Water deriving (Eq, Ord)
+
+{-
+instance Random Tile where 
+  randomR = randomTileRange
+  random = randomTile
+
+randomTileRange :: (RandomGen g, Tile t) => (t, t) -> g -> (t, g)
+-}
+
                          
 data Input = Dir Direction | Exit
 

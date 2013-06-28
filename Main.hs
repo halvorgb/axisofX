@@ -12,6 +12,7 @@ import Console
 import Level
 import Types
 import Logic
+import WorldBuilder
 
 main = do
   hSetEcho stdin False
@@ -20,7 +21,7 @@ main = do
   hideCursor
   setTitle "Axis of X"
   clearScreen
-  let world = genesis { wLevel = level1, wLevels = [level1] }
+  world <- returnWorld
   gameLoop $ world
 
 gameLoop world = do -- entities are the hero, any projectiles and any monsters.

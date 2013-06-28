@@ -52,15 +52,6 @@ drawCoord world coord = do
       minPoint = fst $ lViewFrame lvl
       coord' = (fst coord - minPoint, snd coord) -- side scrolling
 
-drawHero world
-  | newPos == oldPos = return ()
-  | otherwise = do
-    drawCoord world newPos
-    drawCoord world oldPos
-  where
-    hero = wHero world
-    newPos = eCurrPos hero
-    oldPos = eOldPos hero
 
 drawEntities world
   | newPos == oldPos = return ()
