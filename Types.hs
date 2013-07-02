@@ -18,7 +18,9 @@ data EntityType = Monster { mType :: MonsterType,
                             hHP :: Int,
                             hItems :: [Item],
                             hWields :: Weapon,
-                            hWears :: Armor  }
+                            hWears :: Armor,  
+                            hViewFrame :: (Int, Int),
+                            hViewDistance :: Int}
                   
                 | Projectile  { oDamage :: Int, 
                                 oVelocity :: Int} -- currently only projectiles ?
@@ -46,12 +48,7 @@ instance Random MonsterType where
     randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
                         (r, g') -> (toEnum r, g')
                           
-
-
-
-
-
-               
+             
 data Item = Arm Armor | Pot Potion | Weap Weapon
 
 data Armor = Armor { aAvoidance :: Int,
@@ -68,7 +65,7 @@ data Weapon = Weapon { wDamage :: Int,
                        wDesc :: String,
                        wToHit :: Int }
 
-data WallTile = Wall 
+data WallTile = Door | Wall
               deriving (Show, Bounded, Enum, Eq)
 
 data FloorTile = Grass | Water 
@@ -80,7 +77,7 @@ instance Random FloorTile where
     randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
                         (r, g') -> (toEnum r, g')
 
-instance Random WallTile where
+instance Random WallTile where -- this is not really needed.
     random g = case randomR (fromEnum (minBound :: WallTile), fromEnum (maxBound :: WallTile)) g of
                  (r, g') -> (toEnum r, g')
     randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
@@ -96,7 +93,7 @@ randomTileRange :: (RandomGen g, Tile t) => (t, t) -> g -> (t, g)
 -}
 
                          
-data Input = Dir Direction | Exit
+data Input = Dir Direction | Exit | Wait
 
 data Direction = Up | Down | Left | Right deriving (Eq)
 
@@ -107,8 +104,6 @@ data Level = Level { lDepth :: Int,
                      lGold :: M.Map Position Int,
                      lItems :: M.Map Position [Item],
                      lSize :: Int,
-                     lViewFrame :: (Int, Int),
-                     lViewDistance :: Int,
                      lFloorTiles :: M.Map Position FloorTile,
                      lWallTiles :: M.Map Position WallTile,                     
                      lEntities :: M.Map Position [Entity] }
@@ -123,8 +118,6 @@ emptyLevel = Level { lDepth = 0,
                      lGold = M.empty,
                      lItems = M.empty,
                      lSize = 1,
-                     lViewFrame = (0, 9),
-                     lViewDistance = 30,
                      lFloorTiles = M.empty,
                      lWallTiles = M.empty,                     
                      lEntities = M.empty }
@@ -158,7 +151,9 @@ commonerHero =  Hero { hGold = 0,
                        hHP = 10,
                        hItems = [],
                        hWields = fists,
-                       hWears = rags  }
+                       hWears = rags,  
+                       hViewFrame = (0,9),
+                       hViewDistance = 40 }
                 
 commonerEnt = Entity  { eCurrPos = (0,0),
                         eOldPos = (0,0),

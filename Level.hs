@@ -10,7 +10,7 @@ isWater coord lvl = case M.lookup coord (lFloorTiles lvl) of
   _ -> False
 
 isDoor coord lvl = case M.lookup coord (lWallTiles lvl) of
---  Just Door -> True
+  Just Door -> True
   _ -> False
 
 isGrass coord lvl = case M.lookup coord (lFloorTiles lvl) of
@@ -19,45 +19,39 @@ isGrass coord lvl = case M.lookup coord (lFloorTiles lvl) of
 
 isGold coord lvl = M.member coord (lGold lvl)
 
-isMonster coord lvl = False
-  
-  {- any (\x -> case x of 
+isMonster coord lvl = any (\x -> case x of 
                               Entity { eEntityType = Monster { } } -> True
                               _ -> False
                           ) resList
   where
     resList = fromMaybe [] $ M.lookup coord (lEntities lvl)
 
--}
 
-isArmor coord lvl = False {- = any (\x -> case x of 
+isArmor coord lvl =  any (\x -> case x of 
                              Arm { } -> True
                              _ -> False
                           ) resList
   where
     resList = fromMaybe [] $ M.lookup coord (lItems lvl)
-  -} 
+
   
   
 
 
 
-isPotion coord lvl = False {- any (\x -> case x of 
+isPotion coord lvl = any (\x -> case x of 
                              Pot { } -> True
                              _ -> False
                           ) resList
   where
     resList = fromMaybe [] $ M.lookup coord (lItems lvl)
--}
-isWeapon coord lvl = False {- any (\x -> case x of 
+
+isWeapon coord lvl =  any (\x -> case x of 
                              Weap { } -> True
                              _ -> False
                           ) resList
   where
     resList = fromMaybe [] $ M.lookup coord (lItems lvl)
-
--}
-
 
 
 -- og lignende for alle andre funksj.

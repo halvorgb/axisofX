@@ -9,11 +9,11 @@ import qualified Data.Map as M
 
 lengthBounds :: (Int, Int)
 lengthBounds = (100, 200) -- minimum and maximum length of a level
-viewDistanceBounds :: (Int, Int)
-viewDistanceBounds = (5, 40) -- minimum and maximum viewRange (+10 for backwards viewing)
 nofLevels = 1 -- TODO: add more.
 monstersPer10Bounds :: (Int, Int)
 monstersPer10Bounds = (3, 5) -- n monsters every 10 tiles, so length * 10 div mP10 gives the amount of monsters to be generated.
+doorsPer100Bounds :: (Int, Int)
+doorsPer100Bounds = (2, 4)
 
 -- returnWorld :: I
 returnWorld = do
@@ -34,27 +34,39 @@ generateLevels g nofLevels prevLevels
   | otherwise = generateLevels g' (nofLevels-1) (lvl:prevLevels)
   where
     (l, g') = randomR lengthBounds g
-    (vD, _) = randomR viewDistanceBounds g
     (mP10, _) = randomR monstersPer10Bounds g
     nofMonsters = div l $ div 10 mP10
+    (dP100, _) = randomR doorsPer100Bounds g
+    nofDoors = div l $ div 100 dP100
     
-    monsters = generateMonsters g nofMonsters l nofLevels
-    floor = generateFloor g l
-    wall = generateWall  g l
+    
+    (gf, gw) = split g
+    
+    floor = generateFloor gf l
+    wall = generateWall gw l nofDoors
+
+
+    monsters = generateMonsters g nofMonsters l nofLevels wall
+
 --    lvl = emptyLevel --strToLevel (walls:[floor])
 --    lvl' = lvl {lSize = l, lViewDistance = vD}
     lvl = emptyLevel { lSize = l,
                        lDepth = nofLevels,
-                       lViewDistance = vD, 
                        lFloorTiles = floor, 
                        lWallTiles = wall
                      }
 
-generateMonsters :: StdGen -> Int -> Int -> Int -> M.Map Position Entity
-generateMonsters g nofMonsters l level = M.empty --monsterMap
+generateMonsters :: StdGen -> Int -> Int -> Int -> M.Map Position WallTile -> M.Map Position Entity
+generateMonsters g nofMonsters l level wallMap = monsterMap
   where
     randType = (take nofMonsters $ randoms g) :: [MonsterType]
-    randCoords = zip (take nofMonsters $ randomRs (1, (l-1)) g) $ take nofMonsters $ repeat 0
+    randCoords = zip  -- bit weird, the takeWhile ensures that no monsters spawn on the same tile as a door.
+                 (take nofMonsters
+                  (takeWhile (\x -> M.member (x,0) wallMap) $ randomRs (1, (l-1)) g)
+                 ) 
+                 $ replicate nofMonsters 0
+                 
+                 
     zippedList = zip randCoords randType
     randMonsters = map (\(c, t) -> baseMonsterEnt { eCurrPos = c,
                                                     eOldPos = c,
@@ -76,9 +88,10 @@ generateFloor g l = floorMap
     coords = [(x,y) | x <- [0..], y <- [1]]
     floorMap = M.fromList $ zip coords randFloor
 
-generateWall :: StdGen -> Int -> M.Map Position WallTile
-generateWall g l = M.empty -- wallMap
+generateWall :: StdGen -> Int -> Int -> M.Map Position WallTile
+generateWall g l nofDoors =  wallMap
   where
+    doorCoords = zip (take nofDoors $ randomRs (1, (l-1)) g) $ replicate nofDoors 0
     randWall = (take l $ randoms  g) :: [WallTile]
     coords = [(x,y) | x <- [0..], y <- [0]]
-    wallMap = M.fromList $ zip coords randWall
+    wallMap = M.fromList $ zip doorCoords $ replicate nofDoors Door

@@ -3,6 +3,7 @@ module Console where
 import System.Console.ANSI
 import Level 
 import Types
+import Logic
 
 import qualified Data.Map as M
 import Data.Maybe
@@ -48,8 +49,8 @@ drawCoord world coord = do
   uncurry (flip setCursorPosition) coord'
   drawChar (coordToChar coord world)
     where
-      lvl = wLevel world
-      minPoint = fst $ lViewFrame lvl
+      ht = eEntityType $ wHero world
+      minPoint = fst $ hViewFrame ht
       coord' = (fst coord - minPoint, snd coord) -- side scrolling
 
 
@@ -63,14 +64,27 @@ drawEntities world
     newPos = eCurrPos hero
     oldPos = eOldPos hero
 
-
-
-
 drawWorld world = do
+  clearWorld (minPoint, maxPoint) world
   setCursorPosition 0 0
   mapM_ drawChar (unlines chars)
     where
-      lvl = wLevel world
-      (minPoint, maxPoint) = (fst $ lViewFrame lvl, (snd $ lViewFrame lvl) + lViewDistance lvl)
+      (minPoint, maxPoint) = getViewFrame world
+      
       chars = [[coordToChar (x,y) world | x <- [minPoint..maxPoint]]
                                         | y <- [0..1]] -- always 2!
+
+
+clearWorld (minPoint, maxPoint) world = do
+  setCursorPosition 0 (maxPoint - minPoint)
+  mapM_ drawChar chars
+  setCursorPosition 1 (maxPoint - minPoint)
+  mapM_ drawChar chars
+  where
+    ht = eEntityType $ wHero world
+    
+    unBlockedMax = (snd $ hViewFrame ht) + hViewDistance ht
+    chars = if unBlockedMax > maxPoint then
+              replicate (unBlockedMax - maxPoint + 1) ' '
+            else
+              []

@@ -4,7 +4,7 @@ import qualified Data.Map as M
 import Data.Maybe
 import Data.List
 import Types
-
+import Level
 
 
   -- Find all entities currently in view, add them to a list l.
@@ -20,10 +20,15 @@ think world = do
   return world'
     where
       h = wHero world
+      ht = eEntityType h
       lvl = wLevel world
-      e = h:(getEntitiesFromViewFrame world (lViewFrame lvl) (lViewDistance lvl)) -- every entity in view
+      
+      viewFrame = getViewFrame world
+      
+      e = h:(getEntitiesFromViewFrame world viewFrame) -- every entity in view
       e' = prepare e -- subtracts the lowest from every entity
       e'' =  filter (\x -> eTimeUntilNextMove x == 0) e'
+
       projectiles = filter (\x -> case x of 
                                Entity { eEntityType = Projectile { } } -> True
                                _ -> False
@@ -32,25 +37,34 @@ think world = do
                                Entity { eEntityType = Monster { } } -> True
                                _ -> False
                            ) e''
-                    
+
       h' = fromJust $ find (\x -> case x of  -- find to not have to iterate through the whole thing, fromJust is safe because the hero was added to e.
                                Entity { eEntityType = Hero { } } -> True                         --  Crashing is a good idea if hero can't be found in e'
                                _ -> False
                            ) e'
            
-      projectiles' = move projectiles
-      monsters' = ai monsters
+      projectiles' =  move projectiles
+      monsters' =  ai monsters
       
-      -- e''' reset timeUntilNextMove, on every entity except the player.
       e''' = (map (\x -> x { eTimeUntilNextMove = eSpeed x } ) (projectiles' ++ monsters'))
-      emap = updateMap (lEntities lvl) (fst $ lViewFrame lvl, (snd $ lViewFrame lvl) + lViewDistance lvl) e'''
-      world' = world { wLevel = lvl {lEntities = emap}, wHero = h}
-       
+      emap = updateMap (lEntities lvl) (fst $ hViewFrame ht, (snd $ hViewFrame ht) + hViewDistance ht) e'''
+      world' = world { wLevel = lvl {lEntities = emap}, wHero = h'}
 
-getEntitiesFromViewFrame :: World -> (Int, Int) -> Int -> [Entity]
-getEntitiesFromViewFrame w (start,_) end
+
+getViewFrame :: World -> (Int, Int) -- gets vision of the player, blocked by doors if present etc.
+getViewFrame world = (vFStart, maxVision)
+  where
+    lvl = wLevel world
+    ht = eEntityType $ wHero world
+    vFStart = fst $ hViewFrame ht
+    vFMax = hViewDistance ht + (snd $ hViewFrame ht)
+    
+    maxVision = fromMaybe vFMax $ find (\x -> isDoor (x, 0) lvl) [vFStart..vFMax]
+
+getEntitiesFromViewFrame :: World -> (Int, Int) -> [Entity]
+getEntitiesFromViewFrame w (start,end)
   | start > end = []
-  | otherwise   = res ++ getEntitiesFromViewFrame w (start+1,0) end 
+  | otherwise   = res ++ getEntitiesFromViewFrame w (start+1,end)
   where
     lvl = wLevel w
     res = fromMaybe [] $ M.lookup (start, 0) (lEntities lvl)

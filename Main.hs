@@ -25,16 +25,17 @@ main = do
   gameLoop $ world
 
 gameLoop world = do -- entities are the hero, any projectiles and any monsters.
-  drawWorld world
-  world' <- think world
-  drawEntities world'
-  if (eTimeUntilNextMove $ wHero world') == 0 
+  if (eTimeUntilNextMove $ wHero world) == 0 
     then do 
+    drawWorld world
+    drawEntities world
     input <- getInput 
     case input of
       Exit -> handleExit
-      Dir dir -> handleDir world' dir
+      Wait -> handleWait world
+      Dir dir -> handleDir world dir
     else do
+    world' <- think world    
     gameLoop world'
 
 
@@ -43,6 +44,7 @@ getInput = do
   case char of
     'q' -> return Exit
     'a' -> return (Dir Left)
+    's' -> return Wait
     'd' -> return (Dir Right)
     _   -> getInput -- recurse if input not recognized
 
@@ -51,35 +53,39 @@ getInput = do
 -- render the world relative to the player position to enable side scrolling. Only to the right.
 handleDir w dir
   | (dir == Left)  && ((fst $ eCurrPos h) == firstInFrame) = 
-    gameLoop w { 
-      wHero = h { 
-         eOldPos = eCurrPos h,
-         eTimeUntilNextMove = eSpeed h                   
-         } 
-      } -- left corner, no change (takes up a move, possible issue)
+    gameLoop w -- left corner, does not use a turn (takes up a move, possible issue)
+    
   | ((dir == Right) && ((fst $ coord) > (lSize lvl -1))) =  
-      gameLoop w { 
-        wHero = h { 
-           eOldPos = eCurrPos h,
-           eTimeUntilNextMove = eSpeed h
-           } 
-        } -- Right edge of map,  uses a turn, possible issue. Perhaps load next level here.
-      
+      gameLoop w -- Right edge of map, does not use a turn, possible issue. Perhaps load next level here.
+
+
+  | isDoor coord lvl = 
+    gameLoop w {
+      wLevel = lvl { 
+         lWallTiles = M.delete coord $ lWallTiles lvl
+         },
+      wHero = h { 
+        eOldPos = eCurrPos h, 
+        eTimeUntilNextMove = eSpeed h
+        } 
+      } -- Destroys the door, uses a turn.
+
   | (dir == Right) && ((fst $ eCurrPos h) == lastInFrame) && (lastInFrame < lSize lvl) = 
       gameLoop w { 
         wHero = h { 
            eOldPos = eCurrPos h,
            eCurrPos = coord, 
-           eTimeUntilNextMove = eSpeed h},
-        wLevel = lvl { 
-          lViewFrame = (firstInFrame+1, lastInFrame+1) 
-          } 
-        } -- If at right side of frame
-        
-  | isDoor coord lvl = gameLoop w { wHero = h { eOldPos = eCurrPos h, eTimeUntilNextMove = eSpeed h} }
+           eTimeUntilNextMove = eSpeed h,
+           eEntityType = ht { 
+             hViewFrame = (firstInFrame+1, lastInFrame+1)
+             }
+           }
+        } -- If at right side of frame -- TODO: check if monster collides! (above)
+      
   | otherwise =  gameLoop w { wHero = h { eOldPos = eCurrPos h, eCurrPos = coord, eTimeUntilNextMove = eSpeed h} }
   where 
     h              = wHero w
+    ht             = eEntityType h
     lvl            = wLevel w
     coord          = (newX, newY)
     newX           = heroX
@@ -87,9 +93,19 @@ handleDir w dir
     (heroX, heroY) = eCurrPos h |+| dirToCoord dir
     hConst i       = max 0 (min i 20)
     
-    (firstInFrame, lastInFrame) = lViewFrame lvl
+    (firstInFrame, lastInFrame) = hViewFrame ht
 
 
+
+handleWait w =
+  gameLoop w { 
+    wHero = h { 
+       eOldPos = eCurrPos h,
+       eTimeUntilNextMove = eSpeed h
+       } 
+    } -- left corner, does not use a turn (takes up a move, possible issue)
+  where
+    h = wHero w
 
 handleExit = do
   clearScreen
