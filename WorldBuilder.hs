@@ -4,7 +4,6 @@ import Level
 import Types
 
 import System.Random
-import System.IO.Unsafe
 import qualified Data.Map as M
 
 lengthBounds :: (Int, Int)
