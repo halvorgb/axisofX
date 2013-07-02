@@ -7,6 +7,7 @@ import Logic
 
 import qualified Data.Map as M
 import Data.Maybe
+import Data.List
 
 coordToChar coord (World _ hero level _)
   | eCurrPos hero == coord = '@'
@@ -26,7 +27,7 @@ tileColors = M.fromList [
   ('#', (Vivid, Green)), 
   ('~', (Vivid, Cyan)), 
   ('|', (Dull, Yellow)), 
-  ('v', (Vivid, Red)), 
+  ('m', (Vivid, Red)), 
   ('-', (Dull, White)), 
   (',', (Dull, White)), 
   ('.', (Dull, Yellow)), 
@@ -40,10 +41,8 @@ drawChar c = do
           SetColor Foreground (fst tileColor) (snd tileColor)]
   putChar c
   where
-    isMapped = M.lookup c tileColors
-    tileColor
-      | isMapped == Nothing = (Vivid, Black)
-      | otherwise = fromJust isMapped
+    tileColor = fromMaybe (Vivid, Black) $ M.lookup c tileColors
+
 
 drawCoord world coord = do
   uncurry (flip setCursorPosition) coord'
@@ -54,15 +53,20 @@ drawCoord world coord = do
       coord' = (fst coord - minPoint, snd coord) -- side scrolling
 
 
-drawEntities world
-  | newPos == oldPos = return ()
-  | otherwise = do
-    drawCoord world newPos
-    drawCoord world oldPos
+drawEntities world = do
+    --mapM_ (drawCoord world) oldPositions
+    mapM_ (drawCoord world) newPositions
+
+    drawCoord world newHeroPos -- hack to test before combat and collision is implemented, LOL wut?
   where
     hero = wHero world
-    newPos = eCurrPos hero
-    oldPos = eOldPos hero
+    entities = getEntitiesFromViewFrame world $ getViewFrame world
+    newPositions = map eCurrPos entities
+    oldPositions = (map eOldPos (hero:entities)) \\ newPositions -- remove the new to not draw redundant tiles.
+    newHeroPos = eCurrPos hero
+
+    
+    
 
 drawWorld world = do
   clearWorld (minPoint, maxPoint) world

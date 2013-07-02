@@ -8,10 +8,10 @@ import System.IO.Unsafe
 import qualified Data.Map as M
 
 lengthBounds :: (Int, Int)
-lengthBounds = (100, 200) -- minimum and maximum length of a level
-nofLevels = 1 -- TODO: add more.
+lengthBounds = (100, 1000) -- minimum and maximum length of a level
+nofLevels = 20 -- TODO: add more.
 monstersPer10Bounds :: (Int, Int)
-monstersPer10Bounds = (3, 5) -- n monsters every 10 tiles, so length * 10 div mP10 gives the amount of monsters to be generated.
+monstersPer10Bounds = (3, 4) -- n monsters every 10 tiles, so length * 10 div mP10 gives the amount of monsters to be generated.
 doorsPer100Bounds :: (Int, Int)
 doorsPer100Bounds = (2, 4)
 
@@ -53,28 +53,30 @@ generateLevels g nofLevels prevLevels
     lvl = emptyLevel { lSize = l,
                        lDepth = nofLevels,
                        lFloorTiles = floor, 
-                       lWallTiles = wall
+                       lWallTiles = wall,
+                       lEntities = monsters
                      }
 
-generateMonsters :: StdGen -> Int -> Int -> Int -> M.Map Position WallTile -> M.Map Position Entity
+generateMonsters :: StdGen -> Int -> Int -> Int -> M.Map Position WallTile -> M.Map Position [Entity]
 generateMonsters g nofMonsters l level wallMap = monsterMap
   where
     randType = (take nofMonsters $ randoms g) :: [MonsterType]
     randCoords = zip  -- bit weird, the takeWhile ensures that no monsters spawn on the same tile as a door.
                  (take nofMonsters
-                  (takeWhile (\x -> M.member (x,0) wallMap) $ randomRs (1, (l-1)) g)
+                  (takeWhile (\x -> not $ M.member (x,0) wallMap) $ randomRs (1, (l-1)) g)
                  ) 
                  $ replicate nofMonsters 0
                  
                  
     zippedList = zip randCoords randType
-    randMonsters = map (\(c, t) -> baseMonsterEnt { eCurrPos = c,
+    randMonsters = map (\(c, t) -> [baseMonsterEnt { eCurrPos = c,
                                                     eOldPos = c,
                                                     eEntityType = 
                                                       baseMonster { mType = t, 
                                                                     mLevel = level 
                                                                   } 
                                                   }
+                                    ]
                        ) zippedList
     monsterMap = M.fromList $ zip randCoords randMonsters
 
