@@ -68,12 +68,10 @@ generateMonsters g nofMonsters l level wallMap = monsterMap
                  
                  
     zippedList = zip randCoords randType
-    randMonsters = map (\(c, t) -> [baseMonsterEnt { eCurrPos = c,
-                                                    eOldPos = c,
-                                                    eEntityType = 
-                                                      baseMonster { mType = t, 
-                                                                    mLevel = level 
-                                                                  } 
+    randMonsters = map (\(c, t) -> [baseMonster { mCurrPos = c,
+                                                  mOldPos = c,
+                                                  mType = t,
+                                                  mLevel = level
                                                   }
                                     ]
                        ) zippedList
@@ -93,6 +91,4 @@ generateWall :: StdGen -> Int -> Int -> M.Map Position WallTile
 generateWall g l nofDoors =  wallMap
   where
     doorCoords = zip (take nofDoors $ randomRs (1, (l-1)) g) $ replicate nofDoors 0
-    randWall = (take l $ randoms  g) :: [WallTile]
-    coords = [(x,y) | x <- [0..], y <- [0]]
     wallMap = M.fromList $ zip doorCoords $ replicate nofDoors Door

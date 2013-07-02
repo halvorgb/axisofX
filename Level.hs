@@ -20,7 +20,7 @@ isGrass coord lvl = case M.lookup coord (lFloorTiles lvl) of
 isGold coord lvl = M.member coord (lGold lvl)
 
 isMonster coord lvl = any (\x -> case x of 
-                              Entity { eEntityType = Monster { } } -> True
+                              Monster { } -> True
                               _ -> False
                           ) resList
   where

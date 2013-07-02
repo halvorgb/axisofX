@@ -7,41 +7,53 @@ import System.Random
 type Position = (Int, Int)
 type Gold = Int
 
-data EntityType = Monster { mType :: MonsterType,
-                            mInventory :: Inventory,
-                            mLevel :: Int }
+data Entity = Monster { mType :: MonsterType,
+                        mRace :: Race,
+                        mInventory :: Inventory,
+                        mLevel :: Int, 
+                        mExperience :: Int, 
+                        mCurrPos :: Position,
+                        mOldPos :: Position,
+                        mCurrHP :: Int,
+                        mMaxHP :: Int,
+                        mSpeed :: Int, -- How much time between each action.
+                        mNextMove :: Int -- How much time until the NEXT action.                                               
+                      }
                   
-                | Hero    { hGold :: Int,
-                            hClass :: Class,
-                            hLevel :: Int,
-                            hExperience :: Int,
-                            hHP :: Int,
-                            hItems :: [Item],
-                            hWields :: Weapon,
-                            hWears :: Armor,  
-                            hViewFrame :: (Int, Int),
-                            hViewDistance :: Int}
-                  
-                | Projectile  { oDamage :: Int, 
-                                oVelocity :: Int} -- currently only projectiles ?
-
-data Entity = Entity { eCurrPos :: Position,
-                       eOldPos :: Position,
-                       eEntityType :: EntityType,
-                       eSpeed :: Int,
-                       eTimeUntilNextMove :: Int }
-                
-                
+            | Hero    { hClass :: Class,
+                        hRace :: Race,
+                        hInventory :: Inventory,
+                        hLevel :: Int,
+                        hExperience :: Int,
+                        hExperiencePenalty :: Float,
+                        hCurrPos :: Position,
+                        hOldPos :: Position,
+                        hCurrHP :: Int,
+                        hMaxHP :: Int,
+                        hSpeed :: Int,
+                        hNextMove :: Int,
+                        hWield :: Weapon,
+                        hWear :: Armor,
+                        hMovementSlack :: (Int, Int),  -- the coordinates that the hero can move between without wrapping.
+                        hViewDistance :: Int } -- Added to $ snd hMovementSlack
+                                          
+            | Projectile  { pDamage :: Int,
+                            pCurrPos :: Position,
+                            pOldPos :: Position,
+                            pSpeed :: Int,
+                            pNextMove :: Int }
+            deriving (Show)
 
 data Inventory = Inventory [Item] Gold
+                 deriving (Show)
 
 
+data Race = Ogre | Giant | Troll | Orc | Goblin | Hobgoblin
+          deriving (Show, Bounded, Enum, Eq)
                
 data MonsterType = Politician | Noble 
                  deriving (Show, Bounded, Enum, Eq)
                  
-
-                          
 instance Random MonsterType where
     random g = case randomR (fromEnum (minBound :: MonsterType), fromEnum (maxBound :: MonsterType)) g of
                  (r, g') -> (toEnum r, g')
@@ -49,21 +61,28 @@ instance Random MonsterType where
                         (r, g') -> (toEnum r, g')
                           
              
+
+
 data Item = Arm Armor | Pot Potion | Weap Weapon
+          deriving (Show, Eq)
 
 data Armor = Armor { aAvoidance :: Int,
                      aMitigation :: Int,
                      aDesc :: String }
+           deriving(Show, Eq)
              
 data Potion = Potion { pAmount :: Int,
                        pDesc :: String,
-                       pEffect :: Effect }
-              
+                       pEffect :: Effect } 
+            deriving (Show, Eq)
+             
 data Effect = Heal | Harm
+            deriving (Show, Eq)
 
 data Weapon = Weapon { wDamage :: Int,
                        wDesc :: String,
                        wToHit :: Int }
+            deriving (Show, Eq)
 
 data WallTile = Door | Wall
               deriving (Show, Bounded, Enum, Eq)
@@ -77,28 +96,14 @@ instance Random FloorTile where
     randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
                         (r, g') -> (toEnum r, g')
 
-instance Random WallTile where -- this is not really needed.
-    random g = case randomR (fromEnum (minBound :: WallTile), fromEnum (maxBound :: WallTile)) g of
-                 (r, g') -> (toEnum r, g')
-    randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
-                        (r, g') -> (toEnum r, g')
-
-
-{-
-instance Random Tile where 
-  randomR = randomTileRange
-  random = randomTile
-
-randomTileRange :: (RandomGen g, Tile t) => (t, t) -> g -> (t, g)
--}
-
                          
 data Input = Dir Direction | Exit | Wait
 
-data Direction = Up | Down | Left | Right deriving (Eq)
+data Direction = Left | Right deriving (Eq)
 
                              
 data Class = Bard | Jester
+           deriving (Show, Eq)
 
 data Level = Level { lDepth :: Int,
                      lGold :: M.Map Position Int,
@@ -107,11 +112,13 @@ data Level = Level { lDepth :: Int,
                      lFloorTiles :: M.Map Position FloorTile,
                      lWallTiles :: M.Map Position WallTile,                     
                      lEntities :: M.Map Position [Entity] }
+           deriving (Show)
 
 data World = World { wDepth :: Int,
                      wHero :: Entity,
                      wLevel :: Level,
                      wLevels :: [Level] }
+           deriving (Show)
 
 
 emptyLevel = Level { lDepth = 0,
@@ -124,14 +131,17 @@ emptyLevel = Level { lDepth = 0,
              
              
 baseMonster = Monster { mType = Noble,
+                        mRace = Ogre,
                         mInventory = Inventory [] 0,
-                        mLevel = 0 }
-              
-baseMonsterEnt = Entity { eCurrPos = (0,0),
-                          eOldPos = (0,0),
-                          eEntityType = baseMonster,
-                          eSpeed = 10,
-                          eTimeUntilNextMove = 10 }
+                        mLevel = 0, 
+                        mExperience = 1, 
+                        mCurrPos = (0,0),
+                        mOldPos = (0,0),
+                        mCurrHP = 1,
+                        mMaxHP = 1,
+                        mSpeed = 10,
+                        mNextMove = 10 }
+
 
 fists = Weapon 0 "Bare Fists" 0
 
@@ -139,24 +149,27 @@ rags = Armor 0 0 "Rags"
 
 
 genesis = World { wDepth = 0,
-                  wHero = commonerEnt,
+                  wHero = player,
                   wLevel = emptyLevel,
                   wLevels = [emptyLevel] }
 
 
-commonerHero =  Hero { hGold = 0,
-                       hClass = Bard,
-                       hLevel = 0,
-                       hExperience = 0,
-                       hHP = 10,
-                       hItems = [],
-                       hWields = fists,
-                       hWears = rags,  
-                       hViewFrame = (0,9),
-                       hViewDistance = 40 }
-                
-commonerEnt = Entity  { eCurrPos = (0,0),
-                        eOldPos = (0,0),
-                        eSpeed = 5,
-                        eEntityType = commonerHero,
-                        eTimeUntilNextMove = 0 }
+
+
+player = Hero { hClass = Jester,
+                hRace = Hobgoblin,
+                hInventory = Inventory [] 0,
+                hLevel = 1,
+                hExperience = 0,
+                hExperiencePenalty = 0.0,
+                hCurrPos = (0,0),
+                hOldPos = (0,0),
+                hCurrHP = 10,
+                hMaxHP = 10,
+                hSpeed = 5,
+                hNextMove = 0,
+                hWield = fists,
+                hWear = rags,
+                hMovementSlack = (0, 9),
+                hViewDistance = 40 }
+                           

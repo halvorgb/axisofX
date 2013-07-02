@@ -20,34 +20,41 @@ think world = do
   return world'
     where
       h = wHero world
-      ht = eEntityType h
       lvl = wLevel world
       
       viewFrame = getViewFrame world
       
       e = h:(getEntitiesFromViewFrame world viewFrame) -- every entity in view
       e' = prepare e -- subtracts the lowest from every entity
-      e'' =  filter (\x -> eTimeUntilNextMove x == 0) e'
+      e'' =  filter (\x -> case x of 
+                        Monster {} -> mNextMove x == 0
+                        Hero {} -> hNextMove x == 0
+                        Projectile {} -> pNextMove x == 0
+                    ) e'
 
       projectiles = filter (\x -> case x of 
-                               Entity { eEntityType = Projectile { } } -> True
+                               Projectile { }  -> True
                                _ -> False
                            ) e''
       monsters    = filter (\x -> case x of 
-                               Entity { eEntityType = Monster { } } -> True
+                               Monster { } -> True
                                _ -> False
                            ) e''
 
       h' = fromJust $ find (\x -> case x of  -- find to not have to iterate through the whole thing, fromJust is safe because the hero was added to e.
-                               Entity { eEntityType = Hero { } } -> True                         --  Crashing is a good idea if hero can't be found in e'
+                               Hero { } -> True                         --  Crashing is a good idea if hero can't be found in e'
                                _ -> False
                            ) e'
            
       projectiles' =  move projectiles
       monsters' =  ai monsters
       
-      e''' = (map (\x -> x { eTimeUntilNextMove = eSpeed x } ) (projectiles' ++ monsters'))
-      emap = updateMap (lEntities lvl) (fst $ hViewFrame ht, (snd $ hViewFrame ht) + hViewDistance ht) e'''
+      e''' = (map (\x -> case x of 
+                        Monster {} -> x { mNextMove = mSpeed x }
+                        Projectile {} -> x { pNextMove = pSpeed x }                        
+                    ) (projectiles' ++ monsters'))
+             
+      emap = updateMap (lEntities lvl) (fst $ hMovementSlack h, (snd $ hMovementSlack h) + hViewDistance h) e'''
       world' = world { wLevel = lvl {lEntities = emap}, wHero = h'}
 
 
@@ -55,10 +62,9 @@ getViewFrame :: World -> (Int, Int) -- gets vision of the player, blocked by doo
 getViewFrame world = (vFStart, maxVision)
   where
     lvl = wLevel world
-    ht = eEntityType $ wHero world
-    vFStart = fst $ hViewFrame ht
-    vFMax = hViewDistance ht + (snd $ hViewFrame ht)
-    
+    h = wHero world
+    vFStart = fst $ hMovementSlack h
+    vFMax = hViewDistance h + (snd $ hMovementSlack h)
     maxVision = fromMaybe vFMax $ find (\x -> isDoor (x, 0) lvl) [vFStart..vFMax]
 
 getEntitiesFromViewFrame :: World -> (Int, Int) -> [Entity]
@@ -75,9 +81,17 @@ prepare :: [Entity] -> [Entity]
 prepare e = sub e
   where
     -- 10000 is infinite in this case.
-    lowestRemaining = foldl (\x y -> (min x $ eTimeUntilNextMove y)) 1000 e
+    lowestRemaining = foldl (\x y -> case y of
+                                Monster {} -> min x $ mNextMove y
+                                Projectile {} -> min x $ pNextMove y
+                                Hero {} -> min x $ hNextMove y
+                              ) 1000 e
     -- subtract this value from every entity
-    sub = map (\x -> x {eTimeUntilNextMove = eTimeUntilNextMove x - lowestRemaining})
+    sub = map (\x -> case x of 
+                  Monster {} -> x { mNextMove = mNextMove x - lowestRemaining } 
+                  Projectile {} -> x { pNextMove = pNextMove x - lowestRemaining }
+                  Hero {} -> x { hNextMove = hNextMove x - lowestRemaining } 
+              )
 
 
 move :: [Entity] -> [Entity]
@@ -93,16 +107,24 @@ updateMap emap (start, stop) e
   | otherwise = M.adjust (\_ -> e') pos emap
   where
     pos = (start, 0)
-    e' = filter (\x -> eCurrPos x == pos) e
-
-
+    e' = filter (\x -> case x of 
+                    Monster {} -> mCurrPos x == pos
+                    Projectile {} -> pCurrPos x == pos                    
+                ) e
 
 
 -- just getting a prototype running...
-dirToCoord Up    = (0, -1)
-dirToCoord Down  = (0,  1)
 dirToCoord Left  = (-1, 0)
 dirToCoord Right = (1,  0)
 
 (|+|) :: Position -> Position -> Position
 (|+|) (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)
+
+
+
+
+
+
+-- Combat!
+damageEntity :: Entity -> (Int, Int) -> Entity
+damageEntity e (minDamage, maxDamage) = e

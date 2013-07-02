@@ -10,7 +10,7 @@ import Data.Maybe
 import Data.List
 
 coordToChar coord (World _ hero level _)
-  | eCurrPos hero == coord = '@'
+  | hCurrPos hero == coord = '@'
   | isWater coord level = '~'
   | isDoor coord level = '|'
   | isGrass coord level = '#'
@@ -48,22 +48,31 @@ drawCoord world coord = do
   uncurry (flip setCursorPosition) coord'
   drawChar (coordToChar coord world)
     where
-      ht = eEntityType $ wHero world
-      minPoint = fst $ hViewFrame ht
+      h = wHero world
+      minPoint = fst $ hMovementSlack h
       coord' = (fst coord - minPoint, snd coord) -- side scrolling
 
 
 drawEntities world = do
-    --mapM_ (drawCoord world) oldPositions
+    mapM_ (drawCoord world) oldPositions
     mapM_ (drawCoord world) newPositions
 
     drawCoord world newHeroPos -- hack to test before combat and collision is implemented, LOL wut?
   where
     hero = wHero world
     entities = getEntitiesFromViewFrame world $ getViewFrame world
-    newPositions = map eCurrPos entities
-    oldPositions = (map eOldPos (hero:entities)) \\ newPositions -- remove the new to not draw redundant tiles.
-    newHeroPos = eCurrPos hero
+    newPositions = map (\e -> case e of
+                           Monster {} -> mCurrPos e
+                           Projectile {} -> pCurrPos e
+                           Hero {} -> hCurrPos e
+                           ) entities
+    
+    oldPositions = (map (\e -> case e of
+                            Monster {} -> mOldPos e
+                            Projectile {} -> pOldPos e
+                            Hero {} -> hCurrPos e
+                        ) (hero:entities)) \\ newPositions -- remove the new to not draw redundant tiles.
+    newHeroPos = hCurrPos hero
 
     
     
@@ -85,9 +94,9 @@ clearWorld (minPoint, maxPoint) world = do
   setCursorPosition 1 (maxPoint - minPoint)
   mapM_ drawChar chars
   where
-    ht = eEntityType $ wHero world
+    h = wHero world
     
-    unBlockedMax = (snd $ hViewFrame ht) + hViewDistance ht
+    unBlockedMax = (snd $ hMovementSlack h) + hViewDistance h
     chars = if unBlockedMax > maxPoint then
               replicate (unBlockedMax - maxPoint + 1) ' '
             else
