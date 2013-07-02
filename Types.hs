@@ -20,8 +20,8 @@ data EntityType = Monster { mType :: MonsterType,
                             hWields :: Weapon,
                             hWears :: Armor  }
                   
-                | Object  { oDamage :: Int, 
-                            oVelocity :: Int} -- currently only projectiles ?
+                | Projectile  { oDamage :: Int, 
+                                oVelocity :: Int} -- currently only projectiles ?
 
 data Entity = Entity { eCurrPos :: Position,
                        eOldPos :: Position,
@@ -67,7 +67,6 @@ data Effect = Heal | Harm
 data Weapon = Weapon { wDamage :: Int,
                        wDesc :: String,
                        wToHit :: Int }
---data Wall = Door deriving (Eq, Ord)
 
 data WallTile = Wall 
               deriving (Show, Bounded, Enum, Eq)

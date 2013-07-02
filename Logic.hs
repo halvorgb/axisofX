@@ -2,6 +2,7 @@ module Logic where
 import Prelude hiding (Either(..))
 import qualified Data.Map as M
 import Data.Maybe
+import Data.List
 import Types
 
 
@@ -24,30 +25,26 @@ think world = do
       e' = prepare e -- subtracts the lowest from every entity
       e'' =  filter (\x -> eTimeUntilNextMove x == 0) e'
       projectiles = filter (\x -> case x of 
-                               (Entity _ _(Object _ _) _ _) -> True
+                               Entity { eEntityType = Projectile { } } -> True
                                _ -> False
                            ) e''
       monsters    = filter (\x -> case x of 
-                               (Entity _ _(Monster _ _ _) _ _) -> True
+                               Entity { eEntityType = Monster { } } -> True
                                _ -> False
                            ) e''
                     
-      h' = filter (\x -> case x of 
-                               (Entity _ _(Hero _ _ _ _ _ _ _ _) _ _) -> True
+      h' = fromJust $ find (\x -> case x of  -- find to not have to iterate through the whole thing, fromJust is safe because the hero was added to e.
+                               Entity { eEntityType = Hero { } } -> True                         --  Crashing is a good idea if hero can't be found in e'
                                _ -> False
                            ) e'
-                    
+           
       projectiles' = move projectiles
       monsters' = ai monsters
       
       -- e''' reset timeUntilNextMove, on every entity except the player.
-      e''' = (map (\x -> if eTimeUntilNextMove x == 0
-                           then
-                             x { eTimeUntilNextMove = eSpeed x }
-                           else
-                             x) (projectiles' ++ monsters'))
+      e''' = (map (\x -> x { eTimeUntilNextMove = eSpeed x } ) (projectiles' ++ monsters'))
       emap = updateMap (lEntities lvl) (fst $ lViewFrame lvl, (snd $ lViewFrame lvl) + lViewDistance lvl) e'''
-      world' = world { wLevel = lvl {lEntities = emap}, wHero = head h'}
+      world' = world { wLevel = lvl {lEntities = emap}, wHero = h}
        
 
 getEntitiesFromViewFrame :: World -> (Int, Int) -> Int -> [Entity]

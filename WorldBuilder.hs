@@ -51,7 +51,7 @@ generateLevels g nofLevels prevLevels
                      }
 
 generateMonsters :: StdGen -> Int -> Int -> Int -> M.Map Position Entity
-generateMonsters g nofMonsters l level = monsterMap
+generateMonsters g nofMonsters l level = M.empty --monsterMap
   where
     randType = (take nofMonsters $ randoms g) :: [MonsterType]
     randCoords = zip (take nofMonsters $ randomRs (1, (l-1)) g) $ take nofMonsters $ repeat 0
@@ -77,7 +77,7 @@ generateFloor g l = floorMap
     floorMap = M.fromList $ zip coords randFloor
 
 generateWall :: StdGen -> Int -> M.Map Position WallTile
-generateWall g l = wallMap
+generateWall g l = M.empty -- wallMap
   where
     randWall = (take l $ randoms  g) :: [WallTile]
     coords = [(x,y) | x <- [0..], y <- [0]]

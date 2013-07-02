@@ -1,6 +1,7 @@
 module Level where
 
 import qualified Data.Map as M
+import Data.Maybe
 
 import Types
 
@@ -18,23 +19,44 @@ isGrass coord lvl = case M.lookup coord (lFloorTiles lvl) of
 
 isGold coord lvl = M.member coord (lGold lvl)
 
-isMonster coord lvl = case M.lookup coord (lEntities lvl) of 
-  Just ((Entity _ _ (Monster _ _ _) _ _):_) -> True
-  _ -> False
-
-
-isArmor coord lvl = case M.lookup coord (lItems lvl) of
-  Just ((Arm _):_) -> True
-  _ -> False
-
-isPotion coord lvl = case M.lookup coord (lItems lvl) of
-  Just ((Pot _):_) -> True
-  _ -> False
+isMonster coord lvl = False
   
-isWeapon coord lvl = case M.lookup coord (lItems lvl) of
-  Just ((Weap _):_) -> True
-  _ -> False
+  {- any (\x -> case x of 
+                              Entity { eEntityType = Monster { } } -> True
+                              _ -> False
+                          ) resList
+  where
+    resList = fromMaybe [] $ M.lookup coord (lEntities lvl)
 
+-}
+
+isArmor coord lvl = False {- = any (\x -> case x of 
+                             Arm { } -> True
+                             _ -> False
+                          ) resList
+  where
+    resList = fromMaybe [] $ M.lookup coord (lItems lvl)
+  -} 
+  
+  
+
+
+
+isPotion coord lvl = False {- any (\x -> case x of 
+                             Pot { } -> True
+                             _ -> False
+                          ) resList
+  where
+    resList = fromMaybe [] $ M.lookup coord (lItems lvl)
+-}
+isWeapon coord lvl = False {- any (\x -> case x of 
+                             Weap { } -> True
+                             _ -> False
+                          ) resList
+  where
+    resList = fromMaybe [] $ M.lookup coord (lItems lvl)
+
+-}
 
 
 
