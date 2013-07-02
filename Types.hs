@@ -2,6 +2,7 @@ module Types where
 
 import qualified Data.Map as M
 import Prelude hiding (Either(..))
+import System.Random
 
 type Position = (Int, Int)
 type Gold = Int
@@ -34,7 +35,22 @@ data Inventory = Inventory [Item] Gold
 
 
                
-data MonsterType = Politician | Noble deriving (Show, Eq)
+data MonsterType = Politician | Noble 
+                 deriving (Show, Bounded, Enum, Eq)
+                 
+
+                          
+instance Random MonsterType where
+    random g = case randomR (fromEnum (minBound :: MonsterType), fromEnum (maxBound :: MonsterType)) g of
+                 (r, g') -> (toEnum r, g')
+    randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
+                        (r, g') -> (toEnum r, g')
+                          
+
+
+
+
+
                
 data Item = Arm Armor | Pot Potion | Weap Weapon
 
@@ -52,7 +68,25 @@ data Weapon = Weapon { wDamage :: Int,
                        wDesc :: String,
                        wToHit :: Int }
 --data Wall = Door deriving (Eq, Ord)
-data Tile = Door | Floor | Water deriving (Eq, Ord)
+
+data WallTile = Wall 
+              deriving (Show, Bounded, Enum, Eq)
+
+data FloorTile = Grass | Water 
+               deriving (Show, Bounded, Enum, Eq)
+
+instance Random FloorTile where
+    random g = case randomR (fromEnum (minBound :: FloorTile), fromEnum (maxBound :: FloorTile)) g of
+                 (r, g') -> (toEnum r, g')
+    randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
+                        (r, g') -> (toEnum r, g')
+
+instance Random WallTile where
+    random g = case randomR (fromEnum (minBound :: WallTile), fromEnum (maxBound :: WallTile)) g of
+                 (r, g') -> (toEnum r, g')
+    randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
+                        (r, g') -> (toEnum r, g')
+
 
 {-
 instance Random Tile where 
@@ -76,7 +110,8 @@ data Level = Level { lDepth :: Int,
                      lSize :: Int,
                      lViewFrame :: (Int, Int),
                      lViewDistance :: Int,
-                     lTiles :: M.Map Position Tile,
+                     lFloorTiles :: M.Map Position FloorTile,
+                     lWallTiles :: M.Map Position WallTile,                     
                      lEntities :: M.Map Position [Entity] }
 
 data World = World { wDepth :: Int,
@@ -91,8 +126,20 @@ emptyLevel = Level { lDepth = 0,
                      lSize = 1,
                      lViewFrame = (0, 9),
                      lViewDistance = 30,
-                     lTiles = M.empty,
+                     lFloorTiles = M.empty,
+                     lWallTiles = M.empty,                     
                      lEntities = M.empty }
+             
+             
+baseMonster = Monster { mType = Noble,
+                        mInventory = Inventory [] 0,
+                        mLevel = 0 }
+              
+baseMonsterEnt = Entity { eCurrPos = (0,0),
+                          eOldPos = (0,0),
+                          eEntityType = baseMonster,
+                          eSpeed = 10,
+                          eTimeUntilNextMove = 10 }
 
 fists = Weapon 0 "Bare Fists" 0
 

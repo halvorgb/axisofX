@@ -11,25 +11,25 @@ coordToChar coord (World _ hero level _)
   | eCurrPos hero == coord = '@'
   | isWater coord level = '~'
   | isDoor coord level = '|'
-  | isFloor coord level = '#'
+  | isGrass coord level = '#'
   | isMonster coord level = 'm'
-  | isArmor coord level = 'a'
-  | isWeapon coord level = 'w'
+  | isArmor coord level = '-'  
+  | isWeapon coord level = ','
   | isGold  coord level  = '.'
-  | isPotion coord level = 'p'
+  | isPotion coord level = '+'
   | otherwise = ' '
     
 
 tileColors = M.fromList [
   ('@', (Vivid, Blue)), 
-  ('#', (Vivid, Black)), 
+  ('#', (Vivid, Green)), 
   ('~', (Vivid, Cyan)), 
   ('|', (Dull, Yellow)), 
   ('v', (Vivid, Red)), 
-  ('a', (Dull, Green)), 
-  ('w', (Dull, Green)), 
+  ('-', (Dull, White)), 
+  (',', (Dull, White)), 
   ('.', (Dull, Yellow)), 
-  ('p', (Vivid, Magenta)), 
+  ('+', (Vivid, Magenta)), 
   (' ', (Vivid, Black))  ]
 
 drawChar :: Char -> IO ()

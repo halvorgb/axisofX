@@ -4,16 +4,16 @@ import qualified Data.Map as M
 
 import Types
 
-isWater coord lvl = case M.lookup coord (lTiles lvl) of
+isWater coord lvl = case M.lookup coord (lFloorTiles lvl) of
   Just Water -> True
   _ -> False
 
-isDoor coord lvl = case M.lookup coord (lTiles lvl) of
-  Just Door -> True
+isDoor coord lvl = case M.lookup coord (lWallTiles lvl) of
+--  Just Door -> True
   _ -> False
 
-isFloor coord lvl = case M.lookup coord (lTiles lvl) of
-  Just Floor -> True
+isGrass coord lvl = case M.lookup coord (lFloorTiles lvl) of
+  Just Grass -> True
   _ -> False
 
 isGold coord lvl = M.member coord (lGold lvl)

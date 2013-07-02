@@ -13,7 +13,7 @@ viewDistanceBounds :: (Int, Int)
 viewDistanceBounds = (5, 40) -- minimum and maximum viewRange (+10 for backwards viewing)
 nofLevels = 1 -- TODO: add more.
 monstersPer10Bounds :: (Int, Int)
-monstersPer10Bounds = (3, 7) -- n monsters every 10 tiles, so length div mP10 gives the amount of monsters to be generated.
+monstersPer10Bounds = (3, 5) -- n monsters every 10 tiles, so length * 10 div mP10 gives the amount of monsters to be generated.
 
 -- returnWorld :: I
 returnWorld = do
@@ -30,54 +30,55 @@ generateWorld gen = world
 
 generateLevels :: StdGen -> Int -> [Level] -> ([Level], StdGen)
 generateLevels g nofLevels prevLevels
-  | nofLevels == 1 = (lvl':prevLevels, g')
+  | nofLevels == 1 = (lvl:prevLevels, g')
   | otherwise = generateLevels g' (nofLevels-1) (lvl:prevLevels)
   where
     (l, g') = randomR lengthBounds g
-    (vD, g'') = randomR viewDistanceBounds g'
-    (mP10, g''') = randomR monstersPer10Bounds g''
-    nofMonsters = div l mP10
-    (monsters, g'''') = generateMonsters g''' nofMonsters l
-    floor = generateFloor g'''' l
-    walls = concat $ generateWalls l
-    lvl = strToLevel (walls:[floor])
-    lvl' = lvl {lSize = l, lViewDistance = vD}
+    (vD, _) = randomR viewDistanceBounds g
+    (mP10, _) = randomR monstersPer10Bounds g
+    nofMonsters = div l $ div 10 mP10
+    
+    monsters = generateMonsters g nofMonsters l nofLevels
+    floor = generateFloor g l
+    wall = generateWall  g l
+--    lvl = emptyLevel --strToLevel (walls:[floor])
+--    lvl' = lvl {lSize = l, lViewDistance = vD}
+    lvl = emptyLevel { lSize = l,
+                       lDepth = nofLevels,
+                       lViewDistance = vD, 
+                       lFloorTiles = floor, 
+                       lWallTiles = wall
+                     }
+
+generateMonsters :: StdGen -> Int -> Int -> Int -> M.Map Position Entity
+generateMonsters g nofMonsters l level = monsterMap
+  where
+    randType = (take nofMonsters $ randoms g) :: [MonsterType]
+    randCoords = zip (take nofMonsters $ randomRs (1, (l-1)) g) $ take nofMonsters $ repeat 0
+    zippedList = zip randCoords randType
+    randMonsters = map (\(c, t) -> baseMonsterEnt { eCurrPos = c,
+                                                    eOldPos = c,
+                                                    eEntityType = 
+                                                      baseMonster { mType = t, 
+                                                                    mLevel = level 
+                                                                  } 
+                                                  }
+                       ) zippedList
+    monsterMap = M.fromList $ zip randCoords randMonsters
+
     
 
-generateMonsters :: StdGen -> Int -> Int -> (String, StdGen)
-generateMonsters g nofMonsters l = ([], g)
-
-
-generateFloor :: StdGen -> Int -> String
-generateFloor g l = floor
+generateFloor :: StdGen -> Int -> M.Map Position FloorTile
+generateFloor g l = floorMap
   where
-    possibleValues = "#~"
-    randInts = (take l $ randomRs (1,2) g) :: [Int]
-    floor = concat $ map (\i -> if (i == 1) then "#" else "~") randInts
+    randFloor = (take l $ randoms  g) :: [FloorTile]
+--    floor = concat $ map (\i -> if (i == Grass) then "#" else "~") randFloor -- list of all floortiles.
+    coords = [(x,y) | x <- [0..], y <- [1]]
+    floorMap = M.fromList $ zip coords randFloor
 
-generateFloor' :: StdGen -> Int -> M.Map Position Entity
-generateFloor' g l = undefined
+generateWall :: StdGen -> Int -> M.Map Position WallTile
+generateWall g l = wallMap
   where
-    lst = M.empty
-
-
-strToLevel :: [String] -> Level
-strToLevel str = foldl populate emptyLevel {lSize = maxX} asciiMap
-  where
-    asciiMap = concat $ zipWith zip coords str
-    coords = [[(x,y) | x <- [0..]] | y <- [0..]]
-    maxX = maximum . map (fst . fst ) $ asciiMap
-    populate lvl (coord, tile) =
-      case tile of
-        '#' -> lvl { lTiles = M.insert coord Floor t }
-        '~' -> lvl { lTiles = M.insert coord Water t }
-        '|' -> lvl { lTiles = M.insert coord Door t }
---        '\\' -> lvl { lTiles = M.insert coord Stairs t }
-        _ -> lvl
-        where
-          t = lTiles lvl
-                     
-
-
-generateWalls 1 = []
-generateWalls l = " ":generateWalls (l-1)
+    randWall = (take l $ randoms  g) :: [WallTile]
+    coords = [(x,y) | x <- [0..], y <- [0]]
+    wallMap = M.fromList $ zip coords randWall
