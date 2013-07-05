@@ -1,36 +1,29 @@
 module Main where
 
 import Prelude hiding (Either(..))
-import System.Console.ANSI
 import System.IO
 
 import qualified Data.Map as M
 import Data.Maybe
 import Data.List
 
-import Console
+
+import Render.Console.GUI as GUI
 import Level
 import Types
 import Logic
 import WorldBuilder
 
 main = do
-  setSGR [ Reset ]
-  hSetEcho stdin False
-  hSetBuffering stdin NoBuffering
-  hSetBuffering stdout NoBuffering
-  hideCursor
-  setTitle "Axis of X"
-  clearScreen
   world <- returnWorld
+  GUI.setup world
   gameLoop $ world
 
 gameLoop world = do -- entities are the hero, any projectiles and any monsters.
   if (eNextMove $ wHero world) == 0 
     then do 
-    drawWorld world
-    drawEntities world
-    input <- getInput 
+    GUI.update world
+    input <- getInput
     case input of
       Exit -> handleExit
       Wait -> handleWait world
@@ -106,22 +99,14 @@ handleWait w =
     h = wHero w
 
 handleExit = do
-  clearScreen
-  setCursorPosition 0 0
-  showCursor
-  setSGR [ Reset ]
-  putStrLn "Thank you for playing Axis of X!"
+  GUI.shutdown
   
   
 nextLevel :: World -> IO ()
 nextLevel world = do
   if null $ tail $ wLevels world
     then do
-    clearScreen
-    setCursorPosition 0 0
-    showCursor
-    setSGR [ Reset ]
-    putStrLn "Victory!"
+    GUI.shutdown
     else do
     let hero = wHero world in
       gameLoop world { wLevel =  (wLevels world) !! 1, 
