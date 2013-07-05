@@ -1,4 +1,4 @@
-module Render.SDL.Render (drawWorld, drawEntities) where
+module Render.SDL.Render (drawWorld, drawEntities, loadImages, TileSurfaces, TileType) where
 
 import Graphics.UI.SDL as SDL
 import Graphics.UI.SDL.Image as SDLi
@@ -40,23 +40,28 @@ coordToTileType coord (World _ hero level _ )
 
 
 
-
-
 loadGfx :: [String] -> IO TileSurfaces
 loadGfx paths = do
   tileSurfaces <- mapM SDLi.load paths
   return $ zip tileTypes tileSurfaces
   
+  
+-- visible.
+--loadImages :: IO TileSurfaces
+loadImages = do
+  loadGfx gfxFilePaths
+
+
 --drawWorld :: World -> IO ()
-drawWorld world mainSurface = do
-  tileSurfaces <- loadGfx gfxFilePaths
+drawWorld world mainSurface tileSurfaces = do
+--  tileSurfaces <- loadGfx gfxFilePaths
   clearWorld (minPoint, maxPoint) world tileSurfaces mainSurface
   
   mapM_ (drawTile mainSurface tileSurfaces) wallTiles
   mapM_ (drawTile mainSurface tileSurfaces) floorTiles
   
   mapM_ freeSurf tileSurfaces -- This is retarded, freeing and loading every blit... HACK HACK
-  return ()
+--  return ()
     where
       (minPoint, maxPoint) = getViewFrame world
       freeSurf (_, s) = SDL.freeSurface s
@@ -68,7 +73,7 @@ drawWorld world mainSurface = do
 clearWorld (minPoint, maxPoint) world tileSurfaces mainSurface = do
   mapM_ (drawTile mainSurface tileSurfaces)  wallTiles
   mapM_ (drawTile mainSurface tileSurfaces)  floorTiles
-  return ()
+  --return ()
     where
       h = wHero world
       unBlockedMax = (snd $ hMovementSlack h) + hViewDistance h

@@ -9,6 +9,8 @@ import Data.List
 
 
 import Render.SDL.GUI as GUI
+
+
 import Level
 import Types
 import Logic
@@ -17,33 +19,43 @@ import WorldBuilder
 main = do
   world <- returnWorld
   GUI.setup world
-  gameLoop $ world
+  assets <- GUI.loadAssets  -- CALL #1
 
-gameLoop world = do -- entities are the hero, any projectiles and any monsters.
-  if (eNextMove $ wHero world) == 0 
-    then do 
-    GUI.update world
-    input <- GUI.getInput
-    case input of
-      Exit -> handleExit
-      Wait -> handleWait world
-      Dir dir -> handleDir world dir
+  gameLoop world assets     -- TO FUNC. gameLoop as PARAM
+
+
+gameLoop world assets = do
+  if (null $ wLevels world) -- check if complete. (future also check for death)
+    then do
+    GUI.shutdown
+    
     else do
-    world' <- think world    
-    gameLoop world'
+    if (eNextMove $ wHero world) == 0  -- check if hero's turn.
+      then do 
+      azz <- GUI.loadAssets -- ....
+      GUI.update world azz -- THIS WORKS
+      GUI.update world assets -- THIS NEVER WORKS.
+      input <- GUI.getInput
+      case input of 
+        Exit -> handleExit
+        Wait -> gameLoop (handleWait world) assets
+        Dir dir -> gameLoop (handleDir world dir) assets
+      else do -- else: AI
+      world' <- think world    
+      gameLoop world' assets
 
 
 -- render the world relative to the player position to enable side scrolling. Only to the right.
 handleDir w dir
   | (dir == Left)  && ((fst $ eCurrPos h) == firstInFrame) = 
-    gameLoop w -- left corner, does not use a turn (takes up a move, possible issue)
+    w -- left corner, does not use a turn (takes up a move, possible issue)
     
   | ((dir == Right) && ((fst $ coord) > (lSize lvl -1))) =  
       nextLevel w -- Right edge of map, does not use a turn, possible issue. Perhaps load next level here.
 
 
   | isDoor coord lvl = 
-    gameLoop w {
+    w {
       wLevel = lvl { 
          lWallTiles = M.delete coord $ lWallTiles lvl
          },
@@ -52,9 +64,9 @@ handleDir w dir
         eNextMove = eSpeed h
         } 
       } -- Destroys the door, uses a turn.
-
+    
   | (dir == Right) && ((fst $ eCurrPos h) == lastInFrame) && (lastInFrame < lSize lvl) = 
-      gameLoop w { 
+      w { 
         wHero = h { 
            eOldPos = eCurrPos h,
            eCurrPos = coord, 
@@ -64,7 +76,7 @@ handleDir w dir
         } -- If at right side of frame -- TODO: check if monster collides! (above)
       
   | otherwise =  
-        gameLoop w { wHero = h { eOldPos = eCurrPos h, eCurrPos = coord, eNextMove = eSpeed h} }
+        w { wHero = h { eOldPos = eCurrPos h, eCurrPos = coord, eNextMove = eSpeed h} }
   where 
     h              = wHero w
     lvl            = wLevel w
@@ -76,14 +88,14 @@ handleDir w dir
     (firstInFrame, lastInFrame) = hMovementSlack h
 
 
-
-handleWait w =
-  gameLoop w { 
+--handleWait :: World -> World
+handleWait w = 
+  w {
     wHero = h { 
        eOldPos = eCurrPos h,
        eNextMove = eSpeed h
        } 
-    }
+}
   where
     h = wHero w
 
@@ -91,17 +103,17 @@ handleExit = do
   GUI.shutdown
   
   
-nextLevel :: World -> IO ()
-nextLevel world = do
-  if null $ tail $ wLevels world
-    then do
-    GUI.shutdown
-    else do
-    let hero = wHero world in
-      gameLoop world { wLevel =  (wLevels world) !! 1, 
-                       wLevels = tail $ wLevels world, 
-                       wHero = hero { eCurrPos = (0,0),
-                                      eOldPos = (0,0), 
-                                      hMovementSlack = (0, 9)}
-                     }
+--nextLevel :: World -> IO 
+nextLevel world
+  | null $ tail $ wLevels world =
+    world { wLevels = [] }  -- just set wLevels to [] and check for that in the main Loop... (ugly.)
+  | otherwise = 
+      world { wLevel =  (wLevels world) !! 1, 
+              wLevels = tail $ wLevels world, 
+              wHero = hero { eCurrPos = (0,0),
+                             eOldPos = (0,0), 
+                             hMovementSlack = (0, 9)}
+            }
+  where
+    hero = wHero world
     
