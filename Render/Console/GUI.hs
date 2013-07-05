@@ -1,4 +1,4 @@
-module Render.Console.GUI (setup, update, shutdown) where
+module Render.Console.GUI (setup, update, shutdown, getInput) where
 
 import Render.Console.Render
 import Render.Console.Layout
@@ -6,6 +6,8 @@ import Render.Console.Layout
 import System.Console.ANSI
 import System.IO
 import GHC.IO.Handle
+
+import Prelude hiding (Either(..))
 
 import Types
 
@@ -35,6 +37,17 @@ shutdown = do
   showCursor
   setSGR [ Reset ]
   putStrLn "thank you for playing Axis of X!"
+  
+  
+  
+getInput = do
+  char <- getChar
+  case char of
+    'q' -> return Exit
+    'a' -> return (Dir Left)
+    's' -> return Wait
+    'd' -> return (Dir Right)
+    _   -> getInput -- recurse if input not recognized
   
 
 -- Internal functions.

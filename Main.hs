@@ -8,7 +8,7 @@ import Data.Maybe
 import Data.List
 
 
-import Render.Console.GUI as GUI
+import Render.SDL.GUI as GUI
 import Level
 import Types
 import Logic
@@ -23,7 +23,7 @@ gameLoop world = do -- entities are the hero, any projectiles and any monsters.
   if (eNextMove $ wHero world) == 0 
     then do 
     GUI.update world
-    input <- getInput
+    input <- GUI.getInput
     case input of
       Exit -> handleExit
       Wait -> handleWait world
@@ -31,17 +31,6 @@ gameLoop world = do -- entities are the hero, any projectiles and any monsters.
     else do
     world' <- think world    
     gameLoop world'
-
-
-getInput = do
-  char <- getChar
-  case char of
-    'q' -> return Exit
-    'a' -> return (Dir Left)
-    's' -> return Wait
-    'd' -> return (Dir Right)
-    _   -> getInput -- recurse if input not recognized
-
 
 
 -- render the world relative to the player position to enable side scrolling. Only to the right.

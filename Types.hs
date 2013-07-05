@@ -179,5 +179,5 @@ player = Hero { hClass = Jester,
                 hWield = fists,
                 hWear = rags,
                 hMovementSlack = (0, 9),
-                hViewDistance = 40 }
+                hViewDistance = 15 }
                            
