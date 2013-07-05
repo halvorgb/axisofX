@@ -9,7 +9,7 @@ import Data.List
 
 
 import Render.SDL.GUI as GUI
-
+import Render.SDL.Render
 
 import Level
 import Types
@@ -18,12 +18,12 @@ import WorldBuilder
 
 main = do
   world <- returnWorld
-  GUI.setup world
-  assets <- GUI.loadAssets  -- CALL #1
+  assets <- loadAssets
+  GUI.setup world assets
+  gameLoop world assets
 
-  gameLoop world assets     -- TO FUNC. gameLoop as PARAM
 
-
+gameLoop :: World -> TileSurfaces -> IO ()
 gameLoop world assets = do
   if (null $ wLevels world) -- check if complete. (future also check for death)
     then do
@@ -32,23 +32,21 @@ gameLoop world assets = do
     else do
     if (eNextMove $ wHero world) == 0  -- check if hero's turn.
       then do 
-      azz <- GUI.loadAssets -- ....
-      GUI.update world azz -- THIS WORKS
-      GUI.update world assets -- THIS NEVER WORKS.
+      GUI.update_ world assets
       input <- GUI.getInput
       case input of 
-        Exit -> handleExit
+        Exit -> handleExit 
         Wait -> gameLoop (handleWait world) assets
         Dir dir -> gameLoop (handleDir world dir) assets
       else do -- else: AI
-      world' <- think world    
+      world' <- think world
       gameLoop world' assets
 
 
 -- render the world relative to the player position to enable side scrolling. Only to the right.
 handleDir w dir
   | (dir == Left)  && ((fst $ eCurrPos h) == firstInFrame) = 
-    w -- left corner, does not use a turn (takes up a move, possible issue)
+    w -- left corner, does not use a turn.
     
   | ((dir == Right) && ((fst $ coord) > (lSize lvl -1))) =  
       nextLevel w -- Right edge of map, does not use a turn, possible issue. Perhaps load next level here.
@@ -101,7 +99,6 @@ handleWait w =
 
 handleExit = do
   GUI.shutdown
-  
   
 --nextLevel :: World -> IO 
 nextLevel world

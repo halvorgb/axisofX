@@ -1,5 +1,6 @@
 module Render.SDL.Render (drawWorld, drawEntities, loadImages, TileSurfaces, TileType) where
 
+
 import Graphics.UI.SDL as SDL
 import Graphics.UI.SDL.Image as SDLi
 
@@ -60,11 +61,9 @@ drawWorld world mainSurface tileSurfaces = do
   mapM_ (drawTile mainSurface tileSurfaces) wallTiles
   mapM_ (drawTile mainSurface tileSurfaces) floorTiles
   
-  mapM_ freeSurf tileSurfaces -- This is retarded, freeing and loading every blit... HACK HACK
 --  return ()
     where
       (minPoint, maxPoint) = getViewFrame world
-      freeSurf (_, s) = SDL.freeSurface s
       xs = [0..(maxPoint-minPoint)]
       wallTiles = zip [(x,0) | x <- xs] [coordToTileType (x, 0) world | x <- [minPoint..maxPoint]]
       floorTiles = zip [(x,1) | x <- xs] [coordToTileType (x, 1) world | x <- [minPoint..maxPoint]]
@@ -73,7 +72,7 @@ drawWorld world mainSurface tileSurfaces = do
 clearWorld (minPoint, maxPoint) world tileSurfaces mainSurface = do
   mapM_ (drawTile mainSurface tileSurfaces)  wallTiles
   mapM_ (drawTile mainSurface tileSurfaces)  floorTiles
-  --return ()
+  -- 1return ()
     where
       h = wHero world
       unBlockedMax = (snd $ hMovementSlack h) + hViewDistance h
