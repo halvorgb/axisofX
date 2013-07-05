@@ -9,7 +9,7 @@ import Data.List
 
 
 import Render.SDL.GUI as GUI
-import Render.SDL.Render
+
 
 import Level
 import Types
@@ -23,7 +23,7 @@ main = do
   gameLoop world assets
 
 
-gameLoop :: World -> TileSurfaces -> IO ()
+
 gameLoop world assets = do
   if (null $ wLevels world) -- check if complete. (future also check for death)
     then do
