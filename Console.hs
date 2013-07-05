@@ -10,7 +10,7 @@ import Data.Maybe
 import Data.List
 
 coordToChar coord (World _ hero level _)
-  | hCurrPos hero == coord = '@'
+  | eCurrPos hero == coord = '@'
   | isWater coord level = '~'
   | isDoor coord level = '|'
   | isGrass coord level = '#'
@@ -61,18 +61,10 @@ drawEntities world = do
   where
     hero = wHero world
     entities = getEntitiesFromViewFrame world $ getViewFrame world
-    newPositions = map (\e -> case e of
-                           Monster {} -> mCurrPos e
-                           Projectile {} -> pCurrPos e
-                           Hero {} -> hCurrPos e
-                           ) entities
+    newPositions = map eCurrPos entities
     
-    oldPositions = (map (\e -> case e of
-                            Monster {} -> mOldPos e
-                            Projectile {} -> pOldPos e
-                            Hero {} -> hCurrPos e
-                        ) (hero:entities)) \\ newPositions -- remove the new to not draw redundant tiles.
-    newHeroPos = hCurrPos hero
+    oldPositions = (map eOldPos (hero:entities)) \\ newPositions -- remove the new to not draw redundant tiles.
+    newHeroPos = eCurrPos hero
 
     
     

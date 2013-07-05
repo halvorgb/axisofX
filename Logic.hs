@@ -26,11 +26,7 @@ think world = do
       
       e = h:(getEntitiesFromViewFrame world viewFrame) -- every entity in view
       e' = prepare e -- subtracts the lowest from every entity
-      e'' =  filter (\x -> case x of 
-                        Monster {} -> mNextMove x == 0
-                        Hero {} -> hNextMove x == 0
-                        Projectile {} -> pNextMove x == 0
-                    ) e'
+      e'' =  filter (\x -> eNextMove x == 0) e
 
       projectiles = filter (\x -> case x of 
                                Projectile { }  -> True
@@ -49,10 +45,7 @@ think world = do
       projectiles' =  move projectiles
       monsters' =  ai monsters
       
-      e''' = (map (\x -> case x of 
-                        Monster {} -> x { mNextMove = mSpeed x }
-                        Projectile {} -> x { pNextMove = pSpeed x }                        
-                    ) (projectiles' ++ monsters'))
+      e''' = (map (\x -> x { eNextMove = eSpeed x }) (projectiles' ++ monsters'))
              
       emap = updateMap (lEntities lvl) (fst $ hMovementSlack h, (snd $ hMovementSlack h) + hViewDistance h) e'''
       world' = world { wLevel = lvl {lEntities = emap}, wHero = h'}
@@ -81,18 +74,10 @@ prepare :: [Entity] -> [Entity]
 prepare e = sub e
   where
     -- 10000 is infinite in this case.
-    lowestRemaining = foldl (\x y -> case y of
-                                Monster {} -> min x $ mNextMove y
-                                Projectile {} -> min x $ pNextMove y
-                                Hero {} -> min x $ hNextMove y
-                              ) 1000 e
-    -- subtract this value from every entity
-    sub = map (\x -> case x of 
-                  Monster {} -> x { mNextMove = mNextMove x - lowestRemaining } 
-                  Projectile {} -> x { pNextMove = pNextMove x - lowestRemaining }
-                  Hero {} -> x { hNextMove = hNextMove x - lowestRemaining } 
-              )
+    lowestRemaining = foldl (\x y -> min x $ eNextMove y) 10000 e
 
+    -- subtract this value from every entity
+    sub = map  (\x -> x { eNextMove = eNextMove x - lowestRemaining } )
 
 move :: [Entity] -> [Entity]
 move a = a
@@ -107,10 +92,7 @@ updateMap emap (start, stop) e
   | otherwise = M.adjust (\_ -> e') pos emap
   where
     pos = (start, 0)
-    e' = filter (\x -> case x of 
-                    Monster {} -> mCurrPos x == pos
-                    Projectile {} -> pCurrPos x == pos                    
-                ) e
+    e' = filter (\x -> eCurrPos x == pos) e 
 
 
 -- just getting a prototype running...

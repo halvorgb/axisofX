@@ -12,12 +12,14 @@ data Entity = Monster { mType :: MonsterType,
                         mInventory :: Inventory,
                         mLevel :: Int, 
                         mExperience :: Int, 
-                        mCurrPos :: Position,
-                        mOldPos :: Position,
                         mCurrHP :: Int,
                         mMaxHP :: Int,
-                        mSpeed :: Int, -- How much time between each action.
-                        mNextMove :: Int -- How much time until the NEXT action.                                               
+                        
+                        --common...                        
+                        eSpeed :: Int, -- How much time between each action.
+                        eNextMove :: Int, -- How much time until the NEXT action.                        
+                        eCurrPos :: Position,
+                        eOldPos :: Position
                       }
                   
             | Hero    { hClass :: Class,
@@ -26,22 +28,28 @@ data Entity = Monster { mType :: MonsterType,
                         hLevel :: Int,
                         hExperience :: Int,
                         hExperiencePenalty :: Float,
-                        hCurrPos :: Position,
-                        hOldPos :: Position,
                         hCurrHP :: Int,
                         hMaxHP :: Int,
-                        hSpeed :: Int,
-                        hNextMove :: Int,
                         hWield :: Weapon,
                         hWear :: Armor,
                         hMovementSlack :: (Int, Int),  -- the coordinates that the hero can move between without wrapping.
-                        hViewDistance :: Int } -- Added to $ snd hMovementSlack
+                        hViewDistance :: Int, -- Added to $ snd hMovementSlack
+                        
+                        --common for all entities. Duplicated for ease of use.
+                        eCurrPos :: Position,
+                        eOldPos :: Position,
+                        eSpeed :: Int,
+                        eNextMove :: Int
+                        
+                        } 
                                           
             | Projectile  { pDamage :: Int,
-                            pCurrPos :: Position,
-                            pOldPos :: Position,
-                            pSpeed :: Int,
-                            pNextMove :: Int }
+                            --common...                        
+                            eSpeed :: Int, 
+                            eNextMove :: Int,
+                            eCurrPos :: Position,
+                            eOldPos :: Position
+                            }
             deriving (Show)
 
 data Inventory = Inventory [Item] Gold
@@ -135,12 +143,12 @@ baseMonster = Monster { mType = Noble,
                         mInventory = Inventory [] 0,
                         mLevel = 0, 
                         mExperience = 1, 
-                        mCurrPos = (0,0),
-                        mOldPos = (0,0),
+                        eCurrPos = (0,0),
+                        eOldPos = (0,0),
                         mCurrHP = 1,
                         mMaxHP = 1,
-                        mSpeed = 10,
-                        mNextMove = 10 }
+                        eSpeed = 10,
+                        eNextMove = 10 }
 
 
 fists = Weapon 0 "Bare Fists" 0
@@ -162,12 +170,12 @@ player = Hero { hClass = Jester,
                 hLevel = 1,
                 hExperience = 0,
                 hExperiencePenalty = 0.0,
-                hCurrPos = (0,0),
-                hOldPos = (0,0),
+                eCurrPos = (0,0),
+                eOldPos = (0,0),
                 hCurrHP = 10,
                 hMaxHP = 10,
-                hSpeed = 5,
-                hNextMove = 0,
+                eSpeed = 5,
+                eNextMove = 0,
                 hWield = fists,
                 hWear = rags,
                 hMovementSlack = (0, 9),

@@ -7,8 +7,8 @@ import System.Random
 import qualified Data.Map as M
 
 lengthBounds :: (Int, Int)
-lengthBounds = (100, 1000) -- minimum and maximum length of a level
-nofLevels = 20 -- TODO: add more.
+lengthBounds = (100, 200) -- minimum and maximum length of a level
+nofLevels = 2 -- TODO: add more.
 monstersPer10Bounds :: (Int, Int)
 monstersPer10Bounds = (3, 4) -- n monsters every 10 tiles, so length * 10 div mP10 gives the amount of monsters to be generated.
 doorsPer100Bounds :: (Int, Int)
@@ -68,8 +68,8 @@ generateMonsters g nofMonsters l level wallMap = monsterMap
                  
                  
     zippedList = zip randCoords randType
-    randMonsters = map (\(c, t) -> [baseMonster { mCurrPos = c,
-                                                  mOldPos = c,
+    randMonsters = map (\(c, t) -> [baseMonster { eCurrPos = c,
+                                                  eOldPos = c,
                                                   mType = t,
                                                   mLevel = level
                                                   }
