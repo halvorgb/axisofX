@@ -1,16 +1,17 @@
-module WorldBuilder where
+module WorldBuilder (returnWorld) where
 
 import Level
 import Types
 
 import System.Random
 import qualified Data.Map as M
+import Data.List
 
 lengthBounds :: (Int, Int)
-lengthBounds = (100, 200) -- minimum and maximum length of a level
+lengthBounds = (100, 100) -- minimum and maximum length of a level
 nofLevels = 2 -- TODO: add more.
 monstersPer10Bounds :: (Int, Int)
-monstersPer10Bounds = (3, 4) -- n monsters every 10 tiles, so length * 10 div mP10 gives the amount of monsters to be generated.
+monstersPer10Bounds = (3, 5) -- n monsters every 10 tiles, so length * 10 div mP10 gives the amount of monsters to be generated.
 doorsPer100Bounds :: (Int, Int)
 doorsPer100Bounds = (2, 4)
 
@@ -47,8 +48,6 @@ generateLevels g nofLevels prevLevels
 
     monsters = generateMonsters g nofMonsters l nofLevels wall
 
---    lvl = emptyLevel --strToLevel (walls:[floor])
---    lvl' = lvl {lSize = l, lViewDistance = vD}
     lvl = emptyLevel { lSize = l,
                        lDepth = nofLevels,
                        lFloorTiles = floor, 
@@ -66,16 +65,32 @@ generateMonsters g nofMonsters l level wallMap = monsterMap
                  ) 
                  $ replicate nofMonsters 0
                  
-                 
-    zippedList = zip randCoords randType
-    randMonsters = map (\(c, t) -> [baseMonster { eCurrPos = c,
-                                                  eOldPos = c,
-                                                  mType = t,
-                                                  mLevel = level
-                                                  }
-                                    ]
+    mIDs = [0..]
+    zippedList = zip3 randCoords randType mIDs
+    randMonsters = map (\(c, t, id) -> baseMonster { eCurrPos = c,
+                                                      eOldPos = c,
+                                                      mType = t,
+                                                      mLevel = level,
+                                                      mID = id
+                                                    }
+                                       
                        ) zippedList
-    monsterMap = M.fromList $ zip randCoords randMonsters
+                   
+    filterMonsters :: [Entity] -> (Int,Int) -> [(Position, [Entity])]
+    filterMonsters monsters (x,maxX) 
+      | x > maxX = []
+      | null monstersAtX = filterMonsters monsters (x+1, maxX)
+      | otherwise = ((x, 0), monstersAtX):filterMonsters monsters (x+1, maxX) 
+      where
+        monstersAtX = filter (\m -> eCurrPos m == (x, 0)) monsters
+    
+        
+    monsterMap = M.fromList $ filterMonsters randMonsters (1, (l-1))
+
+
+
+
+    --monsterMap = M.fromList $ zip randCoords randMonsters
 
     
 

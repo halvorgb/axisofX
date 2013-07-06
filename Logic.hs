@@ -16,6 +16,7 @@ import Level
   -- remove all entities in e from map
   -- do actions
   -- add all entities in e' to map
+think :: World -> IO World
 think world = do 
   return world'
     where
@@ -26,12 +27,8 @@ think world = do
       
       e = h:(getEntitiesFromViewFrame world viewFrame) -- every entity in view
       e' = prepare e -- subtracts the lowest from every entity
-      e'' =  filter (\x -> eNextMove x == 0) e
+      e'' =  filter (\x -> eNextMove x == 0) e' -- the monsters whose turns are up!
 
-      projectiles = filter (\x -> case x of 
-                               Projectile { }  -> True
-                               _ -> False
-                           ) e''
       monsters    = filter (\x -> case x of 
                                Monster { } -> True
                                _ -> False
@@ -41,15 +38,22 @@ think world = do
                                Hero { } -> True                         --  Crashing is a good idea if hero can't be found in e'
                                _ -> False
                            ) e'
-           
-      projectiles' =  move projectiles
-      monsters' =  ai monsters
+      monsters' = map (\m -> m {eNextMove = eSpeed m}) monsters
+      emap =  ai monsters' $ lEntities lvl
       
-      e''' = (map (\x -> x { eNextMove = eSpeed x }) (projectiles' ++ monsters'))
+      
+--      e''' = map (\x -> x { eNextMove = eSpeed x }) (projectiles' ++ monsters')
              
-      emap = updateMap (lEntities lvl) (fst $ hMovementSlack h, (snd $ hMovementSlack h) + hViewDistance h) e'''
+--      emap = lEntities lvl
       world' = world { wLevel = lvl {lEntities = emap}, wHero = h'}
-
+      {-
+        if emap == lEntities lvl
+               then
+                 undefined
+               else
+                 
+world { wLevel = lvl {lEntities = emap}, wHero = h'}
+-}
 
 getViewFrame :: World -> (Int, Int) -- gets vision of the player, blocked by doors if present etc.
 getViewFrame world = (vFStart, maxVision)
@@ -79,20 +83,54 @@ prepare e = sub e
     -- subtract this value from every entity
     sub = map  (\x -> x { eNextMove = eNextMove x - lowestRemaining } )
 
-move :: [Entity] -> [Entity]
-move a = a
 
-ai :: [Entity] -> [Entity]
-ai a = a
+ai :: [Entity] -> M.Map Position [Entity] -> M.Map Position [Entity]
+ai [] entityMap = entityMap
+ai (m:ms) entityMap = undefined -- ai ms M.empty --entityMap''
+  where
+    mPos = eCurrPos m
+    
+    -- delete m from entityMap (preserving possible other entities at same location)
+    res = fromJust  $ M.lookup mPos entityMap -- fromJust because this should NEVEr be Nothing
+    
+    res' = filter (\m' -> case m' of
+                      Monster {} -> mID m' /= mID m
+                      _ -> False -- just to be robust incase entityMap ever holds nonMonsters.
+                  ) res -- every entity at key "mPos" except for m
+    
+    entityMap' :: M.Map Position [Entity]
+    entityMap' = if null res'
+                 then
+                   M.delete mPos entityMap -- delete to not have key -> []
+                 else
+                   M.insert mPos res' (M.delete mPos entityMap)
+    -- update m
+    m' = moveLeft m
+    
+    moveLeft :: Entity -> Entity
+    moveLeft e =
+      e { eOldPos = eCurrPos e,
+          eCurrPos = ((fst $ eCurrPos e) - 1, snd $ eCurrPos e)
+        }
+    
+    -- add m to entityMap
+    entityMap'' = M.insertWith (\new olde -> new ++ olde) (eCurrPos m') [m'] entityMap'
+    
 
 -- Purpose: Given a map, a range and a list of entities, create a  new map and insert every value except those in the range, but insert every value in [Entity]
+
+-- Faulty Logic!
+    
 updateMap :: M.Map Position [Entity] -> (Int, Int) -> [Entity] -> M.Map Position [Entity]
-updateMap emap (start, stop) e
+updateMap emap (start, stop) e 
   | start > stop = emap
-  | otherwise = M.adjust (\_ -> e') pos emap
+--  | null e'   = updateMap (M.delete pos emap) (start+1, stop) e
+  | otherwise =  (M.insert pos e' emap) --(start+1, stop) e
+
   where
     pos = (start, 0)
-    e' = filter (\x -> eCurrPos x == pos) e 
+    e' = filter (\x -> (eCurrPos x == pos)) e
+    
 
 
 -- just getting a prototype running...

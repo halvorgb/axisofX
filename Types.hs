@@ -14,6 +14,7 @@ data Entity = Monster { mType :: MonsterType,
                         mExperience :: Int, 
                         mCurrHP :: Int,
                         mMaxHP :: Int,
+                        mID :: Int, -- to make each monster unique
                         
                         --common...                        
                         eSpeed :: Int, -- How much time between each action.
@@ -42,18 +43,10 @@ data Entity = Monster { mType :: MonsterType,
                         eNextMove :: Int
                         
                         } 
-                                          
-            | Projectile  { pDamage :: Int,
-                            --common...                        
-                            eSpeed :: Int, 
-                            eNextMove :: Int,
-                            eCurrPos :: Position,
-                            eOldPos :: Position
-                            }
-            deriving (Show)
+            deriving (Show, Eq)
 
 data Inventory = Inventory [Item] Gold
-                 deriving (Show)
+                 deriving (Show, Eq)
 
 
 data Race = Ogre | Giant | Troll | Orc | Goblin | Hobgoblin
@@ -105,9 +98,11 @@ instance Random FloorTile where
                         (r, g') -> (toEnum r, g')
 
                          
-data Input = Dir Direction | Exit | Wait
+data Input = Dir Direction | Exit | Wait | NoInput
+           deriving (Eq, Show)
 
-data Direction = Left | Right deriving (Eq)
+data Direction = Left | Right 
+               deriving (Eq, Show)
 
                              
 data Class = Bard | Jester
@@ -125,7 +120,8 @@ data Level = Level { lDepth :: Int,
 data World = World { wDepth :: Int,
                      wHero :: Entity,
                      wLevel :: Level,
-                     wLevels :: [Level] }
+                     wLevels :: [Level], 
+                     wPrevInput :: Input }
            deriving (Show)
 
 
@@ -143,6 +139,7 @@ baseMonster = Monster { mType = Noble,
                         mInventory = Inventory [] 0,
                         mLevel = 0, 
                         mExperience = 1, 
+                        mID = 1,
                         eCurrPos = (0,0),
                         eOldPos = (0,0),
                         mCurrHP = 1,
@@ -159,7 +156,8 @@ rags = Armor 0 0 "Rags"
 genesis = World { wDepth = 0,
                   wHero = player,
                   wLevel = emptyLevel,
-                  wLevels = [emptyLevel] }
+                  wLevels = [emptyLevel], 
+                  wPrevInput = NoInput }
 
 
 

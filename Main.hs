@@ -9,6 +9,7 @@ import Data.List
 
 
 import Render.SDL.GUI as GUI
+import Render.SDL.Render
 
 
 import Level
@@ -16,6 +17,7 @@ import Types
 import Logic
 import WorldBuilder
 
+main :: IO ()
 main = do
   world <- returnWorld
   assets <- loadAssets
@@ -23,11 +25,11 @@ main = do
   gameLoop world assets
 
 
-
+gameLoop :: World -> ImageAssets -> IO ()
 gameLoop world assets = do
   if (null $ wLevels world) -- check if complete. (future also check for death)
     then do
-    GUI.shutdown
+    GUI.shutdown assets
     
     else do
     if (eNextMove $ wHero world) == 0  -- check if hero's turn.
@@ -35,7 +37,7 @@ gameLoop world assets = do
       GUI.update_ world assets
       input <- GUI.getInput
       case input of 
-        Exit -> handleExit 
+        Exit -> handleExit assets
         Wait -> gameLoop (handleWait world) assets
         Dir dir -> gameLoop (handleDir world dir) assets
       else do -- else: AI
@@ -43,7 +45,8 @@ gameLoop world assets = do
       gameLoop world' assets
 
 
--- render the world relative to the player position to enable side scrolling. Only to the right.
+
+handleDir :: World -> Direction -> World
 handleDir w dir
   | (dir == Left)  && ((fst $ eCurrPos h) == firstInFrame) = 
     w -- left corner, does not use a turn.
@@ -86,19 +89,20 @@ handleDir w dir
     (firstInFrame, lastInFrame) = hMovementSlack h
 
 
---handleWait :: World -> World
+handleWait :: World -> World
 handleWait w = 
   w {
     wHero = h { 
        eOldPos = eCurrPos h,
        eNextMove = eSpeed h
        } 
-}
+    }
   where
     h = wHero w
 
-handleExit = do
-  GUI.shutdown
+handleExit ::  ImageAssets -> IO ()
+handleExit assets = do
+  GUI.shutdown assets
   
 --nextLevel :: World -> IO 
 nextLevel world
