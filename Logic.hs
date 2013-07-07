@@ -7,6 +7,10 @@ import Types
 import Level
 
 
+--debug:
+import Debug.Trace
+
+
   -- Find all entities currently in view, add them to a list l.
   -- subtract eTimeRemaining from every entity until one or more is 0, save these entities to list l'
   --  for every Inanimate object in l' call move o
@@ -26,8 +30,19 @@ think world = do
       viewFrame = getViewFrame world
       
       e = h:(getEntitiesFromViewFrame world viewFrame) -- every entity in view
+      
+      dbg ents
+        | trace ("\n\ndbg" ++ "\n" ++ show ents) True = True
+        
+      
       e' = prepare e -- subtracts the lowest from every entity
-      e'' =  filter (\x -> eNextMove x == 0) e' -- the monsters whose turns are up!
+      
+      
+      k = dbg e
+      l = dbg e'
+
+      
+      e'' =  filter (\x -> (eNextMove x == 0) == (l == k))  e' -- the monsters whose turns are up!
 
       monsters    = filter (\x -> case x of 
                                Monster { } -> True
@@ -38,6 +53,7 @@ think world = do
                                Hero { } -> True                         --  Crashing is a good idea if hero can't be found in e'
                                _ -> False
                            ) e'
+           
       monsters' = map (\m -> m {eNextMove = eSpeed m}) monsters
       emap =  ai monsters' $ lEntities lvl
       
@@ -46,14 +62,7 @@ think world = do
              
 --      emap = lEntities lvl
       world' = world { wLevel = lvl {lEntities = emap}, wHero = h'}
-      {-
-        if emap == lEntities lvl
-               then
-                 undefined
-               else
-                 
-world { wLevel = lvl {lEntities = emap}, wHero = h'}
--}
+      
 
 getViewFrame :: World -> (Int, Int) -- gets vision of the player, blocked by doors if present etc.
 getViewFrame world = (vFStart, maxVision)
@@ -75,18 +84,32 @@ getEntitiesFromViewFrame w (start,end)
 
 -- find the lowest timeRemaining, subtract it from all.
 prepare :: [Entity] -> [Entity]
-prepare e = sub e
+prepare e = map (\x -> x { eNextMove = eNextMove x - lowestRemaining }) e
   where
     -- 10000 is infinite in this case.
     lowestRemaining = foldl (\x y -> min x $ eNextMove y) 10000 e
 
-    -- subtract this value from every entity
-    sub = map  (\x -> x { eNextMove = eNextMove x - lowestRemaining } )
 
 
+
+
+{-
+updateMap :: [Entity] -> M.Map Position [Entity] -> M.Map Position [Entity]
+updateMap [] entityMap = entityMap
+updateMap (m:ms) entityMap
+  | null ms = entityMap''
+  | otherwise = updateMap ms entityMap''
+  where
+    mPos = eCurrPos m
+-}
+
+-- recurse through every entity whose turn is up, do an action and update the map
+    -- currently only moves to the left.
 ai :: [Entity] -> M.Map Position [Entity] -> M.Map Position [Entity]
 ai [] entityMap = entityMap
-ai (m:ms) entityMap = undefined -- ai ms M.empty --entityMap''
+ai (m:ms) entityMap
+  | null ms = entityMap''
+  | otherwise = ai ms entityMap''
   where
     mPos = eCurrPos m
     
@@ -115,12 +138,12 @@ ai (m:ms) entityMap = undefined -- ai ms M.empty --entityMap''
     
     -- add m to entityMap
     entityMap'' = M.insertWith (\new olde -> new ++ olde) (eCurrPos m') [m'] entityMap'
-    
 
 -- Purpose: Given a map, a range and a list of entities, create a  new map and insert every value except those in the range, but insert every value in [Entity]
 
 -- Faulty Logic!
     
+{-
 updateMap :: M.Map Position [Entity] -> (Int, Int) -> [Entity] -> M.Map Position [Entity]
 updateMap emap (start, stop) e 
   | start > stop = emap
@@ -131,7 +154,7 @@ updateMap emap (start, stop) e
     pos = (start, 0)
     e' = filter (\x -> (eCurrPos x == pos)) e
     
-
+-}
 
 -- just getting a prototype running...
 dirToCoord Left  = (-1, 0)
@@ -139,6 +162,43 @@ dirToCoord Right = (1,  0)
 
 (|+|) :: Position -> Position -> Position
 (|+|) (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)
+
+
+
+
+
+updateMap :: Entity -> Position -> M.Map Position [Entity] -> M.Map Position [Entity]
+updateMap m pos entityMap = entityMap''
+  where
+    
+    mPos = eCurrPos m
+    
+    -- remove the mID (monster) from pos (if it exists)
+    esAtPos = fromMaybe [] $ M.lookup pos entityMap
+    
+    esAtPosF = filter (\m' -> case m' of
+                          Monster {} -> mID m' /= mID m
+                          _ -> False
+                      ) esAtPos 
+    -- remove m from pos
+    entityMap' =
+      if null esAtPos -- no previous entry at pos
+      then
+        entityMap -- no change
+      else
+        if null esAtPosF -- "Only "e" is at key pos.
+        then
+          M.delete pos entityMap -- delete said key
+          
+        else  -- There are others in addition to "e" at key pos
+          
+          M.insert pos esAtPosF -- add the others 
+          (M.delete pos entityMap) -- remove "e" 
+    
+    
+    -- add m to mPos (can equal pos)
+    
+    entityMap'' = M.insertWith (\new olde -> new ++ olde) (mPos) [m] entityMap'
 
 
 
