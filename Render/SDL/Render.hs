@@ -3,6 +3,7 @@ module Render.SDL.Render (drawWorld, loadImages, ImageAssets) where
 
 import Graphics.UI.SDL as SDL
 import Graphics.UI.SDL.Image as SDLi
+import Graphics.UI.SDL.TTF  as SDLttf
 
 import Level
 import Types
@@ -20,6 +21,8 @@ tileFilePaths = [ "assets/tiles/test_bg.png",
                  "assets/tiles/test_water.png" ]
                 
 bgFilePath = "assets/background/gui_bg.png"
+
+
                
 data TileType = TT_bg | TT_char | TT_door | TT_enemy | TT_grass | TT_water
                deriving (Bounded, Eq, Enum, Ord, Show)
@@ -34,9 +37,10 @@ tileTypes = enumFrom TT_bg
 type TileSurfaces = [(TileType, SDL.Surface)]
 
 type Background = SDL.Surface
-type ImageAssets = (Background, TileSurfaces)
 
-coordToTileType coord (World _ hero level _ _)
+type ImageAssets  = (Background, TileSurfaces)
+
+coordToTileType coord (World _ hero level _ _ _ _)
   | eCurrPos hero == coord = TT_char
   | isWater coord level = TT_water
   | isDoor coord level = TT_door
@@ -60,8 +64,8 @@ loadImages = do
   
 
 
-drawWorld :: World -> SDL.Surface -> ImageAssets -> IO ()
-drawWorld world mainSurface imageAssets = do
+drawWorld :: World -> SDL.Surface -> TileSurfaces -> IO ()
+drawWorld world mainSurface tileSurfaces = do
   clearWorld  tileSurfaces mainSurface
   
   mapM_ (drawTile mainSurface tileSurfaces) wallTiles
@@ -69,8 +73,6 @@ drawWorld world mainSurface imageAssets = do
 
   
     where
-      tileSurfaces = snd imageAssets
-      
       (minPoint, maxPoint) = getViewFrame world
       xs = [0..(maxPoint-minPoint)]
       wallTiles = zip [(x,0) | x <- xs] [coordToTileType (x, 0) world | x <- [minPoint..maxPoint]]
@@ -80,7 +82,6 @@ drawWorld world mainSurface imageAssets = do
 clearWorld tileSurfaces mainSurface = do
   mapM_ (drawTile mainSurface tileSurfaces)  wallTiles
   mapM_ (drawTile mainSurface tileSurfaces)  floorTiles
-  -- 1return ()
     where
       tiles = replicate (div 800 16) TT_bg
       
@@ -88,18 +89,6 @@ clearWorld tileSurfaces mainSurface = do
       wallTiles = zip [(x, 0) | x <- xs] tiles
       floorTiles = zip [(x, 1) | x <- xs] tiles
       
-      {-
-      h = wHero world
-      unBlockedMax = (snd $ hMovementSlack h) + hViewDistance h
-      tiles = if unBlockedMax > maxPoint then
-                replicate (unBlockedMax - maxPoint) TT_bg
-              else
-                []
-      xs = [(maxPoint-minPoint+1)..(unBlockedMax-minPoint+1)]
-      wallTiles = zip [(x, 0) | x <- xs] tiles
-      floorTiles = zip [(x, 1) | x <- xs] tiles
-  -}
-
 drawTile :: SDL.Surface -> TileSurfaces -> (Position, TileType) -> IO ()
 drawTile destSurf ts ((x,y), tileType) = do
   let sourceRect = Just (SDL.Rect 0 0 32 32)

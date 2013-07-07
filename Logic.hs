@@ -157,7 +157,6 @@ updateMap m pos entityMap = entityMap''
     
     
     -- add m to mPos (can equal pos)
-    
     entityMap'' = M.insertWith (\new olde -> new ++ olde) (mPos) [m] entityMap'
 
 

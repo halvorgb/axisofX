@@ -121,7 +121,10 @@ data World = World { wDepth :: Int,
                      wHero :: Entity,
                      wLevel :: Level,
                      wLevels :: [Level], 
-                     wPrevInput :: Input }
+                     wPrevInput :: Input, 
+                     wMessageBuffer :: [String],
+                     wBossPosition :: Position}
+             
            deriving (Show)
 
 
@@ -153,11 +156,14 @@ fists = Weapon 0 "Bare Fists" 0
 rags = Armor 0 0 "Rags"
 
 
+
 genesis = World { wDepth = 0,
                   wHero = player,
                   wLevel = emptyLevel,
                   wLevels = [emptyLevel], 
-                  wPrevInput = NoInput }
+                  wPrevInput = NoInput, 
+                  wMessageBuffer = ["Welcome to Axis of X!"],
+                  wBossPosition = (-200, 0)}
 
 
 

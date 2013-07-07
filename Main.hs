@@ -25,21 +25,21 @@ main = do
   gameLoop world assets
 
 
-gameLoop :: World -> ImageAssets -> IO ()
+gameLoop :: World -> Assets -> IO ()
 gameLoop world assets = do
   if (null $ wLevels world) -- check if complete. (future also check for death)
     then do
     GUI.shutdown assets
-    
     else do
     if (eNextMove $ wHero world) == 0  -- check if hero's turn.
       then do 
-      GUI.update_ world assets
+      let world' = world { wMessageBuffer = take 12 $ wMessageBuffer world } -- "prune" the messagebuffer.
+      GUI.update_ world' assets
       input <- GUI.getInput
       case input of 
         Exit -> handleExit assets
-        Wait -> gameLoop (handleWait world) assets
-        Dir dir -> gameLoop (handleDir world dir) assets
+        Wait -> gameLoop (handleWait world') assets
+        Dir dir -> gameLoop (handleDir world' dir) assets
       else do -- else: AI
       world' <- think world
       gameLoop world' assets
@@ -49,7 +49,9 @@ gameLoop world assets = do
 handleDir :: World -> Direction -> World
 handleDir w dir
   | (dir == Left)  && ((fst $ eCurrPos h) == firstInFrame) = 
-    w -- left corner, does not use a turn.
+    w { 
+      wMessageBuffer = "You can't go there! No turn used.":mBuffer 
+      }-- left corner, does not use a turn.
     
   | ((dir == Right) && ((fst $ coord) > (lSize lvl -1))) =  
       nextLevel w -- Right edge of map, does not use a turn, possible issue. Perhaps load next level here.
@@ -63,7 +65,8 @@ handleDir w dir
       wHero = h { 
         eOldPos = eCurrPos h, 
         eNextMove = eSpeed h
-        } 
+        },
+      wMessageBuffer = "Opened door!":mBuffer
       } -- Destroys the door, uses a turn.
     
   | (dir == Right) && ((fst $ eCurrPos h) == lastInFrame) && (lastInFrame < lSize lvl) = 
@@ -73,7 +76,7 @@ handleDir w dir
            eCurrPos = coord, 
            eNextMove = eSpeed h,
            hMovementSlack = (firstInFrame+1, lastInFrame+1)
-           }
+           }        
         } -- If at right side of frame -- TODO: check if monster collides! (above)
       
   | otherwise =  
@@ -87,6 +90,8 @@ handleDir w dir
     (heroX, heroY) = eCurrPos h |+| dirToCoord dir
     hConst i       = max 0 (min i 20)
     (firstInFrame, lastInFrame) = hMovementSlack h
+    
+    mBuffer = wMessageBuffer w
 
 
 handleWait :: World -> World
@@ -95,12 +100,13 @@ handleWait w =
     wHero = h { 
        eOldPos = eCurrPos h,
        eNextMove = eSpeed h
-       } 
+       }, 
+    wMessageBuffer = "Waiting!":wMessageBuffer w
     }
   where
     h = wHero w
 
-handleExit ::  ImageAssets -> IO ()
+handleExit ::  Assets -> IO ()
 handleExit assets = do
   GUI.shutdown assets
   

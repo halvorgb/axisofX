@@ -44,13 +44,10 @@ generateLevels g nofLevels prevLevels
     (dD, _) = randomR doorDistanceBounds g
     nofDoors = div l dD
     
-
-    
     (gf, gw) = split g
     
     floor = generateFloor gf l
     wall = generateWall gw l nofDoors
-
 
     monsters = generateMonsters g nofMonsters l nofLevels wall
 
