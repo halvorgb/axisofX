@@ -151,7 +151,6 @@ updateMap m pos entityMap = entityMap''
           M.delete pos entityMap -- delete said key
           
         else  -- There are others in addition to "e" at key pos
-          
           M.insert pos esAtPosF -- add the others 
           (M.delete pos entityMap) -- remove "e" 
     

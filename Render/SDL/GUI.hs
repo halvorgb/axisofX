@@ -45,7 +45,7 @@ update_ world ((background, tiles), font) = do
   drawWorld world mainSurf tiles
   
   -- TODO: Draw other UI elements (text etc)
-  drawText world mainSurf font
+  drawAll world mainSurf font
   
   -- Flip!
   SDL.flip mainSurf

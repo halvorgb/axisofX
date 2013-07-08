@@ -1,4 +1,4 @@
-module Render.SDL.Text (FontAssets, loadFont, drawText) where
+module Render.SDL.Text (FontAssets, loadFont, drawAll) where
 
 import qualified Graphics.UI.SDL.TTF.General as TTFG
 import Graphics.UI.SDL.TTF as TTF
@@ -9,7 +9,21 @@ import Types
 fontFilePath = "assets/fonts/OldStandard-Regular.ttf"
 
 bottomPos :: Position
-bottomPos = (48, 560)
+bottomPos = (40, 572)
+
+
+namePos :: Position
+namePos = (40, 100)
+
+hpPos :: Position
+hpPos = (72, 124)
+
+hpMPos :: Position
+hpMPos = (112, 124)
+
+
+
+
 
 type FontAssets = Font
 
@@ -19,11 +33,45 @@ loadFont = do
   lol <- TTFG.init
   font <- openFont fontFilePath 14
   return font
+
+
+
+
+drawAll :: World -> SDL.Surface -> Font -> IO ()
+drawAll world mainSurf font = do
+  drawCharacterText world mainSurf font
+  drawConsoleText world mainSurf font
+
   
 
-drawText :: World -> SDL.Surface -> Font -> IO ()
-drawText world mainSurf font = do
-  let surfaces = createSurfaces font messageBuffer (Color 10 10 20)
+
+
+
+drawCharacterText :: World -> SDL.Surface -> Font -> IO ()
+drawCharacterText world mainSurf font = do
+  -- name:
+  let nameSurf = createSurfaces font nameString (Color 20 20 20)
+  renderText mainSurf (namePos, head nameSurf)
+  
+  -- hp:
+  let hpSurf = createSurfaces font hpString (Color 200 20 20)
+  renderText mainSurf (hpPos, head hpSurf)
+  
+  let hpMSurf = createSurfaces font hpMString (Color 200 20 20)
+  renderText mainSurf (hpMPos, head hpMSurf)
+
+  where
+    hero = wHero world
+    nameString = [hName hero ++ ", the " ++ (show $ hRace hero) ++ " " ++ (show $ hClass hero)]
+    
+    hpString = [show $ hCurrHP hero]
+    hpMString = [show $ hMaxHP hero]
+    
+
+
+drawConsoleText :: World -> SDL.Surface -> Font -> IO ()
+drawConsoleText world mainSurf font = do
+  let surfaces = createSurfaces font messageBuffer (Color 40 40 40)
   let preppedOutput = zip positions surfaces
   
 --  renderText mainSurf ((30, 30), renderTextSolid font (head messageBuffer) (Color 255 255 255))
@@ -35,12 +83,6 @@ drawText world mainSurf font = do
     
     positions :: [Position]
     positions = createPositions bottomPos (length messageBuffer) (-16)
-      
-      --reverse [(fst bottomPos, y) | y <- [(snd topPos)..(snd bottomPos)], div y 16 == 0]
---    positions = replicate (length messageBuffer) bottomPos
-    
---    preppedOutput = zip positions surfaces
-    
     
 
 renderText :: SDL.Surface -> (Position, IO (SDL.Surface)) -> IO ()

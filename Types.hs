@@ -23,7 +23,8 @@ data Entity = Monster { mType :: MonsterType,
                         eOldPos :: Position
                       }
                   
-            | Hero    { hClass :: Class,
+            | Hero    { hName :: String,  
+                        hClass :: Class,
                         hRace :: Race,
                         hInventory :: Inventory,
                         hLevel :: Int,
@@ -50,7 +51,7 @@ data Inventory = Inventory [Item] Gold
 
 
 data Race = Ogre | Giant | Troll | Orc | Goblin | Hobgoblin
-          deriving (Show, Bounded, Enum, Eq)
+          deriving (Show, Bounded, Enum, Eq, Read)
                
 data MonsterType = Politician | Noble 
                  deriving (Show, Bounded, Enum, Eq)
@@ -105,8 +106,8 @@ data Direction = Left | Right
                deriving (Eq, Show)
 
                              
-data Class = Bard | Jester
-           deriving (Show, Eq)
+data Class = Bard | Jester | Fool
+           deriving (Show, Eq, Read)
 
 data Level = Level { lDepth :: Int,
                      lGold :: M.Map Position Int,
@@ -168,7 +169,8 @@ genesis = World { wDepth = 0,
 
 
 
-player = Hero { hClass = Jester,
+player = Hero { hName = "",
+                hClass = Jester,
                 hRace = Hobgoblin,
                 hInventory = Inventory [] 0,
                 hLevel = 1,
