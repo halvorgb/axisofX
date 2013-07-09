@@ -19,10 +19,32 @@ import WorldBuilder
 
 main :: IO ()
 main = do
+  -- Read in parameters.
+  {-
+  putStrLn "Hello, what is your name?"
+  name <- getLine
+  
+  putStrLn "So Bjarne, what is class? (Bard | Jester | Fool)"
+  clss <- getLine
+  let cls = read clss :: Class
+      
+  putStrLn "Race? (Ogre | Giant | Troll | Orc | Goblin | Hobgoblin)"
+  rce <- getLine
+  let race = read rce :: Race
+  
+  -}
+  
+  
   world <- returnWorld
   assets <- loadAssets
-  GUI.setup world assets
-  gameLoop world assets
+  let world' = world { 
+        wHero = (wHero world) {
+           hName = "Hedstemanden", 
+           hClass = Jester, 
+           hRace = Giant } 
+        }
+  GUI.setup world' assets
+  gameLoop world' assets
 
 
 gameLoop :: World -> Assets -> IO ()
@@ -33,13 +55,12 @@ gameLoop world assets = do
     else do
     if (eNextMove $ wHero world) == 0  -- check if hero's turn.
       then do 
-      let world' = world { wMessageBuffer = take 12 $ wMessageBuffer world } -- "prune" the messagebuffer.
-      GUI.update_ world' assets
+      GUI.update_ world assets
       input <- GUI.getInput
       case input of 
         Exit -> handleExit assets
-        Wait -> gameLoop (handleWait world') assets
-        Dir dir -> gameLoop (handleDir world' dir) assets
+        Wait -> gameLoop (handleWait world) assets
+        Dir dir -> gameLoop (handleDir world dir) assets
       else do -- else: AI
       world' <- think world
       gameLoop world' assets

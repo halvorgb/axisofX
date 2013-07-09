@@ -7,6 +7,13 @@ import System.Random
 type Position = (Int, Int)
 type Gold = Int
 
+calculateExperience :: Int -> Int -- Level -> experience required.
+calculateExperience level = experience
+  where
+    experience = 100 * level;
+
+
+
 data Entity = Monster { mType :: MonsterType,
                         mRace :: Race,
                         mInventory :: Inventory,
@@ -28,10 +35,11 @@ data Entity = Monster { mType :: MonsterType,
                         hRace :: Race,
                         hInventory :: Inventory,
                         hLevel :: Int,
-                        hExperience :: Int,
-                        hExperiencePenalty :: Float,
+                        hExperienceRemaining :: Int,
                         hCurrHP :: Int,
                         hMaxHP :: Int,
+                        hCurrEnergy :: Int,
+                        hMaxEnergy :: Int,
                         hWield :: Weapon,
                         hWear :: Armor,
                         hMovementSlack :: (Int, Int),  -- the coordinates that the hero can move between without wrapping.
@@ -42,8 +50,18 @@ data Entity = Monster { mType :: MonsterType,
                         eOldPos :: Position,
                         eSpeed :: Int,
                         eNextMove :: Int
-                        
                         } 
+            | Boss    { bName :: String,
+                        bInnocentKills :: Int,
+                        bRivalKills :: Int,
+                        bCurrHP :: Int,
+                        bMaxHP :: Int,
+                        
+                        eCurrPos :: Position,
+                        eOldPos :: Position,
+                        eSpeed :: Int,
+                        eNextMove :: Int
+                        }
             deriving (Show, Eq)
 
 data Inventory = Inventory [Item] Gold
@@ -124,9 +142,17 @@ data World = World { wDepth :: Int,
                      wLevels :: [Level], 
                      wPrevInput :: Input, 
                      wMessageBuffer :: [String],
-                     wBossPosition :: Position}
+                     wStdGen :: StdGen,
+                     wBoss :: Entity
+                   }
              
            deriving (Show)
+                    
+                    
+
+data AttackType = Thump | Slash | Maul
+                deriving (Show)
+
 
 
 emptyLevel = Level { lDepth = 0,
@@ -164,22 +190,36 @@ genesis = World { wDepth = 0,
                   wLevels = [emptyLevel], 
                   wPrevInput = NoInput, 
                   wMessageBuffer = ["Welcome to Axis of X!"],
-                  wBossPosition = (-200, 0)}
+                  wStdGen = undefined,
+                  wBoss = boss
+                }
 
 
-
+boss = Boss {  bName = "ROARWALD",
+               bInnocentKills = 0,
+               bRivalKills = 0,
+               bCurrHP = 100,
+               bMaxHP = 100,
+               
+               eCurrPos = (-200, 0),
+               eOldPos = (-200, 0),
+               eSpeed = 20,
+               eNextMove = 20
+               
+            }
 
 player = Hero { hName = "",
                 hClass = Jester,
                 hRace = Hobgoblin,
                 hInventory = Inventory [] 0,
                 hLevel = 1,
-                hExperience = 0,
-                hExperiencePenalty = 0.0,
+                hExperienceRemaining = 100,
                 eCurrPos = (0,0),
                 eOldPos = (0,0),
                 hCurrHP = 10,
                 hMaxHP = 10,
+                hCurrEnergy = 50,
+                hMaxEnergy = 50,
                 eSpeed = 5,
                 eNextMove = 0,
                 hWield = fists,

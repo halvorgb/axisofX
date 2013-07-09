@@ -22,7 +22,7 @@ import Debug.Trace
   -- add all entities in e' to map
 think :: World -> IO World
 think world = do 
-  return world'
+  return world''
     where
       h = wHero world
       lvl = wLevel world
@@ -54,35 +54,16 @@ think world = do
         
       -- UPDATE ZONE (update the map for monsters whose turns are not yet up!)  
       emap = wait monstersWAIT $ lEntities lvl              
+      
+      world' = world { wLevel = lvl {lEntities = emap }, wHero = h'}
       -- /UPDATE ZONE
-
+      
       -- AI ZONE
       monsters' = map (\m -> m {eNextMove = eSpeed m}) monstersAI
-      emap' =  ai monsters' emap
+      world'' =  ai monsters' world'
       -- /AI ZONE
       
-      
-      
-      world' = world { wLevel = lvl {lEntities = emap'}, wHero = h'}
-      
-
-getViewFrame :: World -> (Int, Int) -- gets vision of the player, blocked by doors if present etc.
-getViewFrame world = (vFStart, maxVision)
-  where
-    lvl = wLevel world
-    h = wHero world
-    vFStart = fst $ hMovementSlack h
-    vFMax = hViewDistance h + (snd $ hMovementSlack h)
-    maxVision = fromMaybe vFMax $ find (\x -> isDoor (x, 0) lvl) [vFStart..vFMax]
-
-getEntitiesFromViewFrame :: World -> (Int, Int) -> [Entity]
-getEntitiesFromViewFrame w (start,end)
-  | start > end = []
-  | otherwise   = res ++ getEntitiesFromViewFrame w (start+1,end)
-  where
-    lvl = wLevel w
-    res = fromMaybe [] $ M.lookup (start, 0) (lEntities lvl)
-
+       
 
 -- find the lowest timeRemaining, subtract it from all.
 prepare :: [Entity] -> [Entity]
@@ -92,22 +73,45 @@ prepare e = map (\x -> x { eNextMove = eNextMove x - lowestRemaining }) e
     lowestRemaining = foldl (\x y -> min x $ eNextMove y) 10000 e
 
 
--- recurse through every entity whose turn is up, do an action and update the map
-    -- currently only moves to the left.
-ai :: [Entity] -> M.Map Position [Entity] -> M.Map Position [Entity]
-ai [] entityMap = entityMap
-ai (m:ms) entityMap = ai ms entityMap'
+-- recur through every entity whose turn is up, do an action and update the world
+ai :: [Entity] -> World -> World
+ai [] world = world
+ai (m:ms) world = ai ms world'
   where
-    oldPos = eCurrPos m
-    m' = moveLeft m
-
-    moveLeft :: Entity -> Entity
-    moveLeft e =
-      e { eOldPos = eCurrPos e,
-          eCurrPos = ((fst $ eCurrPos e) - 1, snd $ eCurrPos e)
-        }
-    entityMap' = updateMap m' oldPos entityMap
+    world' = selectAIBehavior m world
     
+selectAIBehavior :: Entity -> World -> World
+selectAIBehavior monster world
+--  | playerAdjecent = combat monster Slash hero world
+  | otherwise = moveAI monster playerDirection world
+  where
+    hero = wHero world
+    mPos = eCurrPos monster
+    hPos = eCurrPos hero
+    playerAdjecent = (mPos |+| (-1, 0) == hPos) || (mPos |+| (1, 0) == hPos)
+    
+    playerDirection = if (fst mPos) > (fst hPos)
+                      then
+                        dirToCoord Left
+                      else
+                        dirToCoord Right
+    
+    
+moveAI :: Entity -> (Int, Int) -> World -> World
+moveAI monster dir world = world'
+  where
+    oldPos = eCurrPos monster
+    level = wLevel world
+    oldEntityMap = lEntities level
+    
+    monster' = monster { eOldPos = eCurrPos monster,
+                         eCurrPos = eCurrPos monster |+| dir
+                       }
+    
+    newEntityMap = updateMap monster' oldPos oldEntityMap
+    
+    world' = world { wLevel = level {lEntities = newEntityMap } }
+
 wait :: [Entity] -> M.Map Position [Entity] -> M.Map Position [Entity]
 wait [] entityMap = entityMap
 wait (m:ms) entityMap = wait ms entityMap'
@@ -115,13 +119,6 @@ wait (m:ms) entityMap = wait ms entityMap'
     pos = eCurrPos m
     entityMap' = updateMap m pos entityMap
 
-
--- just getting a prototype running...
-dirToCoord Left  = (-1, 0)
-dirToCoord Right = (1,  0)
-
-(|+|) :: Position -> Position -> Position
-(|+|) (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)
 
 
 
@@ -163,6 +160,53 @@ updateMap m pos entityMap = entityMap''
 
 
 
+
+
+
+
+
+
 -- Combat!
-damageEntity :: Entity -> (Int, Int) -> Entity
-damageEntity e (minDamage, maxDamage) = e
+damageMonster :: Entity -> Entity -> World -> World
+damageMonster sourceEnt destEnt world = world
+
+
+combat :: Entity -> AttackType -> [Entity] -> World -> World
+combat sourceEnt atckType destEnts world
+  | null destEnts = 
+    let failureString = "You " ++ (show atckType) ++ " at nothing, and miss!" in
+          world { wMessageBuffer = failureString:(wMessageBuffer world) }
+  | otherwise = world
+
+
+
+
+
+
+
+
+--- general purpose functions.
+
+getViewFrame :: World -> (Int, Int) -- gets vision of the player, blocked by doors if present etc.
+getViewFrame world = (vFStart, maxVision)
+  where
+    lvl = wLevel world
+    h = wHero world
+    vFStart = fst $ hMovementSlack h
+    vFMax = hViewDistance h + (snd $ hMovementSlack h)
+    maxVision = fromMaybe vFMax $ find (\x -> isDoor (x, 0) lvl) [vFStart..vFMax]
+
+getEntitiesFromViewFrame :: World -> (Int, Int) -> [Entity]
+getEntitiesFromViewFrame w (start,end)
+  | start > end = []
+  | otherwise   = res ++ getEntitiesFromViewFrame w (start+1,end)
+  where
+    lvl = wLevel w
+    res = fromMaybe [] $ M.lookup (start, 0) (lEntities lvl)
+    
+    
+dirToCoord Left  = (-1, 0)
+dirToCoord Right = (1,  0)
+
+(|+|) :: Position -> Position -> Position
+(|+|) (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)

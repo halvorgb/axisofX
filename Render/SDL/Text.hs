@@ -8,18 +8,35 @@ import Types
 
 fontFilePath = "assets/fonts/OldStandard-Regular.ttf"
 
-bottomPos :: Position
-bottomPos = (40, 572)
+consoleBottomPos :: Position
+consoleBottomPos = (350, 572)
+
+consoleBufferSize :: Int
+consoleBufferSize = 18
 
 
-namePos :: Position
-namePos = (40, 100)
 
-hpPos :: Position
-hpPos = (72, 124)
+playerNamePos :: Position
+playerNamePos = (40, 100)
 
-hpMPos :: Position
-hpMPos = (112, 124)
+playerHPPos :: Position
+playerHPPos = (72, 124)
+
+playerMaxHPPos :: Position
+playerMaxHPPos = (112, 124)
+
+playerEnergyPos :: Position
+playerEnergyPos = (215, 124)
+
+playerMaxEnergyPos :: Position
+playerMaxEnergyPos = (245, 124)
+
+playerExperiencePos :: Position
+playerExperiencePos = (136, 142)
+
+playerLevelPos :: Position
+playerLevelPos = (250, 142)
+
 
 
 
@@ -51,14 +68,28 @@ drawCharacterText :: World -> SDL.Surface -> Font -> IO ()
 drawCharacterText world mainSurf font = do
   -- name:
   let nameSurf = createSurfaces font nameString (Color 20 20 20)
-  renderText mainSurf (namePos, head nameSurf)
+  renderText mainSurf (playerNamePos, head nameSurf)
   
   -- hp:
   let hpSurf = createSurfaces font hpString (Color 200 20 20)
-  renderText mainSurf (hpPos, head hpSurf)
+  renderText mainSurf (playerHPPos, head hpSurf)
   
   let hpMSurf = createSurfaces font hpMString (Color 200 20 20)
-  renderText mainSurf (hpMPos, head hpMSurf)
+  renderText mainSurf (playerMaxHPPos, head hpMSurf)
+  
+  -- energy:
+  let eSurf = createSurfaces font eString (Color 20 200 20)
+  renderText mainSurf (playerEnergyPos, head eSurf)
+  
+  let eMSurf = createSurfaces font eMString (Color 20 200 20)
+  renderText mainSurf (playerMaxEnergyPos, head eMSurf)
+  
+  -- exp and level
+  let expSurf = createSurfaces font expString (Color 20 20 20)
+  renderText mainSurf (playerExperiencePos, head expSurf)
+  
+  let lSurf = createSurfaces font levelString (Color 20 20 20)
+  renderText mainSurf (playerLevelPos, head lSurf)
 
   where
     hero = wHero world
@@ -66,6 +97,12 @@ drawCharacterText world mainSurf font = do
     
     hpString = [show $ hCurrHP hero]
     hpMString = [show $ hMaxHP hero]
+    
+    eString = [show $ hCurrEnergy hero]
+    eMString = [show $ hMaxEnergy hero]
+    
+    expString = [show $ hExperienceRemaining hero]
+    levelString = [show $ hLevel hero]
     
 
 
@@ -79,10 +116,10 @@ drawConsoleText world mainSurf font = do
   mapM_ (renderText mainSurf)  preppedOutput
   
   where
-    messageBuffer = wMessageBuffer world
+    messageBuffer = take consoleBufferSize $ wMessageBuffer world
     
     positions :: [Position]
-    positions = createPositions bottomPos (length messageBuffer) (-16)
+    positions = createPositions consoleBottomPos (length messageBuffer) (-16)
     
 
 renderText :: SDL.Surface -> (Position, IO (SDL.Surface)) -> IO ()

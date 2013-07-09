@@ -40,13 +40,16 @@ type Background = SDL.Surface
 
 type ImageAssets  = (Background, TileSurfaces)
 
-coordToTileType coord (World _ hero level _ _ _ _)
+coordToTileType coord world 
   | eCurrPos hero == coord = TT_char
   | isWater coord level = TT_water
   | isDoor coord level = TT_door
   | isGrass coord level = TT_grass
   | isMonster coord level = TT_enemy
   | otherwise = TT_bg
+  where
+    hero = wHero world
+    level = wLevel world
 
 
 

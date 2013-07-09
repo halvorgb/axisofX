@@ -30,8 +30,8 @@ returnWorld = do
 --generateWorld :: StdGen -> (Int, Int)
 generateWorld gen = world
   where
-    (levels, _) = generateLevels gen nofLevels  []
-    world = genesis { wLevel = (levels !! 0), wLevels = levels }
+    (levels, gen') = generateLevels gen nofLevels  []
+    world = genesis { wLevel = (levels !! 0), wLevels = levels, wStdGen = gen' }
 
 generateLevels :: StdGen -> Int -> [Level] -> ([Level], StdGen)
 generateLevels g nofLevels prevLevels
