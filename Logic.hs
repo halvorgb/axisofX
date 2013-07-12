@@ -82,7 +82,7 @@ ai (m:ms) world = ai ms world'
     
 selectAIBehavior :: Entity -> World -> World
 selectAIBehavior monster world
---  | playerAdjecent = combat monster Slash hero world
+  | playerAdjecent = world --combat monster Prod hero world
   | otherwise = moveAI monster playerDirection world
   where
     hero = wHero world
@@ -167,8 +167,8 @@ updateMap m pos entityMap = entityMap''
 
 
 -- Combat!
-damageMonster :: Entity -> Entity -> World -> World
-damageMonster sourceEnt destEnt world = world
+calculateDamage :: Entity -> AttackType -> Entity -> Int
+calculateDamage sourceEnt ackType destEnt = 1
 
 
 combat :: Entity -> AttackType -> [Entity] -> World -> World
@@ -177,6 +177,7 @@ combat sourceEnt atckType destEnts world
     let failureString = "You " ++ (show atckType) ++ " at nothing, and miss!" in
           world { wMessageBuffer = failureString:(wMessageBuffer world) }
   | otherwise = world
+      
 
 
 

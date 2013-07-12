@@ -79,9 +79,15 @@ instance Random MonsterType where
                  (r, g') -> (toEnum r, g')
     randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
                         (r, g') -> (toEnum r, g')
-                          
-             
+                        
 
+data Potion = Potion { pAmount :: Int,
+                       pDesc :: String,
+                       pEffect :: Effect } 
+            deriving (Show, Eq)
+             
+data Effect = Heal | Harm
+            deriving (Show, Eq)
 
 data Item = Arm Armor | Pot Potion | Weap Weapon
           deriving (Show, Eq)
@@ -90,14 +96,7 @@ data Armor = Armor { aAvoidance :: Int,
                      aMitigation :: Int,
                      aDesc :: String }
            deriving(Show, Eq)
-             
-data Potion = Potion { pAmount :: Int,
-                       pDesc :: String,
-                       pEffect :: Effect } 
-            deriving (Show, Eq)
-             
-data Effect = Heal | Harm
-            deriving (Show, Eq)
+
 
 data Weapon = Weapon { wDamage :: Int,
                        wDesc :: String,
