@@ -66,7 +66,7 @@ instance Show Entity where
     show e = filter (/= '\"') outString -- remove them silly "'s.
       where
         outString = case e of
-          Hero {} -> (show $ hName e) ++ " the level " ++ (show $ hLevel e) ++ " " ++ (show $ hRace e) ++ " " ++ (show $ hClass e)
+          Hero {} -> (show $ hName e) ++ " the " ++ (show $ hRace e) ++ " " ++ (show $ hClass e)
           Monster {} -> "A level " ++ (show $ mLevel e) ++ " " ++ (show $ mRace e) ++ " " ++ (show $ mType e)
           Boss {} -> show $ bName e
       
