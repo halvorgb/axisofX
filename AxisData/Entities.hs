@@ -68,7 +68,7 @@ instance Show Entity where
         outString = case e of
           Hero {} -> (show $ hName e) ++ " the level " ++ (show $ hLevel e) ++ " " ++ (show $ hRace e) ++ " " ++ (show $ hClass e)
           Monster {} -> "A level " ++ (show $ mLevel e) ++ " " ++ (show $ mRace e) ++ " " ++ (show $ mType e)
-          _ -> "LOL"
+          Boss {} -> show $ bName e
       
 
 data Race = Ogre | Giant | Troll | Orc | Goblin | Hobgoblin

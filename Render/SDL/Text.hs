@@ -9,7 +9,7 @@ import AxisData.World
 import AxisData.Entities
 import AxisData.HelpText
 
-fontFilePath = "assets/fonts/OldStandard-Regular.ttf"
+fontFilePath = "assets/fonts/SourceSansPro-Regular.ttf"
 
 consoleBottomPos :: Position
 consoleBottomPos = (350, 572)
@@ -17,32 +17,35 @@ consoleBottomPos = (350, 572)
 consoleBufferSize :: Int
 consoleBufferSize = 18
 
-
-
 playerNamePos :: Position
 playerNamePos = (40, 100)
 
 playerHPPos :: Position
-playerHPPos = (72, 124)
+playerHPPos = (64, 127)
 
 playerMaxHPPos :: Position
-playerMaxHPPos = (112, 124)
+playerMaxHPPos = (104, 127)
 
 playerEnergyPos :: Position
-playerEnergyPos = (215, 124)
+playerEnergyPos = (196, 127)
 
 playerMaxEnergyPos :: Position
-playerMaxEnergyPos = (245, 124)
+playerMaxEnergyPos = (226, 127)
 
 playerExperiencePos :: Position
-playerExperiencePos = (136, 142)
+playerExperiencePos = (122, 148)
 
 playerLevelPos :: Position
-playerLevelPos = (250, 142)
+playerLevelPos = (218, 148)
 
-
+bossNamePos :: Position
+bossNamePos = (40, 244)
+  
+-- the help/inv/skills ++ screen
 screenTopPos :: Position
 screenTopPos = (40, 320)
+
+
 
 
 
@@ -62,57 +65,48 @@ loadFont = do
 drawAll :: World -> SDL.Surface -> Font -> IO ()
 drawAll world mainSurf font = do
   drawCharacterText world mainSurf font
+  drawBossText world mainSurf font
   drawConsoleText world mainSurf font
   drawScreen world mainSurf font
 
   
 
 
-
-
-drawScreen :: World -> SDL.Surface -> Font -> IO ()
-drawScreen world mainSurf font = do 
-  let surfaces = createSurfaces font messageBuffer (Color 40 40 40)
-  let preppedOutput = zip positions surfaces
-      
-  mapM_ (renderText mainSurf) preppedOutput
-    where
-      messageBuffer = case wScreenShown world of
-        Help -> helpText
-        Inv -> ["Inventory TEMP"]
-        Skills -> ["Skills TEMP"]
-        LevelUp -> ["LevelUp TEMP"]
-      positions = createPositions screenTopPos (length messageBuffer) (16)
-
-
-
+drawBossText :: World -> SDL.Surface -> Font -> IO ()
+drawBossText world mainSurf font = do
+  let nameSurf = createSurfaces font nameString (Color 0 0 0)
+  renderText mainSurf (bossNamePos, head nameSurf)
+  where
+    boss = wBoss world
+    nameString = [(show boss)]
+  
 
 
 drawCharacterText :: World -> SDL.Surface -> Font -> IO ()
 drawCharacterText world mainSurf font = do
   -- name:
-  let nameSurf = createSurfaces font nameString (Color 20 20 20)
+  let nameSurf = createSurfaces font nameString (Color 0 0 0)
   renderText mainSurf (playerNamePos, head nameSurf)
   
   -- hp:
-  let hpSurf = createSurfaces font hpString (Color 200 20 20)
+  let hpSurf = createSurfaces font hpString (Color 200 0 0)
   renderText mainSurf (playerHPPos, head hpSurf)
   
-  let hpMSurf = createSurfaces font hpMString (Color 200 20 20)
+  let hpMSurf = createSurfaces font hpMString (Color 200 0 0)
   renderText mainSurf (playerMaxHPPos, head hpMSurf)
   
   -- energy:
-  let eSurf = createSurfaces font eString (Color 20 200 20)
+  let eSurf = createSurfaces font eString (Color 0 200 0)
   renderText mainSurf (playerEnergyPos, head eSurf)
   
-  let eMSurf = createSurfaces font eMString (Color 20 200 20)
+  let eMSurf = createSurfaces font eMString (Color 0 200 0)
   renderText mainSurf (playerMaxEnergyPos, head eMSurf)
   
   -- exp and level
-  let expSurf = createSurfaces font expString (Color 20 20 20)
+  let expSurf = createSurfaces font expString (Color 0 0 0)
   renderText mainSurf (playerExperiencePos, head expSurf)
   
-  let lSurf = createSurfaces font levelString (Color 20 20 20)
+  let lSurf = createSurfaces font levelString (Color 0 0 0)
   renderText mainSurf (playerLevelPos, head lSurf)
 
   where
@@ -129,13 +123,26 @@ drawCharacterText world mainSurf font = do
     levelString = [show $ hLevel hero]
     
 
+drawScreen :: World -> SDL.Surface -> Font -> IO ()
+drawScreen world mainSurf font = do 
+  let surfaces = createSurfaces font messageBuffer (Color 0 0 0)
+  let preppedOutput = zip positions surfaces
+      
+  mapM_ (renderText mainSurf) preppedOutput
+    where
+      messageBuffer = case wScreenShown world of
+        Help -> helpText
+        Inv -> ["Inventory TEMP"]
+        Skills -> ["Skills TEMP"]
+        LevelUp -> ["LevelUp TEMP"]
+      positions = createPositions screenTopPos (length messageBuffer) (16)
+    
+
 
 drawConsoleText :: World -> SDL.Surface -> Font -> IO ()
 drawConsoleText world mainSurf font = do
   let surfaces = createSurfaces font messageBuffer (Color 40 40 40)
   let preppedOutput = zip positions surfaces
-  
---  renderText mainSurf ((30, 30), renderTextSolid font (head messageBuffer) (Color 255 255 255))
   
   mapM_ (renderText mainSurf)  preppedOutput
   
@@ -160,7 +167,7 @@ createSurfaces :: Font -> [String] -> Color-> [IO SDL.Surface]
 createSurfaces font texts color = do
   surfs
     where
-      surfs = map (\t -> renderTextSolid font t color) texts
+      surfs = map (\t -> renderTextBlended font t color) texts
 
 
 

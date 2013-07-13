@@ -50,7 +50,7 @@ baseMonster = Monster { mType = Noble,
 
 
 
-baseBoss = Boss {  bName = "ROARWALD",
+baseBoss = Boss {  bName = "Kitty the Just",
                    bInnocentKills = 0,
                    bRivalKills = 0,
                    bCurrHP = 100,
