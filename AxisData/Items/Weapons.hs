@@ -1,7 +1,7 @@
 module AxisData.Items.Weapons where
 
 
-import AxisData.Skills
+import AxisData.Dice
 
 data WeaponQuality = JourneyMan 
                    | Master { wTitle :: String } 
@@ -37,16 +37,11 @@ data Weapon =
     wepDescription :: String,
     wepDamageDie :: Die,
     wepHitPenalty :: Int,
-    wepSpeedMultiplier :: Float,
-    wepSkillMask :: SkillMask
+    wepSpeedMultiplier :: Float
      -- !
                 
     }
   deriving(Show, Eq)
-
--- temporary to silence GHC.
-data Die = Die Int Int
-         deriving(Show, Eq)
     
                
     

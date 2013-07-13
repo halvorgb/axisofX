@@ -6,6 +6,7 @@ import AxisData.Entities
 import AxisData.World
 import AxisData.Common
 import AxisData.Classes
+import AxisData.Dice
 import AxisData.Items.Inventory
 import AxisData.Items.Armor
 import AxisData.Items.Weapons
@@ -20,7 +21,8 @@ baseWorld = World { wDepth = 0,
                     wPrevInput = NoInput, 
                     wMessageBuffer = ["Welcome to Axis of X!"],
                     wStdGen = undefined,
-                    wBoss = baseBoss
+                    wBoss = baseBoss,
+                    wScreenShown = Skills
                 }
 
 
@@ -92,10 +94,9 @@ baseShortSword =
     wepLevel = 1,
     
     wepDescription = "Dull Short Sword (dmg: 1d6, hitPenalty: (-0), spdMultiplier: 1.0), level 1 crafted by a Journeyman.",
-    wepDamageDie = Die 6 0,
+    wepDamageDie = (1, 6),
     wepHitPenalty = 0,
-    wepSpeedMultiplier = 1.0,
-    wepSkillMask = Common
+    wepSpeedMultiplier = 1.0
     }
 
 baseRags = Armor { aAvoidance = 0,

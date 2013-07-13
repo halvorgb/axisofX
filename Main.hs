@@ -62,6 +62,7 @@ gameLoop world assets = do
       GUI.update_ world assets
       input <- GUI.getInput
       case input of 
+        Show screen -> gameLoop (handleShow screen world) assets
         Exit -> handleExit assets
         Wait -> gameLoop (handleWait world) assets
         Dir dir -> gameLoop (handleDir world dir) assets
@@ -148,4 +149,9 @@ nextLevel world
             }
   where
     hero = wHero world
-    
+
+
+
+
+handleShow :: Screen -> World -> World
+handleShow screen  w = w { wScreenShown = screen }

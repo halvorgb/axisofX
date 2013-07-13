@@ -30,7 +30,8 @@ data World = World { wDepth :: Int,
                      wPrevInput :: Input, 
                      wMessageBuffer :: [String],
                      wStdGen :: StdGen,
-                     wBoss :: Entity
+                     wBoss :: Entity,
+                     wScreenShown :: Screen
                    }
              
            deriving (Show)

@@ -7,6 +7,7 @@ import Graphics.UI.SDL as SDL
 import AxisData.Common
 import AxisData.World
 import AxisData.Entities
+import AxisData.HelpText
 
 fontFilePath = "assets/fonts/OldStandard-Regular.ttf"
 
@@ -40,6 +41,8 @@ playerLevelPos :: Position
 playerLevelPos = (250, 142)
 
 
+screenTopPos :: Position
+screenTopPos = (40, 320)
 
 
 
@@ -60,8 +63,27 @@ drawAll :: World -> SDL.Surface -> Font -> IO ()
 drawAll world mainSurf font = do
   drawCharacterText world mainSurf font
   drawConsoleText world mainSurf font
+  drawScreen world mainSurf font
 
   
+
+
+
+
+drawScreen :: World -> SDL.Surface -> Font -> IO ()
+drawScreen world mainSurf font = do 
+  let surfaces = createSurfaces font messageBuffer (Color 40 40 40)
+  let preppedOutput = zip positions surfaces
+      
+  mapM_ (renderText mainSurf) preppedOutput
+    where
+      messageBuffer = case wScreenShown world of
+        Help -> helpText
+        Inv -> ["Inventory TEMP"]
+        Skills -> ["Skills TEMP"]
+        LevelUp -> ["LevelUp TEMP"]
+      positions = createPositions screenTopPos (length messageBuffer) (16)
+
 
 
 

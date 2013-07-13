@@ -72,10 +72,13 @@ getInput  = do
     where
       handleInput e = case e of
         Quit -> return Exit
-        --_ -> return (Dir Right)
-
         (KeyDown (Keysym key _ _)) -> do
           case key of
+            SDLK_z -> return (Show Skills)
+            SDLK_x -> return (Show Inv)
+            SDLK_c -> return (Show Help)
+            SDLK_v -> return (Show LevelUp)
+            
             SDLK_a -> return (Dir Left)
             SDLK_s -> return Wait
             SDLK_d -> return (Dir Right)
