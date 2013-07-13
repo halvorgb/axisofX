@@ -6,8 +6,15 @@ import Graphics.UI.SDL.Image as SDLi
 import Graphics.UI.SDL.TTF  as SDLttf
 
 import Level
-import Types
+
 import Logic
+
+import AxisData.Common
+import AxisData.World
+import AxisData.Classes
+import AxisData.Entities
+import AxisData.Tiles
+
 
 import qualified Data.Map as M
 import Data.Maybe

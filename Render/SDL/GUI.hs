@@ -1,19 +1,17 @@
 module Render.SDL.GUI (setup, update_, shutdown, getInput, loadAssets, Assets) where
 
-import  Graphics.UI.SDL as SDL
-
+import Graphics.UI.SDL as SDL
 import Render.SDL.Render as Render
 import Render.SDL.Text as Text
 
-import Data.IORef
 import Prelude hiding(Either(..))
 
-import Types
+
+
+import AxisData.Common
+import AxisData.World
 
 type Assets = (ImageAssets, FontAssets)
-
---problem: need to keep tabs on surfaces so they can be freed after use..
-
 
 setup :: World -> Assets -> IO ()
 setup world assets = do
@@ -44,7 +42,7 @@ update_ world ((background, tiles), font) = do
   -- draw Tiles:
   drawWorld world mainSurf tiles
   
-  -- TODO: Draw other UI elements (text etc)
+  -- Draw Text!
   drawAll world mainSurf font
   
   -- Flip!

@@ -2,20 +2,22 @@ module Main where
 
 import Prelude hiding (Either(..))
 import System.IO
-
 import qualified Data.Map as M
 import Data.Maybe
 import Data.List
 
-
 import Render.SDL.GUI as GUI
 import Render.SDL.Render
-
-
 import Level
-import Types
 import Logic
 import WorldBuilder
+
+import AxisData.Entities
+import AxisData.World
+import AxisData.Common
+
+
+
 
 main :: IO ()
 main = do
@@ -37,14 +39,16 @@ main = do
   
   world <- returnWorld
   assets <- loadAssets
+  {-
   let world' = world { 
         wHero = (wHero world) {
            hName = "Hedstemanden", 
            hClass = Jester, 
            hRace = Giant } 
         }
-  GUI.setup world' assets
-  gameLoop world' assets
+  -}
+  GUI.setup world assets
+  gameLoop world assets
 
 
 gameLoop :: World -> Assets -> IO ()

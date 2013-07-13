@@ -4,7 +4,9 @@ import qualified Graphics.UI.SDL.TTF.General as TTFG
 import Graphics.UI.SDL.TTF as TTF
 import Graphics.UI.SDL as SDL
 
-import Types
+import AxisData.Common
+import AxisData.World
+import AxisData.Entities
 
 fontFilePath = "assets/fonts/OldStandard-Regular.ttf"
 
@@ -93,7 +95,7 @@ drawCharacterText world mainSurf font = do
 
   where
     hero = wHero world
-    nameString = [hName hero ++ ", the " ++ (show $ hRace hero) ++ " " ++ (show $ hClass hero)]
+    nameString = [(show hero)]
     
     hpString = [show $ hCurrHP hero]
     hpMString = [show $ hMaxHP hero]

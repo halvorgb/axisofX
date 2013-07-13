@@ -1,9 +1,15 @@
 module Logic where
+
 import Prelude hiding (Either(..))
 import qualified Data.Map as M
 import Data.Maybe
 import Data.List
-import Types
+
+import AxisData.World
+import AxisData.Entities
+import AxisData.Common
+
+
 import Level
 
 
@@ -167,11 +173,12 @@ updateMap m pos entityMap = entityMap''
 
 
 -- Combat!
-calculateDamage :: Entity -> AttackType -> Entity -> Int
-calculateDamage sourceEnt ackType destEnt = 1
+--calculateDamage :: Entity -> AttackType -> Entity -> Int
+--calculateDamage sourceEnt ackType destEnt = 1
 
 
-combat :: Entity -> AttackType -> [Entity] -> World -> World
+--                   v<-- AttackType
+combat :: Entity -> Int -> [Entity] -> World -> World
 combat sourceEnt atckType destEnts world
   | null destEnts = 
     let failureString = "You " ++ (show atckType) ++ " at nothing, and miss!" in

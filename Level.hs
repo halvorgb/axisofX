@@ -3,7 +3,10 @@ module Level where
 import qualified Data.Map as M
 import Data.Maybe
 
-import Types
+import AxisData.World
+import AxisData.Tiles
+import AxisData.Items.Inventory
+import AxisData.Entities
 
 isWater coord lvl = case M.lookup coord (lFloorTiles lvl) of
   Just Water -> True

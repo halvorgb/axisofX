@@ -1,11 +1,18 @@
 module WorldBuilder (returnWorld) where
 
-import Level
-import Types
-
 import System.Random
 import qualified Data.Map as M
 import Data.List
+
+
+import Level
+
+import AxisData.Entities
+import AxisData.Tiles
+import AxisData.Common
+import AxisData.World
+import AxisData.Base
+
 
 
 lengthBounds :: (Int, Int)
@@ -31,7 +38,7 @@ returnWorld = do
 generateWorld gen = world
   where
     (levels, gen') = generateLevels gen nofLevels  []
-    world = genesis { wLevel = (levels !! 0), wLevels = levels, wStdGen = gen' }
+    world = baseWorld { wLevel = (levels !! 0), wLevels = levels, wStdGen = gen' }
 
 generateLevels :: StdGen -> Int -> [Level] -> ([Level], StdGen)
 generateLevels g nofLevels prevLevels
@@ -51,12 +58,12 @@ generateLevels g nofLevels prevLevels
 
     monsters = generateMonsters g nofMonsters l nofLevels wall
 
-    lvl = emptyLevel { lSize = l,
-                       lDepth = nofLevels,
-                       lFloorTiles = floor, 
-                       lWallTiles = wall,
-                       lEntities = monsters
-                     }
+    lvl = baseLevel { lSize = l,
+                      lDepth = nofLevels,
+                      lFloorTiles = floor, 
+                      lWallTiles = wall,
+                      lEntities = monsters
+                    }
 
 generateMonsters :: StdGen -> Int -> Int -> Int -> M.Map Position WallTile -> M.Map Position [Entity]
 generateMonsters g nofMonsters l level wallMap = monsterMap

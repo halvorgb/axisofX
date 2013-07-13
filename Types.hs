@@ -1,5 +1,6 @@
 module Types where
 
+{- 
 import qualified Data.Map as M
 import Prelude hiding (Either(..))
 import System.Random
@@ -226,3 +227,5 @@ player = Hero { hName = "",
                 hMovementSlack = (0, 9),
                 hViewDistance = 15 }
                            
+
+-}
