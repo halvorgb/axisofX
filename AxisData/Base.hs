@@ -14,6 +14,8 @@ import AxisData.Skills
 
 
 
+
+
 baseWorld = World { wDepth = 0,
                     wHero = basePlayer,
                     wLevel = baseLevel,
@@ -46,7 +48,14 @@ baseMonster = Monster { mType = Noble,
                         mCurrHP = 1,
                         mMaxHP = 1,
                         eSpeed = 10,
-                        eNextMove = 10 }
+                        eNextMove = 10 ,
+                        
+                        eHitDie = baseMonsterHitDie,
+                        eDamageDie = baseMonsterDamageDie,
+                        eEvadeDie = baseMonsterEvadeDie,
+                        eMitigation = baseMonsterMitigation
+                      
+                      }
 
 
 
@@ -59,7 +68,13 @@ baseBoss = Boss {  bName = "Kitty the Just",
                    eCurrPos = (-200, 0),
                    eOldPos = (-200, 0),
                    eSpeed = 20,
-                   eNextMove = 20
+                   eNextMove = 20,
+                   
+                   eHitDie = baseMonsterHitDie,
+                   eDamageDie = baseMonsterDamageDie,
+                   eEvadeDie = baseMonsterEvadeDie,
+                   eMitigation = baseMonsterMitigation
+
                
                 }
 
@@ -80,8 +95,26 @@ basePlayer = Hero { hName = "Broseph",
                     hWield = baseShortSword,
                     hWear = baseRags,
                     hMovementSlack = (0, 9),
-                    hViewDistance = 15 }
+                    hViewDistance = 15, 
+                    
+                    
+                    
+                    eHitDie = baseHeroHitDie,
+                    eDamageDie = baseHeroDamageDie,
+                    eEvadeDie = baseHeroEvadeDie,
+                    eMitigation = baseHeroMitigation
+                    }
                         
+
+baseMonsterDamageDie = Dice { dDie = (2, 2), dMod = 0 }
+baseMonsterHitDie = Dice { dDie = (1, 20), dMod = 0 }
+baseMonsterEvadeDie = Dice { dDie = (1, 20), dMod = 15 }
+baseMonsterMitigation = 0
+
+baseHeroDamageDie = Dice { dDie = (2, 5), dMod = 4 }
+baseHeroHitDie = Dice { dDie = (1, 20), dMod = 0 }
+baseHeroEvadeDie = Dice { dDie = (1, 5), dMod = 10}
+baseHeroMitigation = 2
              
              
 -- Starting weapons: Not randomly generated.

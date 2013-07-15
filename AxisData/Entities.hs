@@ -10,6 +10,8 @@ import AxisData.Items.Armor
 import AxisData.Items.Weapons
 import AxisData.Classes
 
+import AxisData.Dice
+
 
 
 data Entity = Monster { mType :: MonsterType,
@@ -25,7 +27,13 @@ data Entity = Monster { mType :: MonsterType,
                         eSpeed :: Int, -- How much time between each action.
                         eNextMove :: Int, -- How much time until the NEXT action.                        
                         eCurrPos :: Position,
-                        eOldPos :: Position
+                        eOldPos :: Position,
+                        
+                        eHitDie :: Dice,
+                        eDamageDie :: Dice,
+                        eEvadeDie :: Dice,
+                        eMitigation :: Int
+                        
                       }
                   
             | Hero    { hName :: String,  
@@ -46,8 +54,14 @@ data Entity = Monster { mType :: MonsterType,
                         --common for all entities. Duplicated for ease of use.
                         eCurrPos :: Position,
                         eOldPos :: Position,
+                        
                         eSpeed :: Int,
-                        eNextMove :: Int
+                        eNextMove :: Int,
+                        
+                        eHitDie :: Dice, -- updated on gear changes.
+                        eDamageDie :: Dice,
+                        eEvadeDie :: Dice,
+                        eMitigation :: Int
                         } 
             | Boss    { bName :: String,
                         bInnocentKills :: Int,
@@ -58,7 +72,12 @@ data Entity = Monster { mType :: MonsterType,
                         eCurrPos :: Position,
                         eOldPos :: Position,
                         eSpeed :: Int,
-                        eNextMove :: Int
+                        eNextMove :: Int,
+                        
+                        eHitDie :: Dice,
+                        eDamageDie :: Dice,
+                        eEvadeDie :: Dice,
+                        eMitigation :: Int                        
                         }
             deriving (Eq)
 
@@ -67,7 +86,7 @@ instance Show Entity where
       where
         outString = case e of
           Hero {} -> (show $ hName e) ++ " the " ++ (show $ hRace e) ++ " " ++ (show $ hClass e)
-          Monster {} -> "A level " ++ (show $ mLevel e) ++ " " ++ (show $ mRace e) ++ " " ++ (show $ mType e)
+          Monster {} -> (show $ mRace e) ++ " " ++ (show $ mType e) ++ "[" ++ (show $ mLevel e) ++ "]"
           Boss {} -> show $ bName e
       
 

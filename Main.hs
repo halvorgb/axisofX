@@ -82,7 +82,6 @@ handleDir w dir
   | ((dir == Right) && ((fst $ coord) > (lSize lvl -1))) =  
       nextLevel w -- Right edge of map, does not use a turn, possible issue. Perhaps load next level here.
 
-
   | isDoor coord lvl = 
     w {
       wLevel = lvl { 
@@ -94,7 +93,10 @@ handleDir w dir
         },
       wMessageBuffer = "Opened door!":mBuffer
       } -- Destroys the door, uses a turn.
-    
+
+  | isMonster coord lvl =
+      simpleCombat h (fromJust $ M.lookup coord (lEntities lvl))w -- Simple combat (using movement keys)
+
   | (dir == Right) && ((fst $ eCurrPos h) == lastInFrame) && (lastInFrame < lSize lvl) = 
       w { 
         wHero = h { 

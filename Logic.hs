@@ -8,10 +8,10 @@ import Data.List
 import AxisData.World
 import AxisData.Entities
 import AxisData.Common
+import Random
 
 
 import Level
-
 
 --debug:
 import Debug.Trace
@@ -184,8 +184,27 @@ combat sourceEnt atckType destEnts world
     let failureString = "You " ++ (show atckType) ++ " at nothing, and miss!" in
           world { wMessageBuffer = failureString:(wMessageBuffer world) }
   | otherwise = world
-      
 
+
+
+-- Simple combat, just attack rolls and defense rolls against a random target,
+--- will be used by the hero when moving into an enemy. when the skill queue system is in place.
+simpleCombat :: Entity -> [Entity] -> World -> World
+simpleCombat sourceEntity targetEntities world = world'
+  where
+    oldGen = wStdGen world
+    
+    (targetEntity, newGen) = randomListMember targetEntities oldGen
+    -- got sourceEntity, targetEntity!
+    
+    (sourceHitRoll, newGen') = rollDie (eHitDie sourceEntity) newGen
+    (targetEvadeRoll, newGen'') = rollDie (eEvadeDie targetEntity) newGen'
+    
+    world' = if sourceHitRoll >= targetEvadeRoll
+             then -- hit: roll for damage!
+               world { wMessageBuffer = "Temp hit message!":(wMessageBuffer world), wStdGen = newGen'' }
+             else
+               world { wMessageBuffer = ("(" ++ (show sourceHitRoll) ++ " < " ++ (show targetEvadeRoll) ++ ")"):((show sourceEntity) ++ " tried to hit " ++ (show targetEntity) ++ ", but missed!"):(wMessageBuffer world), wStdGen = newGen'' }
 
 
 

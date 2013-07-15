@@ -12,3 +12,4 @@ data Dice =
     dDie :: Die, 
     dMod :: Modifier
     }
+  deriving(Show, Eq)
