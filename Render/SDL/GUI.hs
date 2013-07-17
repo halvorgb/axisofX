@@ -8,8 +8,8 @@ import Prelude hiding(Either(..))
 
 
 
-import AxisData.Common
-import AxisData.World
+import Types.Common
+import Types.World
 
 type Assets = (ImageAssets, FontAssets)
 

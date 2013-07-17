@@ -1,24 +1,49 @@
-module AxisData.Entities where
+module Types.World where
 
-
+import qualified Data.Map as M
 import System.Random
 
-
-import AxisData.Common
-import AxisData.Items.Inventory
-import AxisData.Items.Armor
-import AxisData.Items.Weapons
-import AxisData.Classes
-
-import AxisData.Dice
+import Types.Common
+import Types.Monsters
+import Types.Player
+import Types.Items
+import Types.Tiles
 
 
 
+
+---------------------------------------
+data Level = Level { lDepth :: Int,
+                     lGold :: M.Map Position Int,
+                     lItems :: M.Map Position [Item],
+                     lSize :: Int,
+                     lFloorTiles :: M.Map Position FloorTile,
+                     lWallTiles :: M.Map Position WallTile,                     
+                     lEntities :: M.Map Position [Entity] }
+           deriving (Show)
+
+data World = World { wDepth :: Int,
+                     wHero :: Entity,
+                     wLevel :: Level,
+                     wLevels :: [Level], 
+                     wPrevInput :: Input, 
+                     wMessageBuffer :: [String],
+                     wStdGen :: StdGen,
+                     wBoss :: Entity,
+                     wScreenShown :: Screen
+                   }
+             
+           deriving (Show)
+-------------------------------------
+
+
+-- Entities:           
 data Entity = Monster { mType :: MonsterType,
                         mRace :: Race,
                         mInventory :: Inventory,
                         mLevel :: Int, 
-                        mExperience :: Int, 
+                        mExperienceReward :: Int, 
+                        
                         mCurrHP :: Int,
                         mMaxHP :: Int,
                         mID :: Int, -- to make each monster unique
@@ -81,6 +106,7 @@ data Entity = Monster { mType :: MonsterType,
                         }
             deriving (Eq)
 
+
 instance Show Entity where
     show e = filter (/= '\"') outString -- remove them silly "'s.
       where
@@ -88,20 +114,44 @@ instance Show Entity where
           Hero {} -> (show $ hName e) ++ " the " ++ (show $ hRace e) ++ " " ++ (show $ hClass e)
           Monster {} -> (show $ mRace e) ++ " " ++ (show $ mType e) ++ "[" ++ (show $ mLevel e) ++ "]"
           Boss {} -> show $ bName e
-      
+          
+          
+          
+          
+-- Races:          
+data Race = Race { rName :: String, -- Has to be unique for each race (not enforced)
+                   rHitModifier :: Int,
+                   rEvasionModifier :: Int,
+                   rDamageModifier :: Int,
+                   rMitigationModifier :: Int,
+                   
+                   rBaseSpeed :: Int,
+                   
+                   rBaseHP :: Int,
+                   rBaseHPPerLevel :: Int,
+                   
+                   rBaseEnergy :: Int,
+                   rBaseEnergyPerLevel :: Int,
+                   rBaseEnergyCost :: Int,
+                                      
+                   rExperiencePenalty :: Float,
+                   
+                   rMovementFunc :: (Race -> World -> Race)
+                 }
+instance Show Race where
+  show r = show $ rName r
 
-data Race = Ogre | Giant | Troll | Orc | Goblin | Hobgoblin
-          deriving (Show, Bounded, Enum, Eq, Read)
-               
-data MonsterType = Politician | Noble 
-                 deriving (Show, Bounded, Enum, Eq)
-                 
-instance Random MonsterType where
-    random g = case randomR (fromEnum (minBound :: MonsterType), fromEnum (maxBound :: MonsterType)) g of
-                 (r, g') -> (toEnum r, g')
-    randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
-                        (r, g') -> (toEnum r, g')
+instance Eq Race where
+  x == y = rName x == rName y
+  
 
-
-
-             
+  
+  
+  -- IDEA: have an attribute like rMovementFunc or rEnvironmentFunc :: (World->World)
+--- Allows races that behave differently based on how the world is in an abstract way.
+--- Example #1: Mermen: free movement in water.
+--- Example #2: Orc: +1 attack if surrounded.
+--- Example #3: Dwarf: +1 Mitigation if surrounded?
+--- etc.
+--- Call this function every turn to recalculate stats?
+---- How would movement functions work? nvm I GOT IT! new attrib. rBaseEnergyCost

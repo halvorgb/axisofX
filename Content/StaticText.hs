@@ -1,4 +1,4 @@
-module AxisData.HelpText where
+module Content.StaticText where
 
 
 helpText :: [String]

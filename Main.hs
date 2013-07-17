@@ -12,9 +12,8 @@ import Level
 import Logic
 import WorldBuilder
 
-import AxisData.Entities
-import AxisData.World
-import AxisData.Common
+import Types.World
+import Types.Common
 
 
 
@@ -26,7 +25,7 @@ main = do
   putStrLn "Hello, what is your name?"
   name <- getLine
   
-  putStrLn "So Bjarne, what is class? (Bard | Jester | Fool)"
+  putStrLn "So Bjarne, what is your class? (Bard | Jester | Fool)"
   clss <- getLine
   let cls = read clss :: Class
       

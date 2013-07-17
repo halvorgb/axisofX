@@ -1,7 +1,6 @@
-module AxisData.Tiles where
+module Types.Tiles where
 
 import System.Random
-
 
 data WallTile = Door | Wall
               deriving (Show, Bounded, Enum, Eq)

@@ -6,12 +6,16 @@ import Data.List
 
 
 import Level
+import Random
 
-import AxisData.Entities
-import AxisData.Tiles
-import AxisData.Common
-import AxisData.World
-import AxisData.Base
+import Types.World
+import Types.Tiles
+import Types.Common
+import Types.Monsters
+
+import Content.Base
+import Content.Races
+
 
 
 
@@ -27,14 +31,14 @@ doorDistanceBounds = (20, 40) -- average door distance.
 
 
 
--- returnWorld :: I
-returnWorld = do
+returnWorld :: IO (World)
+returnWorld  = do
   gen <- getStdGen
   let world = generateWorld gen
   return world
 
 
---generateWorld :: StdGen -> (Int, Int)
+generateWorld ::  StdGen -> World
 generateWorld gen = world
   where
     (levels, gen') = generateLevels gen nofLevels  []
@@ -64,19 +68,14 @@ generateLevels g nofLevels prevLevels
                       lWallTiles = wall,
                       lEntities = monsters
                     }
-
+-- Possible issue: generators are not split, every temporary list generated uses the same generator.
 generateMonsters :: StdGen -> Int -> Int -> Int -> M.Map Position WallTile -> M.Map Position [Entity]
 generateMonsters g nofMonsters l level wallMap = monsterMap
   where
-    randType = (take nofMonsters $ randoms g) :: [MonsterType]
-    
-    
-    
     -- Generates random x coordinates, "rolls again" if one coordinate exists where a door is.
-    generateCoords :: StdGen -> Int  ->  [(Int, Int)]
-    generateCoords g_ nofM
-      | nofM == 0 = []
-      | otherwise = (x,0):generateCoords g_' (nofM-1)
+    generateCoords :: StdGen -> Int -> [Position]
+    generateCoords _ 0 = []
+    generateCoords g_ nofM = (x,0):generateCoords g_' (nofM-1)
       where
         (x, g_') = randX g_
         
@@ -90,19 +89,16 @@ generateMonsters g nofMonsters l level wallMap = monsterMap
         
         
     randCoords = generateCoords g nofMonsters    
+    --
+    
     
     mIDs = [0..]
     
-    zippedList = zip3 randCoords randType mIDs
+    generatorList = makeGeneratorList g nofMonsters
     
-    randMonsters = map (\(p, t, id) -> baseMonster { eCurrPos = p,
-                                                      eOldPos = p,
-                                                      mType = t,
-                                                      mLevel = level,
-                                                      mID = id
-                                                    }
-                                       
-                       ) zippedList
+    zippedList = zip3 mIDs randCoords generatorList
+    
+    randMonsters = map (\(id, pos,g) -> randomMonster id pos g) zippedList
                    
     filterMonsters :: [Entity] -> (Int,Int) -> [(Position, [Entity])]
     filterMonsters monsters (x,maxX) 

@@ -1,15 +1,7 @@
-module AxisData.Common where
+module Types.Common where
 
+import System.Random
 
--- move this, incorporate classes/races into it.
- -- i.e. classes and races have experience penalties etc.
-calculateExperience :: Int -> Int -- Level -> experience required.
-calculateExperience level = experience
-  where
-    experience = 100 * level;
-    
-    
-    
 type Position = (Int, Int)
 
 
@@ -28,3 +20,21 @@ data HitMask = Allies | Enemies | All
                       
 data Effect = Heal Int | Harm Int
             deriving(Show, Eq)
+                   
+                    
+                    
+                    
+                    
+--Dice:
+type NOFDie = Int
+type MaxDice = Int
+type Die = (NOFDie, MaxDice)
+
+type Modifier = Int
+
+data Dice = 
+  Dice {
+    dDie :: Die, 
+    dMod :: Modifier
+    }
+  deriving(Show, Eq)

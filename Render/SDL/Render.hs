@@ -9,11 +9,9 @@ import Level
 
 import Logic
 
-import AxisData.Common
-import AxisData.World
-import AxisData.Classes
-import AxisData.Entities
-import AxisData.Tiles
+import Types.Common
+import Types.World
+import Types.Tiles
 
 
 import qualified Data.Map as M

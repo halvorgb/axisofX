@@ -4,10 +4,9 @@ import qualified Graphics.UI.SDL.TTF.General as TTFG
 import Graphics.UI.SDL.TTF as TTF
 import Graphics.UI.SDL as SDL
 
-import AxisData.Common
-import AxisData.World
-import AxisData.Entities
-import AxisData.HelpText
+import Types.Common
+import Types.World
+import Content.StaticText
 
 fontFilePath = "assets/fonts/SourceSansPro-Regular.ttf"
 

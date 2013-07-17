@@ -1,10 +1,7 @@
-module AxisData.Skills where
+module Types.Skills where
 
-
-import AxisData.Attributes
-import AxisData.Common
-import AxisData.Items.Weapons
-
+import Types.Items
+import Types.Common
 
 data WeaponConstraints = WeaponConstraints { wcWeight  :: [WeaponWeight],
                                              wcType    :: [WeaponType],
@@ -50,9 +47,9 @@ data SkillEffect = Direct { seEffect :: Effect } -- heal/damage
                               seTimeBetweenTicks :: Int,
                               seDuration :: Int }
                    
-                 | Buff { seAttribute :: Attribute, -- buffs and debuffs.
-                          seValue :: Int,
-                          seDuration :: Int }
+--                 | Buff { seAttribute :: Attribute, -- buffs and debuffs.
+--                          seValue :: Int,
+--                          seDuration :: Int }
                    
                  deriving(Eq)        
                      
@@ -70,54 +67,3 @@ data SkillTarget = Self
 -- By category?
 data SkillMask = Brute | Finesse | Common | Clever | Shady 
                deriving(Show, Eq)
-                      
-
--- skills this model should allow:
-{-
-
-Skills that affect multiple enemies across multiple tiles,
-Skills that affect multiple enemies on the same tile,
-^... both active and passively
-
-
--}
-
--- Some lists to make skill making easier.
-
-anyWeight :: [WeaponWeight]
-anyWeight = [Balanced, Heavy, Burdensome]
-
-anyType :: [WeaponType]
-anyType = [Edged, Pointy, Blunt]
-
-anyGrip :: [WeaponGrip]
-anyGrip = [OneHanded, TwoHanded]
-
-anyWeapon = 
-  WeaponConstraints {wcWeight = anyWeight,
-                     wcType = anyType,
-                     wcGrip = anyGrip
-                    }
-  
-
-
--- Actual Skills:
-sweep = Active  { sName = "Sweep",
-                  sDescription = "Sweeps through every target on an adjecent tile",
-                  sEffect = 
-                    [Direct { seEffect = (Harm 5) }], -- allow multiple effects?
-                  sTarget =
-                    Other { stRange = 1, stHitMask = Enemies },
-                            
-                  sPrequisites = [],
-                  sSkillMask = [Brute],
-                  
-                  sWeaponConstraints = anyWeapon,
-
-                  
-                  
-                  
-                  sEnergyCost = 8,
-                  sSpeedMultiplier = 1.5,
-                  sCoolDown = 15
-                } 

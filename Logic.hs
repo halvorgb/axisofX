@@ -5,9 +5,8 @@ import qualified Data.Map as M
 import Data.Maybe
 import Data.List
 
-import AxisData.World
-import AxisData.Entities
-import AxisData.Common
+import Types.World
+import Types.Common
 import Random
 
 

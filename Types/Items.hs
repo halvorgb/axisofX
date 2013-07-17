@@ -1,8 +1,17 @@
-module AxisData.Items.Weapons where
+module Types.Items where
 
 
-import AxisData.Dice
+import Types.Common
 
+-- ITEMS: Armor
+-- (temp)
+data Armor = Armor { aAvoidance :: Int,
+                     aMitigation :: Int,
+                     aDescription :: String }
+             
+           deriving(Show, Eq)
+                   
+-- Items: Weapons
 data WeaponQuality = JourneyMan 
                    | Master { wTitle :: String } 
                    | GrandMaster { wTitle :: String,
@@ -42,6 +51,19 @@ data Weapon =
                 
     }
   deriving(Show, Eq)
-    
-               
-    
+
+-- Items: Inventory
+type Gold = Int
+
+data Potion = Potion { pAmount :: Int,
+                       pDesc :: String,
+                       pEffect :: Effect } 
+            deriving (Show, Eq)
+                     
+
+                           
+data Item = Arm Armor | Pot Potion | Weap Weapon
+          deriving(Show, Eq)
+                     
+data Inventory = Inventory [Item] Gold
+               deriving(Show, Eq)
