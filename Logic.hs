@@ -26,7 +26,8 @@ import Debug.Trace
   -- do actions
   -- add all entities in e' to map
 think :: World -> IO World
-think world = do 
+think world = do
+  
   return world''
     where
       h = wHero world
@@ -88,12 +89,16 @@ ai (m:ms) world = ai ms world'
 selectAIBehavior :: Entity -> World -> World
 selectAIBehavior monster world
   | playerAdjecent = world --combat monster Prod hero world
+  | movementBlocked = world
   | otherwise = moveAI monster playerDirection world
   where
     hero = wHero world
     mPos = eCurrPos monster
     hPos = eCurrPos hero
     playerAdjecent = (mPos |+| (-1, 0) == hPos) || (mPos |+| (1, 0) == hPos)
+       
+                     
+    movementBlocked = isMonster (mPos |+| playerDirection) $ wLevel world
     
     playerDirection = if (fst mPos) > (fst hPos)
                       then
@@ -101,7 +106,7 @@ selectAIBehavior monster world
                       else
                         dirToCoord Right
     
-    
+
 moveAI :: Entity -> (Int, Int) -> World -> World
 moveAI monster dir world = world'
   where
@@ -130,52 +135,13 @@ wait (m:ms) entityMap = wait ms entityMap'
 
 
 updateMap :: Entity -> Position -> M.Map Position Entity -> M.Map Position Entity
-updateMap m pos entityMap = entityMap'
+updateMap m oldPos entityMap = entityMap''
   where
-    
     mPos = eCurrPos m
     
-    entityMap' =
-      if mPos == pos -- Position has not changed, simply update the value.
-      then
-        M.insert pos m entityMap
-      else
-        M.insert pos m $ M.delete mPos entityMap'
-        {-
+    entityMap' = M.delete oldPos entityMap
     
-    -- remove the mID (monster) from pos (if it exists)    
-    esAtPos = fromMaybe [] $ M.lookup pos entityMap
-    
-    esAtPosF = filter (\m' -> case m' of
-                          Monster {} -> mID m' /= mID m
-                          _ -> False
-                      ) esAtPos 
-    -- remove m from pos
-    entityMap' =
-      if null esAtPos -- no previous entry at pos
-      then
-        entityMap -- no change
-      else
-        if null esAtPosF -- "Only "e" is at key pos.
-        then
-          M.delete pos entityMap -- delete said key
-          
-        else  -- There are others in addition to "e" at key pos
-          M.insert pos esAtPosF -- add the others 
-          (M.delete pos entityMap) -- remove "e" 
-    
-    
-    -- add m to mPos (can equal pos)
-    entityMap'' = M.insertWith (\new olde -> new ++ olde) (mPos) [m] entityMap'
-
--}
-
-
-
-
-
-
-
+    entityMap'' = M.insert mPos m entityMap'
 
 
 
@@ -204,7 +170,7 @@ simpleCombat sourceEntity targetEntity world = world'
 
     
     (sourceHitRoll, newGen) = rollDie (eHitDie sourceEntity) oldGen
-    (targetEvadeRoll, newGen') = rollDie (eEvadeDie targetEntity) newGen'
+    (targetEvadeRoll, newGen') = rollDie (eEvadeDie targetEntity) newGen
     
     world' = if sourceHitRoll >= targetEvadeRoll
              then -- hit: roll for damage!
