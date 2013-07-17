@@ -19,7 +19,7 @@ data Level = Level { lDepth :: Int,
                      lSize :: Int,
                      lFloorTiles :: M.Map Position FloorTile,
                      lWallTiles :: M.Map Position WallTile,                     
-                     lEntities :: M.Map Position [Entity] }
+                     lEntities :: M.Map Position Entity }
            deriving (Show)
 
 data World = World { wDepth :: Int,

@@ -117,7 +117,7 @@ moveAI monster dir world = world'
     
     world' = world { wLevel = level {lEntities = newEntityMap } }
 
-wait :: [Entity] -> M.Map Position [Entity] -> M.Map Position [Entity]
+wait :: [Entity] -> M.Map Position Entity -> M.Map Position Entity
 wait [] entityMap = entityMap
 wait (m:ms) entityMap = wait ms entityMap'
   where
@@ -129,13 +129,21 @@ wait (m:ms) entityMap = wait ms entityMap'
 
 
 
-updateMap :: Entity -> Position -> M.Map Position [Entity] -> M.Map Position [Entity]
-updateMap m pos entityMap = entityMap''
+updateMap :: Entity -> Position -> M.Map Position Entity -> M.Map Position Entity
+updateMap m pos entityMap = entityMap'
   where
     
     mPos = eCurrPos m
     
-    -- remove the mID (monster) from pos (if it exists)
+    entityMap' =
+      if mPos == pos -- Position has not changed, simply update the value.
+      then
+        M.insert pos m entityMap
+      else
+        M.insert pos m $ M.delete mPos entityMap'
+        {-
+    
+    -- remove the mID (monster) from pos (if it exists)    
     esAtPos = fromMaybe [] $ M.lookup pos entityMap
     
     esAtPosF = filter (\m' -> case m' of
@@ -160,7 +168,7 @@ updateMap m pos entityMap = entityMap''
     -- add m to mPos (can equal pos)
     entityMap'' = M.insertWith (\new olde -> new ++ olde) (mPos) [m] entityMap'
 
-
+-}
 
 
 
@@ -188,22 +196,21 @@ combat sourceEnt atckType destEnts world
 
 -- Simple combat, just attack rolls and defense rolls against a random target,
 --- will be used by the hero when moving into an enemy. when the skill queue system is in place.
-simpleCombat :: Entity -> [Entity] -> World -> World
-simpleCombat sourceEntity targetEntities world = world'
+simpleCombat :: Entity -> Entity -> World -> World
+simpleCombat sourceEntity targetEntity world = world'
   where
     oldGen = wStdGen world
     
-    (targetEntity, newGen) = randomListMember targetEntities oldGen
-    -- got sourceEntity, targetEntity!
+
     
-    (sourceHitRoll, newGen') = rollDie (eHitDie sourceEntity) newGen
-    (targetEvadeRoll, newGen'') = rollDie (eEvadeDie targetEntity) newGen'
+    (sourceHitRoll, newGen) = rollDie (eHitDie sourceEntity) oldGen
+    (targetEvadeRoll, newGen') = rollDie (eEvadeDie targetEntity) newGen'
     
     world' = if sourceHitRoll >= targetEvadeRoll
              then -- hit: roll for damage!
-               world { wMessageBuffer = "Temp hit message!":(wMessageBuffer world), wStdGen = newGen'' }
+               world { wMessageBuffer = "Temp hit message!":(wMessageBuffer world), wStdGen = newGen' }
              else
-               world { wMessageBuffer = ("(" ++ (show sourceHitRoll) ++ " < " ++ (show targetEvadeRoll) ++ ")"):((show sourceEntity) ++ " tried to hit " ++ (show targetEntity) ++ ", but missed!"):(wMessageBuffer world), wStdGen = newGen'' }
+               world { wMessageBuffer = ("(" ++ (show sourceHitRoll) ++ " < " ++ (show targetEvadeRoll) ++ ")"):((show sourceEntity) ++ " tried to hit " ++ (show targetEntity) ++ ", but missed!"):(wMessageBuffer world), wStdGen = newGen' }
 
 
 
@@ -224,11 +231,12 @@ getViewFrame world = (vFStart, maxVision)
 
 getEntitiesFromViewFrame :: World -> (Int, Int) -> [Entity]
 getEntitiesFromViewFrame w (start,end)
-  | start > end = []
-  | otherwise   = res ++ getEntitiesFromViewFrame w (start+1,end)
+  | start > end    = []
+  | res == Nothing = getEntitiesFromViewFrame w (start+1, end)
+  | otherwise      = (fromJust res):getEntitiesFromViewFrame w (start+1,end)
   where
     lvl = wLevel w
-    res = fromMaybe [] $ M.lookup (start, 0) (lEntities lvl)
+    res =  M.lookup (start, 0) (lEntities lvl)
     
     
 dirToCoord Left  = (-1, 0)

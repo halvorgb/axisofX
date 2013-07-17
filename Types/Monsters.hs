@@ -19,4 +19,6 @@ data MonsterType =
                 mtDamageDie :: Dice,
                 mtMitigation :: Int
               }
-  deriving(Show,Eq)
+  deriving(Eq)
+instance Show MonsterType where
+  show mt = show $ mtName mt

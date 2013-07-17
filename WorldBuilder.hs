@@ -69,28 +69,41 @@ generateLevels g nofLevels prevLevels
                       lEntities = monsters
                     }
 -- Possible issue: generators are not split, every temporary list generated uses the same generator.
-generateMonsters :: StdGen -> Int -> Int -> Int -> M.Map Position WallTile -> M.Map Position [Entity]
-generateMonsters g nofMonsters l level wallMap = monsterMap
+generateMonsters :: StdGen -> Int -> Int -> Int -> M.Map Position WallTile -> M.Map Position Entity
+generateMonsters g nofMonsters l levelDepth wallMap = monsterMap
   where
-    -- Generates random x coordinates, "rolls again" if one coordinate exists where a door is.
-    generateCoords :: StdGen -> Int -> [Position]
-    generateCoords _ 0 = []
-    generateCoords g_ nofM = (x,0):generateCoords g_' (nofM-1)
-      where
-        (x, g_') = randX g_
-        
-        
-        randX :: StdGen -> (Int, StdGen)
-        randX g__
-          | M.member (rX,0) wallMap = randX g__'
-          | otherwise = (rX, g__')
-            where
-              (rX,g__')  = randomR (1, l) g__
-        
-        
-    randCoords = generateCoords g nofMonsters    
-    --
     
+    getDoorCoords :: Int -> [Position]
+    getDoorCoords 0 = []
+    getDoorCoords x
+      | doorCheck = (x,0):getDoorCoords (x-1)
+      | otherwise = getDoorCoords (x-1)
+      where
+        doorCheck = case M.lookup (x,0) wallMap of
+          Just Door -> True
+          _ -> False
+    doorCoords = getDoorCoords l
+    
+    
+    randomizeCoordinates :: Int -> [Position] -> StdGen -> [Position]
+    randomizeCoordinates 0 _ _ = []
+    randomizeCoordinates nofM takenPositions g_
+      = p:randomizeCoordinates (nofM-1) (p:takenPositions) g_'
+      where
+        (p, g_') = randP g_ 
+        
+        -- rerolls if hitting a taken position. Ineffective? probably, but there is plenty of room in the level so i doubt it is an issue.
+        
+        --  improve this if performance is an hindrance.
+        randP :: StdGen ->  (Position, StdGen)
+        randP g__ 
+          | notElem (rX, 0) takenPositions = ((rX, 0), g__')          
+          | otherwise = randP g__'
+          where
+            (rX, g__') = randomR (1, l) g__
+    
+    
+    randCoords = randomizeCoordinates l doorCoords g
     
     mIDs = [0..]
     
@@ -99,17 +112,7 @@ generateMonsters g nofMonsters l level wallMap = monsterMap
     zippedList = zip3 mIDs randCoords generatorList
     
     randMonsters = map (\(id, pos,g) -> randomMonster id pos g) zippedList
-                   
-    filterMonsters :: [Entity] -> (Int,Int) -> [(Position, [Entity])]
-    filterMonsters monsters (x,maxX) 
-      | x > maxX = []
-      | null monstersAtX = filterMonsters monsters (x+1, maxX)
-      | otherwise = ((x, 0), monstersAtX):filterMonsters monsters (x+1, maxX) 
-      where
-        monstersAtX = filter (\m -> (eCurrPos m == (x, 0))) monsters
-    
-        
-    monsterMap = M.fromList $ filterMonsters randMonsters (1, (l-1))
+    monsterMap = M.fromList $ zip randCoords randMonsters               
 
 
 

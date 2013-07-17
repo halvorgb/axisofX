@@ -94,7 +94,7 @@ handleDir w dir
       } -- Destroys the door, uses a turn.
 
   | isMonster coord lvl =
-      simpleCombat h (fromJust $ M.lookup coord (lEntities lvl))w -- Simple combat (using movement keys)
+      simpleCombat h (fromJust $ M.lookup coord (lEntities lvl)) w -- Simple combat (using movement keys)
 
   | (dir == Right) && ((fst $ eCurrPos h) == lastInFrame) && (lastInFrame < lSize lvl) = 
       w { 
