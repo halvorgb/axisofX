@@ -96,21 +96,19 @@ createHero w n r c  =
   -- add all entities in e' to map
 think :: World -> IO World
 think world = do
-  
   return world''
     where
       h = wHero world
       lvl = wLevel world
       
-      viewFrame = getViewFrame world
-      
-      e = h:(getEntitiesFromViewFrame world viewFrame) -- every entity in view
+      e = h:(getEntitiesFromViewFrame world $ getViewFrame world) -- every entity in view
       
       dbg ents
         | trace ("\n\ndbg" ++ "\n" ++ show ents) True = True
         
       
-      e' = prepare e -- subtracts the lowest from every entity
+      e' = prepare e -- subtracts the lowest eNextMove value from every entity,
+      -- always yielding 1 with 0.
       
       
       h' = fromJust $ find (\x -> case x of  -- find to not have to iterate through the whole thing, fromJust is safe because the hero was added to e.
@@ -119,23 +117,24 @@ think world = do
                            ) e'
       
       e'' =  filter (\x -> (eNextMove x == 0))  e' -- the monsters whose turns are up!
+      -- monsters whose turns are now
       monstersAI    = filter monsterFilter e''
+      -- monsters whose turns are not up yet.
       monstersWAIT  = (e' \\ [h']) \\ monstersAI
       
-      
+      monsterFilter :: Entity -> Bool
       monsterFilter x = case x of
         Monster {} -> True
         _ -> False
         
       -- UPDATE ZONE (update the map for monsters whose turns are not yet up!)  
-      emap = wait monstersWAIT $ lEntities lvl              
-      
+      emap = foldl (\map m -> updateMap (eCurrPos m) m map) (lEntities lvl) monstersWAIT
       world' = world { wLevel = lvl {lEntities = emap }, wHero = h'}
       -- /UPDATE ZONE
       
       -- AI ZONE
       monsters' = map (\m -> m {eNextMove = eSpeed m}) monstersAI
-      world'' =  ai monsters' world'
+      world'' =  foldl (\w m -> selectAIBehavior m w) world' monsters'
       -- /AI ZONE
       
        
@@ -146,14 +145,6 @@ prepare e = map (\x -> x { eNextMove = eNextMove x - lowestRemaining }) e
   where
     -- 10000 is infinite in this case.
     lowestRemaining = foldl (\x y -> min x $ eNextMove y) 10000 e
-
-
--- recur through every entity whose turn is up, do an action and update the world
-ai :: [Entity] -> World -> World
-ai [] world = world
-ai (m:ms) world = ai ms world'
-  where
-    world' = selectAIBehavior m world
     
 selectAIBehavior :: Entity -> World -> World
 selectAIBehavior monster world
@@ -190,17 +181,6 @@ moveAI monster dir world = world'
     newEntityMap = updateMap oldPos monster'  oldEntityMap
     
     world' = world { wLevel = level {lEntities = newEntityMap } }
-
-wait :: [Entity] -> M.Map Position Entity -> M.Map Position Entity
-wait [] entityMap = entityMap
-wait (m:ms) entityMap = wait ms entityMap'
-  where
-    pos = eCurrPos m
-    entityMap' = updateMap pos m entityMap
-
-
-
-
 
 
 updateMap :: Position -> Entity -> M.Map Position Entity -> M.Map Position Entity
