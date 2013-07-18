@@ -4,13 +4,15 @@ import qualified Data.Map as M
 import System.Random
 
 import Types.Common
-import Types.Monsters
-import Types.Player
+import Types.MonsterTypes
+import Types.Classes
 import Types.Items
 import Types.Tiles
 
 
 
+class ShowLong a where
+  showLong  :: a -> String
 
 ---------------------------------------
 data Level = Level { lDepth :: Int,
@@ -44,11 +46,13 @@ data Entity = Monster { mType :: MonsterType,
                         mLevel :: Int, 
                         mExperienceReward :: Int, 
                         
-                        mCurrHP :: Int,
-                        mMaxHP :: Int,
                         mID :: Int, -- to make each monster unique
                         
                         --common...                        
+                        
+                        eCurrHP :: Int,
+                        eMaxHP :: Int,                        
+                        
                         eSpeed :: Int, -- How much time between each action.
                         eNextMove :: Int, -- How much time until the NEXT action.                        
                         eCurrPos :: Position,
@@ -67,8 +71,8 @@ data Entity = Monster { mType :: MonsterType,
                         hInventory :: Inventory,
                         hLevel :: Int,
                         hExperienceRemaining :: Int,
-                        hCurrHP :: Int,
-                        hMaxHP :: Int,
+                        hReputation :: Reputation,
+                        
                         hCurrEnergy :: Int,
                         hMaxEnergy :: Int,
                         hWield :: Weapon,
@@ -77,6 +81,9 @@ data Entity = Monster { mType :: MonsterType,
                         hViewDistance :: Int, -- Added to $ snd hMovementSlack
                         
                         --common for all entities. Duplicated for ease of use.
+                        eCurrHP :: Int,
+                        eMaxHP :: Int,                        
+                        
                         eCurrPos :: Position,
                         eOldPos :: Position,
                         
@@ -91,8 +98,10 @@ data Entity = Monster { mType :: MonsterType,
             | Boss    { bName :: String,
                         bInnocentKills :: Int,
                         bRivalKills :: Int,
-                        bCurrHP :: Int,
-                        bMaxHP :: Int,
+                        
+                        
+                        eCurrHP :: Int,
+                        eMaxHP :: Int,
                         
                         eCurrPos :: Position,
                         eOldPos :: Position,
@@ -111,11 +120,17 @@ instance Show Entity where
     show e = filter (/= '\"') outString -- remove them silly "'s.
       where
         outString = case e of
-          Hero {} -> (show $ hName e) ++ " the " ++ (show $ hRace e) ++ " " ++ (show $ hClass e)
+          Hero {} -> (show $ hName e)
           Monster {} -> (show $ mRace e) ++ " " ++ (show $ mType e) ++ "[" ++ (show $ mLevel e) ++ "]"
           Boss {} -> show $ bName e
           
           
+instance ShowLong Entity where
+  showLong e = filter (/= '\"') outString -- remove "
+    where
+      outString = case e of 
+        Hero {} -> (show $ hName e) ++ " the " ++ (show $ hRace e) ++ " " ++ (show $ hClass e)
+        _ -> "TODO: ShowLong Entity for bosses and monsters."
           
           
 -- Races:          
@@ -136,7 +151,7 @@ data Race = Race { rName :: String, -- Has to be unique for each race (not enfor
                                       
                    rExperiencePenalty :: Float,
                    
-                   rMovementFunc :: (Race -> World -> Race)
+                   rContextFunc :: World -> World
                  }
 instance Show Race where
   show r = show $ rName r

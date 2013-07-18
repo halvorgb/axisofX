@@ -7,13 +7,82 @@ import Data.List
 
 import Types.World
 import Types.Common
-import Random
+import Types.Classes
 
+import Types.Items
+
+import Random
+import Combat
 
 import Level
 
 --debug:
 import Debug.Trace
+
+
+
+
+
+
+
+
+
+
+-- recalculates hero stats
+createHero :: World -> String -> Race -> Class -> World
+createHero w n r c  = 
+  w { wHero = h {
+         hName = n,
+         hClass = c,
+         hRace = r,
+         hInventory = inventory,
+         hReputation = reputation,
+         hCurrEnergy = energy,
+         hMaxEnergy = energy,
+         hWield = weapon,
+         hWear = armor,
+         eCurrHP = hp,
+         eMaxHP = hp,
+         
+         eHitDie = hitDie,
+         eDamageDie = dmgDie,
+         eEvadeDie = evdDie,
+         eMitigation = mitigation
+         }
+    }
+                      
+  where
+    h = wHero w
+    
+    inventory = cStartingInventory c
+    
+    -- todo: experience
+    
+    reputation = cStartingReputation c
+    
+    energy = round $ (fromIntegral $ (rBaseEnergy r)) * (cStartingEnergyMultiplier c)
+    hp = round $ (fromIntegral $ (rBaseHP r)) * (cStartingHPMultiplier c)
+    
+    armor = cStartingArmor c
+    weapon = cStartingWeapon c
+    
+    hitDie = (cHitDie c) { dMod = (dMod $ cHitDie c) + (rHitModifier r) + (wepHitBonus weapon) }
+    evdDie = (cEvadeDie c) { dMod = (dMod $ cEvadeDie c) + (rEvasionModifier r) + (aEvasion armor)}
+    mitigationMod = (cMitigationBonus c) + (rMitigationModifier r)
+    damageMod = (cDamageBonus c) + (rDamageModifier r)
+    
+    dmgDie = (wepDamageDie weapon) { dMod = (dMod $ wepDamageDie weapon) + damageMod}
+    mitigation = mitigationMod + (aMitigation armor)
+    
+    
+    
+
+
+
+
+
+
+
 
 
   -- Find all entities currently in view, add them to a list l.
@@ -88,7 +157,7 @@ ai (m:ms) world = ai ms world'
     
 selectAIBehavior :: Entity -> World -> World
 selectAIBehavior monster world
-  | playerAdjecent = world --combat monster Prod hero world
+  | playerAdjecent = simpleCombat monster hero world --combat monster Prod hero world
   | movementBlocked = world
   | otherwise = moveAI monster playerDirection world
   where
@@ -143,40 +212,6 @@ updateMap m oldPos entityMap = entityMap''
     
     entityMap'' = M.insert mPos m entityMap'
 
-
-
--- Combat!
---calculateDamage :: Entity -> AttackType -> Entity -> Int
---calculateDamage sourceEnt ackType destEnt = 1
-
-
---                   v<-- AttackType
-combat :: Entity -> Int -> [Entity] -> World -> World
-combat sourceEnt atckType destEnts world
-  | null destEnts = 
-    let failureString = "You " ++ (show atckType) ++ " at nothing, and miss!" in
-          world { wMessageBuffer = failureString:(wMessageBuffer world) }
-  | otherwise = world
-
-
-
--- Simple combat, just attack rolls and defense rolls against a random target,
---- will be used by the hero when moving into an enemy. when the skill queue system is in place.
-simpleCombat :: Entity -> Entity -> World -> World
-simpleCombat sourceEntity targetEntity world = world'
-  where
-    oldGen = wStdGen world
-    
-
-    
-    (sourceHitRoll, newGen) = rollDie (eHitDie sourceEntity) oldGen
-    (targetEvadeRoll, newGen') = rollDie (eEvadeDie targetEntity) newGen
-    
-    world' = if sourceHitRoll >= targetEvadeRoll
-             then -- hit: roll for damage!
-               world { wMessageBuffer = "Temp hit message!":(wMessageBuffer world), wStdGen = newGen' }
-             else
-               world { wMessageBuffer = ("(" ++ (show sourceHitRoll) ++ " < " ++ (show targetEvadeRoll) ++ ")"):((show sourceEntity) ++ " tried to hit " ++ (show targetEntity) ++ ", but missed!"):(wMessageBuffer world), wStdGen = newGen' }
 
 
 

@@ -1,4 +1,4 @@
-module Types.Monsters where
+module Types.MonsterTypes where
 
 import System.Random
 

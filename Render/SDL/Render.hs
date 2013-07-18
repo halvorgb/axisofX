@@ -26,6 +26,7 @@ tileFilePaths = [ "assets/tiles/test_bg.png",
                  "assets/tiles/test_water.png" ]
                 
 bgFilePath = "assets/background/gui_bg.png"
+splashFilePath = "assets/background/splash_bg.png"
 
 
                
@@ -41,9 +42,9 @@ tileTypes = enumFrom TT_bg
 
 type TileSurfaces = [(TileType, SDL.Surface)]
 
-type Background = SDL.Surface
+type Backgrounds = (SDL.Surface, SDL.Surface)
 
-type ImageAssets  = (Background, TileSurfaces)
+type ImageAssets  = (Backgrounds, TileSurfaces)
 
 coordToTileType coord world 
   | eCurrPos hero == coord = TT_char
@@ -67,8 +68,9 @@ loadTiles paths = do
 loadImages :: IO ImageAssets
 loadImages = do
   bgSurf <- SDLi.load bgFilePath
+  splashSurf <- SDLi.load splashFilePath
   tileSurfs <- loadTiles tileFilePaths
-  return (bgSurf, tileSurfs)
+  return ((splashSurf, bgSurf), tileSurfs)
   
 
 

@@ -3,6 +3,7 @@ module Content.Base where
 import qualified Data.Map as M
 
 import Types.Common
+import Types.Classes
 import Types.Items
 import Types.World
 
@@ -41,10 +42,11 @@ basePlayer = Hero { hName = "Broseph",
                     hInventory = Inventory [] 0,
                     hLevel = 1,
                     hExperienceRemaining = 100,
+                    hReputation = Asshole,
                     eCurrPos = (0,0),
                     eOldPos = (0,0),
-                    hCurrHP = 10,
-                    hMaxHP = 10,
+                    eCurrHP = 10,
+                    eMaxHP = 10,
                     hCurrEnergy = 50,
                     hMaxEnergy = 50,
                     eSpeed = 5,
@@ -63,7 +65,7 @@ basePlayer = Hero { hName = "Broseph",
                     }  
             
 
-baseHeroDamageDie = Dice { dDie = (2, 5), dMod = 4 }
+baseHeroDamageDie = Dice { dDie = (2, 5), dMod = 0 }
 baseHeroHitDie = Dice { dDie = (1, 20), dMod = 0 }
 baseHeroEvadeDie = Dice { dDie = (1, 5), dMod = 10}
 baseHeroMitigation = 2

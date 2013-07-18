@@ -2,8 +2,11 @@ module Content.Classes where
 
 import Content.StartingGear
 
-import Types.Player
+import Types.Common
+import Types.Classes
 import Types.Items
+
+classes = [peasant]
 
 peasant = Class { cName = "Peasant",
                   
@@ -18,5 +21,12 @@ peasant = Class { cName = "Peasant",
                   cStartingArmor = rags,
                   cStartingInventory = Inventory [] 0,
                   
-                  cStartingReputation = Asshole
+                  cStartingReputation = Asshole,
+                  
+                  cHitDie = Dice {dDie = (1,20), dMod = 0},
+                  cEvadeDie = Dice {dDie = (1,20), dMod = 0},
+                  cDamageBonus = 0,
+                  cMitigationBonus = 0
+                                        
+                                        
                 }

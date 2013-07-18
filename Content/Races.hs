@@ -2,8 +2,8 @@ module Content.Races where
 
 import Types.World
 
-vanilla :: Race -> World -> Race
-vanilla r _ = r
+vanilla :: World -> World
+vanilla w = w
 
 -- add new races here
 races = [human, ogre]
@@ -26,7 +26,7 @@ human = Race { rName = "Human",
                
                rExperiencePenalty = 1.0,
                
-               rMovementFunc = vanilla
+               rContextFunc = vanilla
              }
         
 ogre = Race { rName = "Ogre",
@@ -46,5 +46,5 @@ ogre = Race { rName = "Ogre",
               
               rExperiencePenalty = 1.0,
               
-              rMovementFunc = vanilla
+              rContextFunc = vanilla
             }

@@ -1,35 +1,40 @@
-module Render.SDL.GUI (setup, update_, shutdown, getInput, loadAssets, Assets) where
+module Render.SDL.GUI (setup, chooseProtagonist, update_, shutdown, getInput, loadAssets, Assets) where
 
 import Graphics.UI.SDL as SDL
 import Render.SDL.Render as Render
 import Render.SDL.Text as Text
 
 import Prelude hiding(Either(..))
+import Data.Maybe
+import System.Random
 
-
+import Content.Names
+import Content.Races
+import Content.Classes
 
 import Types.Common
+import Types.Classes
 import Types.World
 
 type Assets = (ImageAssets, FontAssets)
 
-setup :: World -> Assets -> IO ()
-setup world assets = do
-  SDL.init [SDL.InitEverything ]
-  
-  -- init SDL.TTF:
---  Text.setupText
-  
+setup :: IO ()
+setup  = do
+  SDL.init [ SDL.InitEverything ]
+  SDL.enableUnicode True
+    
   setVideoMode 800 600 32 []
-  setCaption "Axis of X!" "Axis of x."
+  setCaption "Axis of X!" "Axis of X."
   
   mainSurf <- SDL.getVideoSurface  
   
   SDL.flip mainSurf
   
+  
+  
     
 update_ :: World -> Assets -> IO ()
-update_ world ((background, tiles), font) = do
+update_ world (((_, background), tiles), font) = do
   mainSurf <- getVideoSurface
   
   -- draw BG:
@@ -43,21 +48,39 @@ update_ world ((background, tiles), font) = do
   drawWorld world mainSurf tiles
   
   -- Draw Text!
-  drawAll world mainSurf font
+  drawGameText world mainSurf font
   
   -- Flip!
   SDL.flip mainSurf
 
-shutdown :: Assets -> IO ()
-shutdown ((background, tiles), font) = do
+shutdown :: World -> Assets -> IO ()
+shutdown world assets@(((splashBG, background), tiles), font) = do
+  
+  let world' = world { wMessageBuffer = ("Press \"Q\" to quit the game."):(wMessageBuffer world) } in
+    update_ world' assets
+    
+  let quit e = case e of
+        Quit -> return ()
+        (KeyDown (Keysym key _ _)) -> do
+          case key of
+            SDLK_q -> return ()
+            _ -> (waitEventBlocking >>= quit)
+        _ -> (waitEventBlocking >>= quit)
+          
+  input <- (waitEventBlocking >>= quit)
+  
+                
+  
+  
+  
   mapM_ freeSurf tiles -- tiles
   freeSurface background -- bg
+  freeSurface splashBG
   --freeSurface font
   
   SDL.quit
-  print "Thanks for playing Axis of X!"
   
-    where
+  where
       freeSurf (_, s) = freeSurface s
   
 loadAssets :: IO Assets
@@ -87,3 +110,91 @@ getInput  = do
         _ -> getInput 
      
 
+
+
+
+
+----------------
+        
+        ---
+        ---
+        -- selecing name/class/race
+        
+
+
+
+-- bit ugly for this to be here...
+chooseProtagonist :: Assets -> IO (String, Class, Race)
+chooseProtagonist (((splashBG, _), _), font) = do
+  
+  mainSurf <- getVideoSurface
+  
+  -- draw BG:
+  let sourceRect = Just (SDL.Rect 0 0 800 600)
+
+  let destRect = Just (SDL.Rect 0 0 0 0)
+  SDL.blitSurface splashBG sourceRect mainSurf destRect
+  
+  -- name = random!
+  nameGen <- getStdGen
+  let name = randomName nameGen
+  let welcomePos = (256, 296)
+  
+  drawTextAtPos ("Welcome to Axis of X,  your name is " ++ name ++ ".") welcomePos mainSurf font
+  
+  
+  let klassTextPos = (256, 328)
+  drawTextAtPos "Select a class:" klassTextPos mainSurf font
+  SDL.flip mainSurf
+  let klassOptionsPos = (256, 360)
+  klass <- chooseFromList classes klassOptionsPos mainSurf font
+  let klassPos = (256, 396)
+  drawTextAtPos ("> " ++ (show klass)) klassPos mainSurf font
+  
+  
+  let raceTextPos = (256, 428)
+  drawTextAtPos "Select a race:" raceTextPos mainSurf font
+  let raceOptionsPos = (256, 460)
+  SDL.flip mainSurf
+  race <- chooseFromList races raceOptionsPos mainSurf font
+  {-
+  let racePos = (256, 496)
+  drawTextAtPos ("> " ++ (show race)) racePos mainSurf font
+  
+  SDL.flip mainSurf
+  -}
+  
+  return (name, klass, race)
+
+
+
+
+-- Used to pick classes and races.
+chooseFromList :: Show a => Eq a => [a] -> Position -> SDL.Surface -> FontAssets -> IO a
+chooseFromList list pos mainSurf font = do  
+  drawTextAtPos outStr pos mainSurf font
+  SDL.flip mainSurf
+  choice <- getChoice lastChoice
+  return $ fromJust $ lookup choice charToList
+  
+    where
+      charToList = zip ['a'..'z'] list
+      charToListString = map (\(c, cls) -> (c, show cls)) charToList
+      outStr = foldl (\str (c, s) -> str ++ (c:": " ++ s ++ "  " )) "" charToListString
+      lastChoice = fst $ last charToList
+      
+-- Used  to get a char bounded [a..maxChar].
+getChoice :: Char -> IO Char
+getChoice maxChar = do
+  waitEventBlocking >>= getCharInput
+    where
+      getCharInput e = case e of
+        (KeyDown (Keysym  _ _ c)) -> do 
+          if c <= maxChar
+            then
+            return c
+            else
+            waitEventBlocking >>= getCharInput
+            
+        _ -> waitEventBlocking >>= getCharInput
+             

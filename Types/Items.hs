@@ -5,7 +5,7 @@ import Types.Common
 
 -- ITEMS: Armor
 -- (temp)
-data Armor = Armor { aAvoidance :: Int,
+data Armor = Armor { aEvasion :: Int,
                      aMitigation :: Int,
                      aDescription :: String }
              
@@ -44,8 +44,8 @@ data Weapon =
     
     -- "proper" stats:
     wepDescription :: String,
-    wepDamageDie :: Die,
-    wepHitPenalty :: Int,
+    wepDamageDie :: Dice,
+    wepHitBonus :: Int,
     wepSpeedMultiplier :: Float
      -- !
                 

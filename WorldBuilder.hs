@@ -11,10 +11,11 @@ import Random
 import Types.World
 import Types.Tiles
 import Types.Common
-import Types.Monsters
+import Types.MonsterTypes
 
 import Content.Base
 import Content.Races
+
 
 
 
@@ -23,7 +24,7 @@ lengthBounds :: (Int, Int)
 lengthBounds = (100, 200) -- minimum and maximum length of a level
 nofLevels = 2 -- TODO: add more.
 monsterDistanceBounds :: (Int, Int)
-monsterDistanceBounds = (2, 3) -- average distance between monsters
+monsterDistanceBounds = (5, 8) -- average distance between monsters
 doorDistanceBounds :: (Int, Int)
 doorDistanceBounds = (20, 40) -- average door distance.
 

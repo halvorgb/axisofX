@@ -7,7 +7,7 @@ import Types.Common
 import Types.World
 import Types.Items
 import Types.World
-import Types.Monsters
+import Types.MonsterTypes
 
 import Content.MonsterTypes
 import Content.Races
@@ -66,8 +66,8 @@ createMonster mt race inv level id position =
                mLevel = level,
                mExperienceReward = 1, -- todo
                
-               mCurrHP = mHP,
-               mMaxHP = mHP,
+               eCurrHP = mHP,
+               eMaxHP = mHP,
                mID = id,
                
                

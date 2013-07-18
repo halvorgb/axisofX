@@ -7,8 +7,9 @@ import Types.Common
 lastBoss = Boss {  bName = "Kitty the Just",
                    bInnocentKills = 0,
                    bRivalKills = 0,
-                   bCurrHP = 100,
-                   bMaxHP = 100,
+                   
+                   eCurrHP = 100,
+                   eMaxHP = 100,
                    
                    eCurrPos = (-200, 0),
                    eOldPos = (-200, 0),

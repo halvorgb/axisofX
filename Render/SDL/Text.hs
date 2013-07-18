@@ -1,4 +1,4 @@
-module Render.SDL.Text (FontAssets, loadFont, drawAll) where
+module Render.SDL.Text (FontAssets, loadFont, drawGameText, drawTextAtPos) where
 
 import qualified Graphics.UI.SDL.TTF.General as TTFG
 import Graphics.UI.SDL.TTF as TTF
@@ -6,6 +6,7 @@ import Graphics.UI.SDL as SDL
 
 import Types.Common
 import Types.World
+import Types.Classes
 import Content.StaticText
 
 fontFilePath = "assets/fonts/SourceSansPro-Regular.ttf"
@@ -17,28 +18,49 @@ consoleBufferSize :: Int
 consoleBufferSize = 18
 
 playerNamePos :: Position
-playerNamePos = (40, 100)
+playerNamePos = (48, 82)
 
 playerHPPos :: Position
-playerHPPos = (64, 127)
+playerHPPos = (64, 102)
 
 playerMaxHPPos :: Position
-playerMaxHPPos = (104, 127)
+playerMaxHPPos = (104, 102)
 
 playerEnergyPos :: Position
-playerEnergyPos = (196, 127)
+playerEnergyPos = (196, 102)
 
 playerMaxEnergyPos :: Position
-playerMaxEnergyPos = (226, 127)
+playerMaxEnergyPos = (226, 102)
 
 playerExperiencePos :: Position
-playerExperiencePos = (122, 148)
+playerExperiencePos = (70, 123)
 
 playerLevelPos :: Position
-playerLevelPos = (218, 148)
+playerLevelPos = (150, 123)
+
+playerSpeedPos :: Position
+playerSpeedPos = (216, 123)
+
+playerHitDiePos :: Position
+playerHitDiePos = (64, 144)
+
+playerDmgDiePos :: Position
+playerDmgDiePos = (188, 144)
+
+playerEvadeDiePos :: Position
+playerEvadeDiePos = (85, 165)
+
+playerMitigationPos :: Position
+playerMitigationPos = (234, 165)
+
+playerRepPos :: Position
+playerRepPos = (122, 186)
+
+
+
 
 bossNamePos :: Position
-bossNamePos = (40, 244)
+bossNamePos = (48, 226)
   
 -- the help/inv/skills ++ screen
 screenTopPos :: Position
@@ -60,9 +82,17 @@ loadFont = do
 
 
 
+drawTextAtPos :: String -> Position -> SDL.Surface -> Font -> IO ()
+drawTextAtPos string pos mainSurf font = do
+  let surf = createSurfaces font [string] (Color 255 255 255)
+  renderText mainSurf (pos, head surf)
 
-drawAll :: World -> SDL.Surface -> Font -> IO ()
-drawAll world mainSurf font = do
+
+
+
+
+drawGameText :: World -> SDL.Surface -> Font -> IO ()
+drawGameText world mainSurf font = do
   drawCharacterText world mainSurf font
   drawBossText world mainSurf font
   drawConsoleText world mainSurf font
@@ -107,19 +137,52 @@ drawCharacterText world mainSurf font = do
   
   let lSurf = createSurfaces font levelString (Color 0 0 0)
   renderText mainSurf (playerLevelPos, head lSurf)
+  
+  
+  -- speed
+  let spdSurf = createSurfaces font speedString (Color 0 0 0)
+  renderText mainSurf (playerSpeedPos, head spdSurf)
+  
+  -- dies.
+  let hitDieSurf = createSurfaces font hitDieString (Color 0 0 0)
+  renderText mainSurf (playerHitDiePos, head hitDieSurf)
+  
+  let dmgDieSurf = createSurfaces font dmgDieString (Color 0 0 0)
+  renderText mainSurf (playerDmgDiePos, head dmgDieSurf)
+  
+  let evdDieSurf = createSurfaces font evdDieString (Color 0 0 0)
+  renderText mainSurf (playerEvadeDiePos, head evdDieSurf)  
+  
+  -- mitigation
+  let mitSurf = createSurfaces font mitString (Color 0 0 0)
+  renderText mainSurf (playerMitigationPos, head mitSurf)
+  
+  -- reputation:
+  let repSurf = createSurfaces font repString (Color 0 0 0)
+  renderText mainSurf (playerRepPos, head repSurf)
 
   where
     hero = wHero world
-    nameString = [(show hero)]
+    nameString = [(showLong hero)]
     
-    hpString = [show $ hCurrHP hero]
-    hpMString = [show $ hMaxHP hero]
+    hpString = [show $ eCurrHP hero]
+    hpMString = [show $ eMaxHP hero]
     
     eString = [show $ hCurrEnergy hero]
     eMString = [show $ hMaxEnergy hero]
     
     expString = [show $ hExperienceRemaining hero]
     levelString = [show $ hLevel hero]
+    
+    speedString = [show $ eSpeed hero]
+    
+    hitDieString = [show $ eHitDie hero]
+    dmgDieString = [show $ eDamageDie hero]
+    evdDieString = [show $ eEvadeDie hero]
+    
+    mitString = [show $ eMitigation hero]
+    
+    repString = ["Asshole(temp)"]
     
 
 drawScreen :: World -> SDL.Surface -> Font -> IO ()

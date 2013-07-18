@@ -8,53 +8,53 @@ import Data.List
 
 import Render.SDL.GUI as GUI
 import Render.SDL.Render
+import Combat
 import Level
 import Logic
 import WorldBuilder
 
 import Types.World
 import Types.Common
+import Types.Classes
 
+import Content.Classes
+import Content.Races
 
 
 
 main :: IO ()
 main = do
-  -- Read in parameters.
   {-
-  putStrLn "Hello, what is your name?"
+  putStrLn "What is your name?"
   name <- getLine
   
-  putStrLn "So Bjarne, what is your class? (Bard | Jester | Fool)"
+  putStrLn "Class?" ++ (show classes)
   clss <- getLine
   let cls = read clss :: Class
       
   putStrLn "Race? (Ogre | Giant | Troll | Orc | Goblin | Hobgoblin)"
   rce <- getLine
   let race = read rce :: Race
-  
   -}
+  assets <- loadAssets
+  GUI.setup
   
+  (name, race, klass) <- GUI.chooseProtagonist assets
   
   world <- returnWorld
-  assets <- loadAssets
-  {-
-  let world' = world { 
-        wHero = (wHero world) {
-           hName = "Hedstemanden", 
-           hClass = Jester, 
-           hRace = Giant } 
-        }
-  -}
-  GUI.setup world assets
-  gameLoop world assets
+  
+
+  let world' = createHero world name klass race
+
+  
+  gameLoop world' assets
 
 
 gameLoop :: World -> Assets -> IO ()
 gameLoop world assets = do
-  if (null $ wLevels world) -- check if complete. (future also check for death)
+  if (null $ wLevels world) || ((eCurrHP $ wHero world) <= 0) -- check if complete. (future also check for death)
     then do
-    GUI.shutdown assets
+    GUI.shutdown world assets
     else do
     if (eNextMove $ wHero world) == 0  -- check if hero's turn.
       then do 
@@ -62,7 +62,7 @@ gameLoop world assets = do
       input <- GUI.getInput
       case input of 
         Show screen -> gameLoop (handleShow screen world) assets
-        Exit -> handleExit assets
+        Exit -> handleExit world assets
         Wait -> gameLoop (handleWait world) assets
         Dir dir -> gameLoop (handleDir world dir) assets
       else do -- else: AI
@@ -88,26 +88,34 @@ handleDir w dir
          },
       wHero = h { 
         eOldPos = eCurrPos h, 
-        eNextMove = eSpeed h
+        eNextMove = eSpeed h,
+        hCurrEnergy = newEnergy
         },
       wMessageBuffer = "Opened door!":mBuffer
       } -- Destroys the door, uses a turn.
 
   | isMonster coord lvl =
-      simpleCombat h (fromJust $ M.lookup coord (lEntities lvl)) w -- Simple combat (using movement keys)
-
+      (simpleCombat h (fromJust $ M.lookup coord (lEntities lvl)) w)
+      {
+        wHero = h {eOldPos = eCurrPos h,
+                   eNextMove = eSpeed h,
+                   hCurrEnergy = newEnergy
+                  }
+      }-- Simple combat (using movement keys)
+      
   | (dir == Right) && ((fst $ eCurrPos h) == lastInFrame) && (lastInFrame < lSize lvl) = 
       w { 
         wHero = h { 
            eOldPos = eCurrPos h,
            eCurrPos = coord, 
            eNextMove = eSpeed h,
+           hCurrEnergy = newEnergy,
            hMovementSlack = (firstInFrame+1, lastInFrame+1)
            }        
-        } -- If at right side of frame -- TODO: check if monster collides! (above)
+        } -- If at right side of frame -- 
       
   | otherwise =  
-        w { wHero = h { eOldPos = eCurrPos h, eCurrPos = coord, eNextMove = eSpeed h} }
+        w { wHero = h { eOldPos = eCurrPos h, eCurrPos = coord, eNextMove = eSpeed h, hCurrEnergy = newEnergy} }
   where 
     h              = wHero w
     lvl            = wLevel w
@@ -119,6 +127,8 @@ handleDir w dir
     (firstInFrame, lastInFrame) = hMovementSlack h
     
     mBuffer = wMessageBuffer w
+    
+    newEnergy = max 0 $ (hCurrEnergy h) - 1
 
 
 handleWait :: World -> World
@@ -133,9 +143,9 @@ handleWait w =
   where
     h = wHero w
 
-handleExit ::  Assets -> IO ()
-handleExit assets = do
-  GUI.shutdown assets
+handleExit :: World -> Assets -> IO ()
+handleExit world assets = do
+  GUI.shutdown world assets
   
 --nextLevel :: World -> IO 
 nextLevel world

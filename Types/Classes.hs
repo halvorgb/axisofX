@@ -1,6 +1,6 @@
-module Types.Player where
+module Types.Classes where
 
-
+import Types.Common
 import Types.Items
 
 -- work on this, main idea: the player is a dick by default.
@@ -23,11 +23,16 @@ data Class =
           cStartingArmor :: Armor,
           cStartingInventory :: Inventory,
             
-          cStartingReputation :: Reputation
+          cStartingReputation :: Reputation,
+          
+          cHitDie :: Dice,
+          cEvadeDie :: Dice,
+          cDamageBonus :: Int,
+          cMitigationBonus :: Int
           
           -- more attributes such as allowed weapons and skills.
         }
   deriving (Eq)
 
 instance Show Class where
-  show c = show $ cName c
+  show c = filter (/= '\"') $ show $ cName c

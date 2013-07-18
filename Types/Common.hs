@@ -37,4 +37,10 @@ data Dice =
     dDie :: Die, 
     dMod :: Modifier
     }
-  deriving(Show, Eq)
+  deriving(Eq)
+          
+instance Show Dice where
+  show d = (show nofDie) ++ "d" ++ (show maxDice) ++ " + " ++ (show modifier)
+    where
+      (nofDie, maxDice) = dDie d
+      modifier = dMod d
