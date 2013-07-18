@@ -45,6 +45,7 @@ data Entity = Monster { mType :: MonsterType,
                         mInventory :: Inventory,
                         mLevel :: Int, 
                         mExperienceReward :: Int, 
+                        mSpotted :: Bool,
                         
                         mID :: Int, -- to make each monster unique
                         
@@ -99,7 +100,6 @@ data Entity = Monster { mType :: MonsterType,
                         bInnocentKills :: Int,
                         bRivalKills :: Int,
                         
-                        
                         eCurrHP :: Int,
                         eMaxHP :: Int,
                         
@@ -111,7 +111,8 @@ data Entity = Monster { mType :: MonsterType,
                         eHitDie :: Dice,
                         eDamageDie :: Dice,
                         eEvadeDie :: Dice,
-                        eMitigation :: Int                        
+                        eMitigation :: Int
+                        
                         }
             deriving (Eq)
 

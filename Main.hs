@@ -46,13 +46,14 @@ gameLoop world assets = do
     else do
     if (eNextMove $ wHero world) == 0  -- check if hero's turn.
       then do 
-      GUI.update_ world assets
+      let world' = checkVision world
+      GUI.update_ world' assets
       input <- GUI.getInput
       case input of 
-        Show screen -> gameLoop (handleShow screen world) assets
-        Exit -> handleExit world assets
-        Wait -> gameLoop (handleWait world) assets
-        Dir dir -> gameLoop (handleDir world dir) assets
+        Show screen -> gameLoop (handleShow screen world') assets
+        Exit -> handleExit world' assets
+        Wait -> gameLoop (handleWait world') assets
+        Dir dir -> gameLoop (handleDir world' dir) assets
       else do -- else: AI
       world' <- think world
       gameLoop world' assets

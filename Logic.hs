@@ -187,7 +187,7 @@ moveAI monster dir world = world'
                          eCurrPos = eCurrPos monster |+| dir
                        }
     
-    newEntityMap = updateMap monster' oldPos oldEntityMap
+    newEntityMap = updateMap oldPos monster'  oldEntityMap
     
     world' = world { wLevel = level {lEntities = newEntityMap } }
 
@@ -196,15 +196,15 @@ wait [] entityMap = entityMap
 wait (m:ms) entityMap = wait ms entityMap'
   where
     pos = eCurrPos m
-    entityMap' = updateMap m pos entityMap
+    entityMap' = updateMap pos m entityMap
 
 
 
 
 
 
-updateMap :: Entity -> Position -> M.Map Position Entity -> M.Map Position Entity
-updateMap m oldPos entityMap = entityMap''
+updateMap :: Position -> Entity -> M.Map Position Entity -> M.Map Position Entity
+updateMap oldPos m entityMap = entityMap''
   where
     mPos = eCurrPos m
     
@@ -215,6 +215,33 @@ updateMap m oldPos entityMap = entityMap''
 
 
 
+
+-- CheckVision: Purpose: announce newly spotted monsters and bosses in the messageBuffer.
+checkVision :: World -> World
+checkVision w = w'
+  where
+    l = wLevel w
+    entMap = lEntities l
+    
+    visibleEs = getEntitiesFromViewFrame w $ getViewFrame w
+    
+    -- entities that haven't been announced yet.
+    newEs = filter (\e -> not $ mSpotted e) visibleEs
+    
+    markedEs = map (\e -> (eCurrPos e, e {mSpotted = True})) newEs
+    
+    
+    stringBuffer = map (\m -> (show $ snd m) ++ " spotted!") markedEs
+    
+    entMap' = foldl (\map (key,value) -> updateMap key value map) entMap markedEs
+    
+    
+    w' = w {
+      wLevel = l {
+         lEntities = entMap'
+         },
+      wMessageBuffer = stringBuffer ++ (wMessageBuffer w)
+      }
 
 
 

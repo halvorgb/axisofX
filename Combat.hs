@@ -51,8 +51,14 @@ damageEntity sourceEntity targetEntity damage world = world'
                               wLevel = level { lEntities = M.insert (eCurrPos targetEntity) (targetEntity {eCurrHP = newTargetHP}) (M.delete (eCurrPos targetEntity) ents) }
                             }
                       
-      Hero {} -> world { wMessageBuffer = ((show  targetEntity) ++ " took " ++ (show damage) ++ "damage from " ++ (show sourceEntity)):(wMessageBuffer world), 
-                         wHero = targetEntity { eCurrHP = newTargetHP }
-                       }
+      Hero {} -> if newTargetHP > 0
+                 then
+                   world { wMessageBuffer = ((show  targetEntity) ++ " took " ++ (show damage) ++ " damage from " ++ (show sourceEntity)):(wMessageBuffer world), 
+                           wHero = targetEntity { eCurrHP = newTargetHP }
+                         }
+                 else
+                   world { wMessageBuffer = ((show  targetEntity) ++ " was killed by " ++ (show sourceEntity) ++ "!" ):(wMessageBuffer world), 
+                           wHero = targetEntity { eCurrHP = newTargetHP }
+                         }                   
       _ -> world
     

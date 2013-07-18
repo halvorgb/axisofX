@@ -65,6 +65,7 @@ createMonster mt race inv level id position =
                mInventory = inv,
                mLevel = level,
                mExperienceReward = 1, -- todo
+               mSpotted = False,
                
                eCurrHP = mHP,
                eMaxHP = mHP,
