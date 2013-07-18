@@ -1,4 +1,4 @@
-module Random (randomListMember, rollDie, makeGeneratorList, randomMonster)  where
+module Random (randomListMember, rollDie, makeGeneratorList, randomMonster) where
 
 
 import System.Random
@@ -83,8 +83,6 @@ createMonster mt race inv level id position =
                eEvadeDie = mEvadeDie,
                eMitigation = mMitigation
             }
-                         
-                          
   where
     mHitDie = (mtHitDie mt)
       { dMod = (dMod $ mtHitDie mt)  +  (rHitModifier race) }

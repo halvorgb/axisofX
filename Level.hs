@@ -28,10 +28,11 @@ isMonster coord lvl = case M.lookup coord (lEntities lvl) of
 
 
 
-isArmor coord lvl =  any (\x -> case x of 
-                             Arm { } -> True
-                             _ -> False
-                          ) resList
+isArmor coord lvl = 
+  any (\x -> case x of 
+          Arm { } -> True
+          _ -> False
+      ) resList
   where
     resList = fromMaybe [] $ M.lookup coord (lItems lvl)
 
@@ -40,29 +41,18 @@ isArmor coord lvl =  any (\x -> case x of
 
 
 
-isPotion coord lvl = any (\x -> case x of 
-                             Pot { } -> True
-                             _ -> False
-                          ) resList
+isPotion coord lvl = 
+  any (\x -> case x of 
+          Pot { } -> True
+          _ -> False
+      ) resList
   where
     resList = fromMaybe [] $ M.lookup coord (lItems lvl)
 
-isWeapon coord lvl =  any (\x -> case x of 
-                             Weap { } -> True
-                             _ -> False
-                          ) resList
+isWeapon coord lvl =  
+  any (\x -> case x of 
+          Weap { } -> True
+          _ -> False
+      ) resList
   where
     resList = fromMaybe [] $ M.lookup coord (lItems lvl)
-
-
--- og lignende for alle andre funksj.
-
-{-
-
-map1 = [
-  "                                                                                       ",
-  "~~~~~~~~~~~~~~~~~~~~##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################~~~~" ]
-map2 = [ "       ",
-         "#######"]
-level1 = strToLevel map1
--}

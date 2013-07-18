@@ -72,8 +72,7 @@ generateLevels g nofLevels prevLevels
 -- Possible issue: generators are not split, every temporary list generated uses the same generator.
 generateMonsters :: StdGen -> Int -> Int -> Int -> M.Map Position WallTile -> M.Map Position Entity
 generateMonsters g nofMonsters l levelDepth wallMap = monsterMap
-  where
-    
+  where    
     getDoorCoords :: Int -> [Position]
     getDoorCoords 0 = []
     getDoorCoords x
@@ -116,17 +115,12 @@ generateMonsters g nofMonsters l levelDepth wallMap = monsterMap
     monsterMap = M.fromList $ zip randCoords randMonsters               
 
 
-
-
-    --monsterMap = M.fromList $ zip randCoords randMonsters
-
     
 
 generateFloor :: StdGen -> Int -> M.Map Position FloorTile
 generateFloor g l = floorMap
   where
     randFloor = (take l $ randoms  g) :: [FloorTile]
---    floor = concat $ map (\i -> if (i == Grass) then "#" else "~") randFloor -- list of all floortiles.
     coords = [(x,y) | x <- [0..], y <- [1]]
     floorMap = M.fromList $ zip coords randFloor
 

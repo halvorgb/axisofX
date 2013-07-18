@@ -23,12 +23,7 @@ import Debug.Trace
 
 
 
-
-
-
-
-
--- recalculates hero stats
+-- First time calculation of hero stats
 createHero :: World -> String -> Race -> Class -> World
 createHero w n r c  = 
   w { wHero = h {
@@ -54,13 +49,10 @@ createHero w n r c  =
   where
     h = wHero w
     
-    inventory = cStartingInventory c
-    
-    -- todo: experience
-    
-    reputation = cStartingReputation c
-    
-    energy = round $ (fromIntegral $ (rBaseEnergy r)) * (cStartingEnergyMultiplier c)
+    inventory = cStartingInventory c   
+    -- todo: experience    
+    reputation = cStartingReputation c    
+    energy = round $ (fromIntegral $ (rBaseEnergy r)) * (cStartingEnergyMultiplier c)    
     hp = round $ (fromIntegral $ (rBaseHP r)) * (cStartingHPMultiplier c)
     
     armor = cStartingArmor c
@@ -77,23 +69,7 @@ createHero w n r c  =
     
     
 
-
-
-
-
-
-
-
-
-  -- Find all entities currently in view, add them to a list l.
-  -- subtract eTimeRemaining from every entity until one or more is 0, save these entities to list l'
-  --  for every Inanimate object in l' call move o
-  --  for every enemy in l' call ai e
-  -- return a new modified world.
-  
-  -- remove all entities in e from map
-  -- do actions
-  -- add all entities in e' to map
+-- Finds which entities whose turns are up, performs AI, those entities whose turns are not up have updated their eNextMove values. Returns a new World with these changes.
 think :: World -> IO World
 think world = do
   return world''
@@ -198,7 +174,13 @@ updateMap oldPos m entityMap = entityMap''
 
 -- CheckVision: Purpose: announce newly spotted monsters and bosses in the messageBuffer.
 checkVision :: World -> World
-checkVision w = w'
+checkVision w =
+  w {
+    wLevel = l {
+       lEntities = entMap'
+       },
+    wMessageBuffer = stringBuffer ++ (wMessageBuffer w)
+    }
   where
     l = wLevel w
     entMap = lEntities l
@@ -210,25 +192,17 @@ checkVision w = w'
     
     markedEs = map (\e -> (eCurrPos e, e {mSpotted = True})) newEs
     
-    
     stringBuffer = map (\m -> (show $ snd m) ++ " spotted!") markedEs
     
     entMap' = foldl (\map (key,value) -> updateMap key value map) entMap markedEs
     
-    
-    w' = w {
-      wLevel = l {
-         lEntities = entMap'
-         },
-      wMessageBuffer = stringBuffer ++ (wMessageBuffer w)
-      }
-
 
 
 
 --- general purpose functions.
-
-getViewFrame :: World -> (Int, Int) -- gets vision of the player, blocked by doors if present etc.
+------------------------------
+-- gets vision of the player, blocked by doors if present etc.
+getViewFrame :: World -> (Int, Int) 
 getViewFrame world = (vFStart, maxVision)
   where
     lvl = wLevel world
@@ -237,14 +211,12 @@ getViewFrame world = (vFStart, maxVision)
     vFMax = hViewDistance h + (snd $ hMovementSlack h)
     maxVision = fromMaybe vFMax $ find (\x -> isDoor (x, 0) lvl) [vFStart..vFMax]
 
+-- gets a list of all entities in view.
 getEntitiesFromViewFrame :: World -> (Int, Int) -> [Entity]
-getEntitiesFromViewFrame w (start,end)
-  | start > end    = []
-  | res == Nothing = getEntitiesFromViewFrame w (start+1, end)
-  | otherwise      = (fromJust res):getEntitiesFromViewFrame w (start+1,end)
+getEntitiesFromViewFrame w (start,end) = foldl (\list pos -> (fromMaybe [] $ fmap (:[]) $ M.lookup pos ents) ++ list) [] coordinates
   where
-    lvl = wLevel w
-    res =  M.lookup (start, 0) (lEntities lvl)
+    ents = lEntities $ wLevel w
+    coordinates = zip [start..end] $ repeat 0
     
     
 dirToCoord Left  = (-1, 0)
