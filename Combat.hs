@@ -9,20 +9,6 @@ import Types.World
 
 import qualified Data.Map as M
 
--- Combat!
---calculateDamage :: Entity -> AttackType -> Entity -> Int
---calculateDamage sourceEnt ackType destEnt = 1
-
-
---                   v<-- AttackType
-combat :: Entity -> Int -> [Entity] -> World -> World
-combat sourceEnt atckType destEnts world
-  | null destEnts = 
-    let failureString = "You " ++ (show atckType) ++ " at nothing, and miss!" in
-          world { wMessageBuffer = failureString:(wMessageBuffer world) }
-  | otherwise = world
-
-
 
 -- Simple combat, just attack rolls and defense rolls.
 --- will be used by the hero when moving into an enemy. when the skill queue system is in place.

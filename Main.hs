@@ -24,18 +24,6 @@ import Content.Races
 
 main :: IO ()
 main = do
-  {-
-  putStrLn "What is your name?"
-  name <- getLine
-  
-  putStrLn "Class?" ++ (show classes)
-  clss <- getLine
-  let cls = read clss :: Class
-      
-  putStrLn "Race? (Ogre | Giant | Troll | Orc | Goblin | Hobgoblin)"
-  rce <- getLine
-  let race = read rce :: Race
-  -}
   assets <- loadAssets
   GUI.setup
   

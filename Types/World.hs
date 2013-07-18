@@ -158,15 +158,3 @@ instance Show Race where
 
 instance Eq Race where
   x == y = rName x == rName y
-  
-
-  
-  
-  -- IDEA: have an attribute like rMovementFunc or rEnvironmentFunc :: (World->World)
---- Allows races that behave differently based on how the world is in an abstract way.
---- Example #1: Mermen: free movement in water.
---- Example #2: Orc: +1 attack if surrounded.
---- Example #3: Dwarf: +1 Mitigation if surrounded?
---- etc.
---- Call this function every turn to recalculate stats?
----- How would movement functions work? nvm I GOT IT! new attrib. rBaseEnergyCost

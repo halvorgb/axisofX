@@ -157,12 +157,6 @@ chooseProtagonist (((splashBG, _), _), font) = do
   let raceOptionsPos = (256, 460)
   SDL.flip mainSurf
   race <- chooseFromList races raceOptionsPos mainSurf font
-  {-
-  let racePos = (256, 496)
-  drawTextAtPos ("> " ++ (show race)) racePos mainSurf font
-  
-  SDL.flip mainSurf
-  -}
   
   return (name, klass, race)
 
