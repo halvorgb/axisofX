@@ -3,8 +3,9 @@ module Content.Classes where
 import Content.StartingGear
 
 import Types.Common
-import Types.Classes
+import Types.World
 import Types.Items
+
 
 classes = [peasant]
 
@@ -20,6 +21,7 @@ peasant = Class { cName = "Peasant",
                   cStartingWeapon = shortSword,
                   cStartingArmor = rags,
                   cStartingInventory = Inventory [] 0,
+                  cStartingSkills = [],
                   
                   cStartingReputation = Asshole,
                   
@@ -28,7 +30,7 @@ peasant = Class { cName = "Peasant",
                   cDamageBonus = 0,
                   cMitigationBonus = 0,
                   
-                  cSkillMask = [],
+                  cSkillMask = anySkillMask,
                   cWeaponConstraints = []
                                         
                                         

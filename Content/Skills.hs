@@ -21,27 +21,37 @@ anyWeapon =
                      wcType = anyType,
                      wcGrip = anyGrip
                     }
+onlyBurdensome = 
+  WeaponConstraints {wcWeight = [Burdensome],
+                     wcType = anyType,
+                     wcGrip = anyGrip
+                    }
 
 
 
-  
+directFunctionCreator :: Int -> (Entity -> Entity)
+directFunctionCreator n = (\e -> e {eCurrHP = eCurrHP e + n})
+
+
 
 
 -- Actual Skills:
 sweep = Active  { sName = "Sweep",
-                  sDescription = "Sweeps through every target on an adjecent tile",
+                  sShortName = "Sweep",
+                  sDescription = "Attacks every enemy in weapon range of the player.",
                   sEffect = 
-                    [Direct { seEffect = (Harm 5) }], -- allow multiple effects?
+                    [Final { seEffect = directFunctionCreator (-5)
+                           , seDelay = 0 }],
                   sTarget =
-                    Other { stRange = 1, stHitMask = Enemies },
+                   Area { stRange = SRConst 0, 
+                          stRadius = SRWeaponRange,
+                          stHitMask = Enemies 
+                        },
                             
                   sPrequisites = [],
                   sSkillMask = [Brute],
                   
-                  sWeaponConstraints = anyWeapon,
-
-                  
-                  
+                  sWeaponConstraints = anyWeapon,                  
                   
                   sEnergyCost = 8,
                   sSpeedMultiplier = 1.5,

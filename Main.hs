@@ -9,16 +9,17 @@ import Data.List
 import Render.SDL.GUI as GUI
 import Render.SDL.Render
 import Combat
-import Level
+import Helpers
 import Logic
 import WorldBuilder
 
 import Types.World
 import Types.Common
-import Types.Classes
+
 
 import Content.Classes
 import Content.Races
+import Content.Skills
 
 
 
@@ -48,9 +49,11 @@ gameLoop world assets = do
       input <- GUI.getInput
       case input of 
         Show screen -> gameLoop (handleShow screen world') assets
-        Exit -> handleExit world' assets
-        Wait -> gameLoop (handleWait world') assets
-        Dir dir -> gameLoop (handleDir world' dir) assets
+        Exit -> handleExit (world' {wScreenShown = Console}) assets
+        Wait -> gameLoop (handleWait (world' {wScreenShown = Console})) assets
+        Dir dir -> gameLoop (handleDir (world' {wScreenShown = Console}) dir) assets
+        Queue i -> gameLoop (world' {wScreenShown = Skills}) assets
+        ExecuteSkills -> gameLoop (world' {wScreenShown = Console}) assets
       else do -- else: AI
       world' <- think world
       gameLoop world' assets
@@ -61,7 +64,7 @@ gameLoop world assets = do
       -- if an enemy is encountered: attack it,
 handleDir :: World -> Direction -> World
 handleDir w dir
-  | (dir == Left)  && ((fst $ eCurrPos h) == firstInFrame) = 
+  | (dir == Left) && ((fst $ eCurrPos h) == firstInFrame) = 
     w { 
       wMessageBuffer = "You can't go there! No turn used.":mBuffer 
       }-- left corner, does not use a turn.
@@ -103,7 +106,7 @@ handleDir w dir
         } -- If at right side of frame 
       
   | otherwise =  
-        w { wHero = h { eOldPos = eCurrPos h, eCurrPos = coord, eNextMove = eSpeed h, hCurrEnergy = newEnergy} }
+        w { wHero = h { eOldPos = eCurrPos h, eCurrPos = coord, eNextMove = eSpeed h, hCurrEnergy = newEnergy} } -- simple movement, no wrapping. 
   where 
     h              = wHero w
     lvl            = wLevel w

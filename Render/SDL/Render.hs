@@ -5,8 +5,7 @@ import Graphics.UI.SDL as SDL
 import Graphics.UI.SDL.Image as SDLi
 import Graphics.UI.SDL.TTF  as SDLttf
 
-import Level
-
+import Helpers
 import Logic
 
 import Types.Common

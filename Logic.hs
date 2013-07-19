@@ -1,4 +1,4 @@
-module Logic where
+module Logic(createHero, think) where
 
 import Prelude hiding (Either(..))
 import qualified Data.Map as M
@@ -7,14 +7,13 @@ import Data.List
 
 import Types.World
 import Types.Common
-import Types.Classes
-
 import Types.Items
 
+import AI
 import Random
-import Combat
+import Helpers
 
-import Level
+
 
 
 -- First time calculation of hero stats
@@ -26,6 +25,7 @@ createHero w n r c  =
          hRace = r,
          hInventory = inventory,
          hReputation = reputation,
+         hSkills = skills,
          hCurrEnergy = energy,
          hMaxEnergy = energy,
          hWield = weapon,
@@ -47,6 +47,7 @@ createHero w n r c  =
     -- todo: experience    
     reputation = cStartingReputation c    
     energy = round $ (fromIntegral $ (rBaseEnergy r)) * (cStartingEnergyMultiplier c)    
+    skills = cStartingSkills c
     hp = round $ (fromIntegral $ (rBaseHP r)) * (cStartingHPMultiplier c)
     
     armor = cStartingArmor c
@@ -99,7 +100,7 @@ think world = do
       
       -- choose an action for the rest of the monsters, execute it, reset time until next move.
       monsters' = map (\m -> m {eNextMove = eSpeed m}) monstersAI
-      world'' =  foldl (\w m -> selectAIBehavior m w) world' monsters'
+      world'' =  foldl (\w m -> performAI m w) world' monsters'
 
       
        
@@ -110,106 +111,5 @@ prepare e = map (\x -> x { eNextMove = eNextMove x - lowestRemaining }) e
   where
     -- 10000 is infinite in this case.
     lowestRemaining = foldl (\x y -> min x $ eNextMove y) 10000 e
-    
-selectAIBehavior :: Entity -> World -> World
-selectAIBehavior monster world
-  | playerAdjecent = simpleCombat monster hero world --combat monster Prod hero world
-  | movementBlocked = world
-  | otherwise = moveAI monster playerDirection world
-  where
-    hero = wHero world
-    mPos = eCurrPos monster
-    hPos = eCurrPos hero
-    playerAdjecent = (mPos |+| (-1, 0) == hPos) || (mPos |+| (1, 0) == hPos)
-       
-                     
-    movementBlocked = isMonster (mPos |+| playerDirection) $ wLevel world
-    
-    playerDirection = if (fst mPos) > (fst hPos)
-                      then
-                        dirToCoord Left
-                      else
-                        dirToCoord Right
-    
-
-moveAI :: Entity -> (Int, Int) -> World -> World
-moveAI monster dir world = world'
-  where
-    oldPos = eCurrPos monster
-    level = wLevel world
-    oldEntityMap = lEntities level
-    
-    monster' = monster { eOldPos = eCurrPos monster,
-                         eCurrPos = eCurrPos monster |+| dir
-                       }
-    
-    newEntityMap = updateMap oldPos monster'  oldEntityMap
-    
-    world' = world { wLevel = level {lEntities = newEntityMap } }
 
 
-updateMap :: Position -> Entity -> M.Map Position Entity -> M.Map Position Entity
-updateMap oldPos m entityMap = entityMap''
-  where
-    mPos = eCurrPos m
-    
-    entityMap' = M.delete oldPos entityMap
-    
-    entityMap'' = M.insert mPos m entityMap'
-
-
-
-
-
--- CheckVision: Purpose: announce newly spotted monsters and bosses in the messageBuffer.
-checkVision :: World -> World
-checkVision w =
-  w {
-    wLevel = l {
-       lEntities = entMap'
-       },
-    wMessageBuffer = stringBuffer ++ (wMessageBuffer w)
-    }
-  where
-    l = wLevel w
-    entMap = lEntities l
-    
-    visibleEs = getEntitiesFromViewFrame w $ getViewFrame w
-    
-    -- entities that haven't been announced yet.
-    newEs = filter (\e -> not $ mSpotted e) visibleEs
-    
-    markedEs = map (\e -> (eCurrPos e, e {mSpotted = True})) newEs
-    
-    stringBuffer = map (\m -> (show $ snd m) ++ " spotted!") markedEs
-    
-    entMap' = foldl (\map (key,value) -> updateMap key value map) entMap markedEs
-    
-
-
-
---- general purpose functions.
-------------------------------
--- gets vision of the player, blocked by doors if present etc.
-getViewFrame :: World -> (Int, Int) 
-getViewFrame world = (vFStart, maxVision)
-  where
-    lvl = wLevel world
-    h = wHero world
-    vFStart = fst $ hMovementSlack h
-    vFMax = hViewDistance h + (snd $ hMovementSlack h)
-    maxVision = fromMaybe vFMax $ find (\x -> isDoor (x, 0) lvl) [vFStart..vFMax]
-
--- gets a list of all entities in view.
-getEntitiesFromViewFrame :: World -> (Int, Int) -> [Entity]
-getEntitiesFromViewFrame w (start,end) = foldl (\list pos -> (fromMaybe [] $ fmap (:[]) $ M.lookup pos ents) ++ list) [] coordinates
-  where
-    ents = lEntities $ wLevel w
-    coordinates = zip [start..end] $ repeat 0
-    
-    
-dirToCoord Left  = (-1, 0)
-dirToCoord Right = (1,  0)
-
-(|+|) :: Position -> Position -> Position
-(|+|) (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)

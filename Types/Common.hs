@@ -6,12 +6,15 @@ type Position = (Int, Int)
 
 
 data Input = Dir Direction | Exit | Wait | NoInput | Show Screen
+           | Queue Int | ExecuteSkills
            deriving (Eq, Show)
 
 data Direction = Left | Right 
                deriving (Eq, Show)
                         
-data Screen = Skills | Inv | Help | LevelUp
+
+                        
+data Screen = Skills | Inv | Help | LevelUp | Console
             deriving (Eq, Show)
                         
 data HitMask = Allies | Enemies | All
@@ -23,9 +26,29 @@ data Effect = Heal Int | Harm Int
                    
 -- which skills an item or class allows.
 -- By category?
-data SkillMask = Brute | Finesse | Common | Clever | Shady 
-               deriving(Show, Eq)
+---
+data SkillMask = Brute | Clever  | Finesse | Shady 
+               deriving(Bounded, Eq, Enum, Ord, Show)                       
+
+skillMaskMaxBound :: Int 
+skillMaskMaxBound = fromEnum (maxBound :: SkillMask)
+
+anySkillMask :: [SkillMask]
+anySkillMask = enumFrom Brute
+---
+
+class ShowLong a where
+  showLong  :: a -> String
+                                          
+                                          
+
                        
+data SkillRange = SRWeaponRange
+                | SRConst Int
+                deriving (Eq)
+
+
+
 data WeaponConstraints = WeaponConstraints { wcWeight  :: [WeaponWeight],
                                              wcType    :: [WeaponType],
                                              wcGrip    :: [WeaponGrip]

@@ -15,7 +15,6 @@ import Content.Races
 import Content.Classes
 
 import Types.Common
-import Types.Classes
 import Types.World
 
 type Assets = (ImageAssets, FontAssets)
@@ -96,17 +95,25 @@ getInput  = do
     where
       handleInput e = case e of
         Quit -> return Exit
-        (KeyDown (Keysym key _ _)) -> do
-          case key of
-            SDLK_z -> return (Show Skills)
-            SDLK_x -> return (Show Inv)
-            SDLK_c -> return (Show Help)
-            SDLK_v -> return (Show LevelUp)
+        (KeyDown (Keysym key _ char)) -> do
+          case (key, char) of
+            (SDLK_z, _) -> return (Show Skills)
+            (SDLK_x, _) -> return (Show Inv)
+            (SDLK_c, _) -> return (Show Help)
+            (SDLK_v, _) -> return (Show LevelUp)
             
-            SDLK_a -> return (Dir Left)
-            SDLK_s -> return Wait
-            SDLK_d -> return (Dir Right)
-            SDLK_q -> return Exit
+            (SDLK_a, _) -> return (Dir Left)
+            (SDLK_s, _) -> return Wait
+            (SDLK_d, _) -> return (Dir Right)
+            (SDLK_q, _) -> return Exit
+            
+            (SDLK_1, _) -> return (Queue 1)
+            (SDLK_2, _) -> return (Queue 2)
+            (SDLK_3, _) -> return (Queue 3)
+            (SDLK_4, _) -> return (Queue 4)
+            (SDLK_RETURN, _) -> return ExecuteSkills
+            (_, '?') -> return (Show Help)
+            (SDLK_ESCAPE, _) -> return (Show Console)
             _ -> getInput 
         _ -> getInput 
      

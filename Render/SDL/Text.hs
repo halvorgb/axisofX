@@ -4,9 +4,9 @@ import qualified Graphics.UI.SDL.TTF.General as TTFG
 import Graphics.UI.SDL.TTF as TTF
 import Graphics.UI.SDL as SDL
 
+import Helpers
 import Types.Common
 import Types.World
-import Types.Classes
 import Content.StaticText
 
 fontFilePath = "assets/fonts/SourceSansPro-Regular.ttf"
@@ -17,6 +17,7 @@ consoleBottomPos = (350, 572)
 consoleBufferSize :: Int
 consoleBufferSize = 18
 
+---
 playerNamePos :: Position
 playerNamePos = (48, 82)
 
@@ -55,16 +56,34 @@ playerMitigationPos = (234, 165)
 
 playerRepPos :: Position
 playerRepPos = (122, 186)
+----
 
+---
+skillQueueOnePos :: Position
+skillQueueOnePos = (366, 134)
+
+skillQueueTwoPos :: Position
+skillQueueTwoPos = (480, 134)
+
+skillQueueThreePos :: Position
+skillQueueThreePos = (592, 134)
+
+skillQueueFourPos :: Position
+skillQueueFourPos = (704, 134)
+
+
+--
 
 
 
 bossNamePos :: Position
 bossNamePos = (48, 226)
   
--- the help/inv/skills ++ screen
-screenTopPos :: Position
-screenTopPos = (40, 320)
+vicinityBufferSize :: Int
+vicinityBufferSize = 15
+
+vicinityBotPos :: Position
+vicinityBotPos = (40, 572)
 
 
 
@@ -95,95 +114,128 @@ drawGameText :: World -> SDL.Surface -> Font -> IO ()
 drawGameText world mainSurf font = do
   drawCharacterText world mainSurf font
   drawBossText world mainSurf font
-  drawConsoleText world mainSurf font
   drawScreen world mainSurf font
+--  drawConsoleText world mainSurf font
+  drawVicinity world mainSurf font
+  drawSkillQueue world mainSurf font
 
   
 
 
 drawBossText :: World -> SDL.Surface -> Font -> IO ()
 drawBossText world mainSurf font = do
-  let nameSurf = createSurfaces font nameString (Color 0 0 0)
   renderText mainSurf (bossNamePos, head nameSurf)
   where
     boss = wBoss world
     nameString = [(show boss)]
+    
+    nameSurf = createSurfaces font nameString (Color 0 0 0)
   
-
+drawSkillQueue :: World -> SDL.Surface -> Font -> IO ()
+drawSkillQueue world mainSurf font = do
+  renderText mainSurf (skillQueueOnePos, head oneSurf)
+  renderText mainSurf (skillQueueTwoPos, head twoSurf)  
+  renderText mainSurf (skillQueueThreePos, head threeSurf)  
+  renderText mainSurf (skillQueueFourPos, head fourSurf)  
+  
+  where
+    hero = wHero world
+    
+    string = ["Hello"]
+    oneSurf = createSurfaces font string (Color 0 0 0)
+    twoSurf = createSurfaces font string (Color 0 0 0)
+    threeSurf = createSurfaces font string (Color 0 0 0)
+    fourSurf = createSurfaces font string (Color 0 0 0)
+  
 
 drawCharacterText :: World -> SDL.Surface -> Font -> IO ()
 drawCharacterText world mainSurf font = do
   -- name:
-  let nameSurf = createSurfaces font nameString (Color 0 0 0)
   renderText mainSurf (playerNamePos, head nameSurf)
   
   -- hp:
-  let hpSurf = createSurfaces font hpString (Color 200 0 0)
   renderText mainSurf (playerHPPos, head hpSurf)
   
-  let hpMSurf = createSurfaces font hpMString (Color 200 0 0)
   renderText mainSurf (playerMaxHPPos, head hpMSurf)
   
   -- energy:
-  let eSurf = createSurfaces font eString (Color 0 200 0)
   renderText mainSurf (playerEnergyPos, head eSurf)
-  
-  let eMSurf = createSurfaces font eMString (Color 0 200 0)
+
   renderText mainSurf (playerMaxEnergyPos, head eMSurf)
   
   -- exp and level
-  let expSurf = createSurfaces font expString (Color 0 0 0)
   renderText mainSurf (playerExperiencePos, head expSurf)
   
-  let lSurf = createSurfaces font levelString (Color 0 0 0)
   renderText mainSurf (playerLevelPos, head lSurf)
   
   
   -- speed
-  let spdSurf = createSurfaces font speedString (Color 0 0 0)
   renderText mainSurf (playerSpeedPos, head spdSurf)
   
   -- dies.
-  let hitDieSurf = createSurfaces font hitDieString (Color 0 0 0)
   renderText mainSurf (playerHitDiePos, head hitDieSurf)
   
-  let dmgDieSurf = createSurfaces font dmgDieString (Color 0 0 0)
   renderText mainSurf (playerDmgDiePos, head dmgDieSurf)
   
-  let evdDieSurf = createSurfaces font evdDieString (Color 0 0 0)
   renderText mainSurf (playerEvadeDiePos, head evdDieSurf)  
   
   -- mitigation
-  let mitSurf = createSurfaces font mitString (Color 0 0 0)
   renderText mainSurf (playerMitigationPos, head mitSurf)
   
   -- reputation:
-  let repSurf = createSurfaces font repString (Color 0 0 0)
   renderText mainSurf (playerRepPos, head repSurf)
 
   where
     hero = wHero world
     nameString = [(showLong hero)]
+    nameSurf = createSurfaces font nameString (Color 0 0 0)
     
     hpString = [show $ eCurrHP hero]
+    hpSurf = createSurfaces font hpString (Color 200 0 0)
     hpMString = [show $ eMaxHP hero]
+    hpMSurf = createSurfaces font hpMString (Color 200 0 0)
     
     eString = [show $ hCurrEnergy hero]
+    eSurf = createSurfaces font eString (Color 0 200 0)
     eMString = [show $ hMaxEnergy hero]
+    eMSurf = createSurfaces font eMString (Color 0 200 0)
     
     expString = [show $ hExperienceRemaining hero]
+    expSurf = createSurfaces font expString (Color 0 0 0)
     levelString = [show $ hLevel hero]
+    lSurf = createSurfaces font levelString (Color 0 0 0)
     
     speedString = [show $ eSpeed hero]
+    spdSurf = createSurfaces font speedString (Color 0 0 0)
     
     hitDieString = [show $ eHitDie hero]
+    hitDieSurf = createSurfaces font hitDieString (Color 0 0 0)
     dmgDieString = [show $ eDamageDie hero]
+    dmgDieSurf = createSurfaces font dmgDieString (Color 0 0 0)
     evdDieString = [show $ eEvadeDie hero]
+    evdDieSurf = createSurfaces font evdDieString (Color 0 0 0)
     
     mitString = [show $ eMitigation hero]
+    mitSurf = createSurfaces font mitString (Color 0 0 0)
+    repString = [show $ hReputation hero]
+    repSurf = createSurfaces font repString (Color 0 0 0)
     
-    repString = ["Asshole(temp)"]
-    
+
+drawVicinity :: World -> SDL.Surface -> Font -> IO ()
+drawVicinity world mainSurf font = do
+  mapM_ (renderText mainSurf) preppedOutput
+    where -- tweak dat --V
+      visibleEnts = take vicinityBufferSize $ getEntitiesFromViewFrame world $ getViewFrame world
+--      h = wHero world
+      entString = map show visibleEnts
+      entSurf = createSurfaces font entString (Color 0 0 0)
+      
+      positions = createPositions vicinityBotPos (length visibleEnts) (-16)
+      preppedOutput = zip positions entSurf
+      
+      
+
+
 
 drawScreen :: World -> SDL.Surface -> Font -> IO ()
 drawScreen world mainSurf font = do 
@@ -197,9 +249,8 @@ drawScreen world mainSurf font = do
         Inv -> ["Inventory TEMP"]
         Skills -> ["Skills TEMP"]
         LevelUp -> ["LevelUp TEMP"]
-      positions = createPositions screenTopPos (length messageBuffer) (16)
-    
-
+        Console -> take consoleBufferSize $ wMessageBuffer world
+      positions = createPositions consoleBottomPos (length messageBuffer) (-16)
 
 drawConsoleText :: World -> SDL.Surface -> Font -> IO ()
 drawConsoleText world mainSurf font = do

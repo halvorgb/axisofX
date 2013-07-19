@@ -5,16 +5,17 @@ import qualified Data.Map as M
 import Data.List
 
 
-import Level
+--import Helpers
 import Random
 
 import Types.World
 import Types.Tiles
 import Types.Common
-import Types.MonsterTypes
+import Types.Items
 
 import Content.Base
 import Content.Races
+import Content.MonsterTypes
 
 
 
@@ -117,8 +118,74 @@ randP g__ l takenPositions
   | otherwise = randP g__' l takenPositions
   where
     (rX, g__') = randomR (1, l) g__
-    
 -------------------------------------------
+    
+-- Generate an actual monster.    
+-------------------------------------------
+    
+-- FUTURE: take into account which level the monster was generated on.
+    -- randomize inventories.
+    -- new argument: Excluded positions?
+randomMonster :: Int -> Position -> StdGen -> Entity
+randomMonster mID pos g = createMonster randomMonsterType randomRace inventory level mID pos
+  where
+    (randomMonsterType, g') = randomListMember monsterTypes g
+    
+    (randomRace, g'') = randomListMember races g'
+    inventory = Inventory [] 0
+    -- make level +-2 levels from dungeon level
+    level = 1
+    
+
+createMonster :: MonsterType -> Race -> Inventory -> Int -> Int -> Position -> Entity
+createMonster mt race inv level id position = 
+    Monster {  mType = mt,
+               mRace = race,
+               mInventory = inv,
+               mLevel = level,
+               mExperienceReward = 1, -- todo
+               mSpotted = False,
+               mBehaviorStack = mtBehaviorStack mt,
+               
+               eCurrHP = mHP,
+               eMaxHP = mHP,
+               mID = id,
+               
+               
+               eCurrPos = position,
+               eOldPos = position,
+                             
+               eSpeed = mSpeed,
+               eNextMove = mSpeed,
+               
+               eHitDie = mHitDie,
+               eDamageDie = mDamageDie,
+               eEvadeDie = mEvadeDie,
+               eMitigation = mMitigation,
+               
+               eSkillEffects = []
+                             
+            }
+  where
+    mHitDie = (mtHitDie mt)
+      { dMod = (dMod $ mtHitDie mt)  +  (rHitModifier race) }
+      
+    mEvadeDie = (mtEvadeDie mt)
+      { dMod = (dMod $ mtEvadeDie mt)  + (rEvasionModifier race) }
+      
+    mDamageDie = (mtDamageDie mt)
+      { dMod = (dMod $ mtDamageDie mt) + (rDamageModifier race) }
+      
+    mMitigation = (mtMitigation mt) + (rMitigationModifier race)
+
+    mHP = round $ (fromIntegral $ (rBaseHP race) + (level * (rBaseHPPerLevel race))) * (mtHPMultiplier mt)
+       
+    -- todo: experience.
+    
+    mSpeed = round $ (fromIntegral $ rBaseSpeed race) * (mtSpeedMultiplier mt)
+    
+
+--------------------------------------
     
     
 

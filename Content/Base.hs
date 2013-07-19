@@ -3,7 +3,6 @@ module Content.Base where
 import qualified Data.Map as M
 
 import Types.Common
-import Types.Classes
 import Types.Items
 import Types.World
 
@@ -23,7 +22,7 @@ baseWorld = World { wDepth = 0,
                     wMessageBuffer = ["Welcome to Axis of X!"],
                     wStdGen = undefined,
                     wBoss = lastBoss,
-                    wScreenShown = Skills
+                    wScreenShown = Console
                 }
 
 
@@ -44,6 +43,7 @@ basePlayer = Hero { hName = "Broseph",
                     hExperienceRemaining = 100,
                     hReputation = Asshole,
                     hSkills = [],
+                    hSkillQueue = clearQueue,
                     
                     eCurrPos = (0,0),
                     eOldPos = (0,0),

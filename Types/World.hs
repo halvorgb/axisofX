@@ -4,8 +4,6 @@ import qualified Data.Map as M
 import System.Random
 
 import Types.Common
-import Types.MonsterTypes
-import Types.Classes
 import Types.Items
 import Types.Tiles
 
@@ -44,6 +42,7 @@ data Entity = Monster { mType :: MonsterType,
                         mLevel :: Int, 
                         mExperienceReward :: Int, 
                         mSpotted :: Bool,
+                        mBehaviorStack :: [World -> Entity -> Maybe World],
                         
                         mID :: Int, -- to make each monster unique
                         
@@ -81,6 +80,8 @@ data Entity = Monster { mType :: MonsterType,
                         hMovementSlack :: (Int, Int),  -- the coordinates that the hero can move between without wrapping.
                         hViewDistance :: Int, -- Added to $ snd hMovementSlack
                         
+                        hSkillQueue :: SkillQueue,
+                        
                         --common for all entities. Duplicated for ease of use.
                         eCurrHP :: Int,
                         eMaxHP :: Int,                        
@@ -96,6 +97,7 @@ data Entity = Monster { mType :: MonsterType,
                         eEvadeDie :: Dice,
                         eMitigation :: Int,
                         eSkillEffects :: [SkillEffect]
+                        
                         } 
             | Boss    { bName :: String,
                         bInnocentKills :: Int,
@@ -135,11 +137,8 @@ instance Show Entity where
       where
         outString = case e of
           Hero {} -> (show $ hName e)
-          Monster {} -> (show $ mRace e) ++ " " ++ (show $ mType e) ++ "[" ++ (show $ mLevel e) ++ "]"
+          Monster {} -> (show $ mRace e) ++ " " ++ (show $ mType e) ++ " [lvl: " ++ (show $ mLevel e) ++ "]"
           Boss {} -> show $ bName e
-          
-class ShowLong a where
-  showLong  :: a -> String
           
 instance ShowLong Entity where
   showLong e = filter (/= '\"') outString -- remove "
@@ -184,6 +183,45 @@ instance Eq Race where
   
 -- Skills:
 -------------------------------------
+class QuadrupleSkillQueue q where
+  first :: q -> Skill
+  second :: q -> Skill
+  third :: q -> Skill
+  fourth :: q -> Skill
+  
+  addToQueue :: Skill -> Int -> q -> q
+  clearQueue :: q
+  
+data SkillQueue = SkillQueue Skill Skill Skill Skill
+
+instance QuadrupleSkillQueue SkillQueue where
+  first  (SkillQueue s _ _ _) = s
+  second (SkillQueue _ s _ _) = s
+  third  (SkillQueue _ _ s _) = s
+  fourth (SkillQueue _ _ _ s) = s
+  
+  addToQueue s i (SkillQueue fs sn th fo) = case i of
+    1 -> (SkillQueue s sn th fo)
+    2 -> case fs of
+      NoSkill -> (SkillQueue s sn th fo)
+      _ -> (SkillQueue fs s th fo)
+    3 -> case fs of
+      NoSkill -> (SkillQueue s sn th fo)
+      _ -> case sn of
+        NoSkill -> (SkillQueue fs s th fo)
+        _ -> (SkillQueue fs sn s fo)
+    4 -> case fs of
+      NoSkill -> (SkillQueue s sn th fo)
+      _ -> case sn of
+        NoSkill -> (SkillQueue fs s th fo)
+        _ -> case th of
+          NoSkill -> (SkillQueue fs sn s fo)
+          _ -> (SkillQueue fs sn th s)
+    _ -> undefined
+    
+  clearQueue = (SkillQueue NoSkill NoSkill NoSkill NoSkill)
+  
+  
 
 data SkillEffect = Final { seEffect :: Entity -> Entity, 
                            seDelay :: Int
@@ -206,10 +244,10 @@ data SkillEffect = Final { seEffect :: Entity -> Entity,
                                    -- Optional: Delay x turns before applying effect.
                      
 data SkillTarget = Self
-                 | Other { stRange :: Int, 
+                 | Other { stRange :: SkillRange, 
                            stHitMask :: HitMask}
-                 | Area  { stRange :: Int,
-                           stRadius :: Int,
+                 | Area  { stRange :: SkillRange,
+                           stRadius :: SkillRange,
                            stHitMask :: HitMask
                          }
                  deriving(Eq)
@@ -220,6 +258,7 @@ data SkillTarget = Self
 
 
 data Skill = Active { sName :: String,
+                      sShortName :: String,
                       sDescription :: String,
                       sEffect :: [SkillEffect], -- allow multiple effects?
                       sTarget :: SkillTarget,
@@ -235,6 +274,7 @@ data Skill = Active { sName :: String,
                       
                      }
            | Sustained { sName :: String,
+                         sShortName :: String,
                          sDescription :: String,
                          sEffect :: [SkillEffect],
                          sTarget :: SkillTarget,
@@ -245,6 +285,78 @@ data Skill = Active { sName :: String,
                          
                          -- MORE
                        }
+           | NoSkill
+             
 instance Eq Skill where
   x == y = (sName x) == (sName y)
+instance Show Skill where
+  show x = filter (/= '\"') $ show $ sShortName x
+instance ShowLong Skill where
+  showLong x = filter (/= '\"') $ ((show $ sName x ) ++ " (" ++ (show $ sShortName x) ++ "): " ++ (show $ sDescription x))
+-------------------------------------
+
+-- Classes:
+-------------------------------------  
+-- work on this, main idea: the player is a dick by default.
+ -- Best reputation: Dick or asshole? Selfish?
+data Reputation = Malevolent | Malicous | Hard 
+                | Sociopath -- Neutral lol
+                | Asshole
+              deriving (Eq, Show)
+
+
+data Class = 
+  Class { cName :: String,
+          cExpReqMultiplier :: Float, 
+          cStartingHPMultiplier :: Float,
+          cHPPerLevelMultiplier :: Float,
+          cStartingEnergyMultiplier :: Float,
+          cEnergyPerLevelMultiplier :: Float,
+            
+          cStartingWeapon :: Weapon,
+          cStartingArmor :: Armor,
+          cStartingInventory :: Inventory,
+          cStartingSkills :: [Skill],
+            
+          cStartingReputation :: Reputation,
+          
+          cHitDie :: Dice,
+          cEvadeDie :: Dice,
+          cDamageBonus :: Int,
+          cMitigationBonus :: Int,
+          
+          cSkillMask :: [SkillMask],
+          cWeaponConstraints :: [WeaponConstraints]
+          -- more attributes such as allowed weapons and skills.
+        }
+  deriving (Eq)
+
+instance Show Class where
+  show c = filter (/= '\"') $ show $ cName c
+-------------------------------------
+
+-- MonsterTypes:
+-------------------------------------
+data MonsterType =
+  MonsterType { mtName :: String,
+                mtExpRewardMultiplier :: Float,
+                mtHPMultiplier :: Float,
+                
+                mtSpeedMultiplier :: Float,
+--                mtSkills = [Skills],
+                -- levelConstraints :: (Int, Int),                
+                -- RaceConstraints?
+                
+                mtBehaviorStack :: [(World -> Entity -> Maybe World)],
+                
+                mtHitDie :: Dice,
+                mtEvadeDie :: Dice,
+                mtDamageDie :: Dice,
+                mtMitigation :: Int
+              }
+
+instance Show MonsterType where
+  show mt = show $ mtName mt
+instance Eq MonsterType where
+  x == y = (mtName x) == (mtName y)
 -------------------------------------
