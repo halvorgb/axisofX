@@ -7,6 +7,7 @@ import Render.SDL.Text as Text
 import Prelude hiding(Either(..))
 import Data.Maybe
 import System.Random
+import System.Exit
 import qualified Data.Char as C
 
 import Content.Names
@@ -185,7 +186,7 @@ getChoice maxChar w a = do
       getCharInput e = case e of
         Quit -> do 
           shutdown w a
-          return undefined -- HACK MUCH?
+          exitWith ExitSuccess
         (KeyDown (Keysym  _ _ c)) -> do 
           if (c <= maxChar) && (C.isAsciiLower c) -- exclude meta keys etc.
             then
