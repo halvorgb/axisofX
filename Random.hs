@@ -21,6 +21,7 @@ randomListMember as gen = (a, newGen)
     (index, newGen) = randomR (0, (length as) - 1) gen
     a = as !! index
     
+-- Roll a dice or multiple die.
 rollDie :: Dice -> StdGen -> (Int, StdGen)
 rollDie dice gen = (result, lastGen)
   where
@@ -35,6 +36,7 @@ rollDie dice gen = (result, lastGen)
     result = max roll 0 -- no negative rolls if  negative modifiers + low rolls.
     
 
+-- splits a generator into n generators.
 makeGeneratorList :: StdGen -> Int -> [StdGen]
 makeGeneratorList _ 0 = []
 makeGeneratorList gen n = gen1:makeGeneratorList  gen2 (n-1)
@@ -81,7 +83,10 @@ createMonster mt race inv level id position =
                eHitDie = mHitDie,
                eDamageDie = mDamageDie,
                eEvadeDie = mEvadeDie,
-               eMitigation = mMitigation
+               eMitigation = mMitigation,
+               
+               eSkillEffects = []
+                             
             }
   where
     mHitDie = (mtHitDie mt)

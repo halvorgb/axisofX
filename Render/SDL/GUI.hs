@@ -162,16 +162,13 @@ chooseProtagonist w a@(((splashBG, _), _), font) = do
   return (name, klass, race)
 
 
-
-
 -- Used to pick classes and races.
 chooseFromList :: Show a => Eq a => [a] -> Position -> SDL.Surface -> FontAssets -> World -> Assets -> IO a
 chooseFromList list pos mainSurf font w a = do  
   drawTextAtPos outStr pos mainSurf font
   SDL.flip mainSurf
   choice <- getChoice lastChoice w a
-  return $ fromJust $ lookup choice charToList
-  
+  return $ fromJust $ lookup choice charToList    
     where
       charToList = zip ['a'..'z'] list
       charToListString = map (\(c, cls) -> (c, show cls)) charToList

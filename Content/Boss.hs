@@ -19,9 +19,9 @@ lastBoss = Boss {  bName = "Kitty the Just",
                    eHitDie = baseMonsterHitDie,
                    eDamageDie = baseMonsterDamageDie,
                    eEvadeDie = baseMonsterEvadeDie,
-                   eMitigation = baseMonsterMitigation
-                                 
-                                             
+                   eMitigation = baseMonsterMitigation,
+                   
+                   eSkillEffects = []
                 }
            
            

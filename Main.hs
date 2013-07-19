@@ -29,16 +29,12 @@ main = do
   world <- returnWorld
   
   (name, race, klass) <- GUI.chooseProtagonist world assets
-  
-
-  
-
   let world' = createHero world  name klass race
 
   
   gameLoop world' assets
 
-
+-- main game loop!
 gameLoop :: World -> Assets -> IO ()
 gameLoop world assets = do
   if (null $ wLevels world) || ((eCurrHP $ wHero world) <= 0) -- check if complete. (future also check for death)
@@ -60,7 +56,9 @@ gameLoop world assets = do
       gameLoop world' assets
 
 
-
+-- tries to move the player.
+      -- if a door is encountered, open it.
+      -- if an enemy is encountered: attack it,
 handleDir :: World -> Direction -> World
 handleDir w dir
   | (dir == Left)  && ((fst $ eCurrPos h) == firstInFrame) = 
@@ -102,7 +100,7 @@ handleDir w dir
            hCurrEnergy = newEnergy,
            hMovementSlack = (firstInFrame+1, lastInFrame+1)
            }        
-        } -- If at right side of frame -- 
+        } -- If at right side of frame 
       
   | otherwise =  
         w { wHero = h { eOldPos = eCurrPos h, eCurrPos = coord, eNextMove = eSpeed h, hCurrEnergy = newEnergy} }
@@ -120,7 +118,7 @@ handleDir w dir
     
     newEnergy = max 0 $ (hCurrEnergy h) - 1
 
-
+-- simply passes the time.
 handleWait :: World -> World
 handleWait w = 
   w {
@@ -133,6 +131,7 @@ handleWait w =
   where
     h = wHero w
 
+--Exits!
 handleExit :: World -> Assets -> IO ()
 handleExit world assets = do
   GUI.shutdown world assets
@@ -151,8 +150,6 @@ nextLevel world
   where
     hero = wHero world
 
-
-
-
+-- Show different content in the context window.
 handleShow :: Screen -> World -> World
 handleShow screen  w = w { wScreenShown = screen }

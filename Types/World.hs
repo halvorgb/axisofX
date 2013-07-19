@@ -10,10 +10,6 @@ import Types.Items
 import Types.Tiles
 
 
-
-class ShowLong a where
-  showLong  :: a -> String
-
 -- Level&World
 ---------------------------------------
 data Level = Level { lDepth :: Int,
@@ -64,7 +60,8 @@ data Entity = Monster { mType :: MonsterType,
                         eHitDie :: Dice,
                         eDamageDie :: Dice,
                         eEvadeDie :: Dice,
-                        eMitigation :: Int
+                        eMitigation :: Int,
+                        eSkillEffects :: [SkillEffect]                        
                         
                       }
                   
@@ -97,7 +94,8 @@ data Entity = Monster { mType :: MonsterType,
                         eHitDie :: Dice, -- updated on gear changes.
                         eDamageDie :: Dice,
                         eEvadeDie :: Dice,
-                        eMitigation :: Int
+                        eMitigation :: Int,
+                        eSkillEffects :: [SkillEffect]
                         } 
             | Boss    { bName :: String,
                         bInnocentKills :: Int,
@@ -114,10 +112,22 @@ data Entity = Monster { mType :: MonsterType,
                         eHitDie :: Dice,
                         eDamageDie :: Dice,
                         eEvadeDie :: Dice,
-                        eMitigation :: Int
+                        eMitigation :: Int,
+                        eSkillEffects :: [SkillEffect]
                         
                         }
-            deriving (Eq)
+instance Eq Entity where
+  x == y = case x of
+    Hero {} -> case y of
+      Hero {} -> True -- only one hero
+      _ -> False
+    Boss {} -> case y of
+      Boss {} -> True -- only one boss
+      _ -> False
+    Monster {} -> case y of
+      Monster {} -> (mID x) == (mID y)
+      _ -> False
+      
 
 
 instance Show Entity where
@@ -128,6 +138,8 @@ instance Show Entity where
           Monster {} -> (show $ mRace e) ++ " " ++ (show $ mType e) ++ "[" ++ (show $ mLevel e) ++ "]"
           Boss {} -> show $ bName e
           
+class ShowLong a where
+  showLong  :: a -> String
           
 instance ShowLong Entity where
   showLong e = filter (/= '\"') outString -- remove "
@@ -135,6 +147,7 @@ instance ShowLong Entity where
       outString = case e of 
         Hero {} -> (show $ hName e) ++ " the " ++ (show $ hRace e) ++ " " ++ (show $ hClass e)
         _ -> "TODO: ShowLong Entity for bosses and monsters."
+          
 -------------------------------------          
           
 

@@ -16,12 +16,6 @@ import Combat
 
 import Level
 
---debug:
-import Debug.Trace
-
-
-
-
 
 -- First time calculation of hero stats
 createHero :: World -> String -> Race -> Class -> World
@@ -77,11 +71,7 @@ think world = do
       h = wHero world
       lvl = wLevel world
       
-      e = h:(getEntitiesFromViewFrame world $ getViewFrame world) -- every entity in view
-      
-      dbg ents
-        | trace ("\n\ndbg" ++ "\n" ++ show ents) True = True
-        
+      e = h:(getEntitiesFromViewFrame world $ getViewFrame world) -- every entity in view       
       
       e' = prepare e -- subtracts the lowest eNextMove value from every entity,
       -- always yielding 1 with 0.
@@ -103,15 +93,14 @@ think world = do
         Monster {} -> True
         _ -> False
         
-      -- UPDATE ZONE (update the map for monsters whose turns are not yet up!)  
+      -- update the map for monsters whose turns are not yet up!
       emap = foldl (\map m -> updateMap (eCurrPos m) m map) (lEntities lvl) monstersWAIT
       world' = world { wLevel = lvl {lEntities = emap }, wHero = h'}
-      -- /UPDATE ZONE
       
-      -- AI ZONE
+      -- choose an action for the rest of the monsters, execute it, reset time until next move.
       monsters' = map (\m -> m {eNextMove = eSpeed m}) monstersAI
       world'' =  foldl (\w m -> selectAIBehavior m w) world' monsters'
-      -- /AI ZONE
+
       
        
 

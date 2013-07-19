@@ -63,7 +63,10 @@ basePlayer = Hero { hName = "Broseph",
                     eHitDie = baseHeroHitDie,
                     eDamageDie = baseHeroDamageDie,
                     eEvadeDie = baseHeroEvadeDie,
-                    eMitigation = baseHeroMitigation
+                    eMitigation = baseHeroMitigation,
+                    
+                    eSkillEffects = []
+                                  
                     }  
             
 
