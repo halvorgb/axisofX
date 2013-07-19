@@ -7,7 +7,7 @@ import Types.World
 import Types.Items
 
 
-classes = [peasant]
+classes = [peasant, berserker]
 
 peasant = Class { cName = "Peasant",
                   
@@ -35,3 +35,32 @@ peasant = Class { cName = "Peasant",
                                         
                                         
                 }
+
+berserker = Class { cName = "Berserker",
+                    
+                    cExpReqMultiplier = 1.2,
+                    cStartingHPMultiplier = 1.5,
+                    cHPPerLevelMultiplier = 1.5,
+                    cStartingEnergyMultiplier = 1.0,
+                    cEnergyPerLevelMultiplier = 1.0,
+                    
+                  
+                    cStartingWeapon = shortSword,
+                    cStartingArmor = rags,
+                    cStartingInventory = Inventory [] 0,
+                    cStartingSkills = [],
+                    
+                    cStartingReputation = Asshole,
+                    
+                    cHitDie = Dice {dDie = (1,20), dMod = 0},
+                    cEvadeDie = Dice {dDie = (1,20), dMod = 0},
+                    cDamageBonus = 2,
+                    cMitigationBonus = 0,
+                    
+                    cSkillMask = anySkillMask,
+                    cWeaponConstraints = []
+                                        
+                                        
+                }
+                    
+                    

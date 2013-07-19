@@ -76,7 +76,7 @@ crossbowman =
                 mtSpeedMultiplier = 2.0,
                 
                 mtHitDie = baseMonsterHitDie,
-                mtEvadeDie = Dice {dDie = (1,20), dMod = (-10)},
+                mtEvadeDie = Dice {dDie = (1,10), dMod = 0},
                 mtDamageDie = baseMonsterDamageDie,
                 mtMitigation = 0,
                 -- TODO: edit so that the crossbowman seeks to be in 2-4 range, not just to flee!

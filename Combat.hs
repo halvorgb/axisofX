@@ -3,6 +3,7 @@ module Combat where
 
 
 import Random
+import Helpers
 import Types.Common
 import Types.World
 
@@ -27,9 +28,9 @@ simpleCombat sourceEntity targetEntity world = world'
                then
                  damageEntity sourceEntity targetEntity damage $ world { wStdGen = newGen'' }
                else
-                 world { wMessageBuffer = ((show targetEntity) ++ " shrugged off "++(show sourceEntity) ++ "' attack!"):(wMessageBuffer world), wStdGen = newGen'' }
+                 world { wMessageBuffer = ((show targetEntity) ++ " shrugged off "++(show sourceEntity) ++ "'s attack!"):(wMessageBuffer world), wStdGen = newGen'' }
              else
---               world { wMessageBuffer = ("(" ++ (show sourceHitRoll) ++ " < " ++ (show targetEvadeRoll) ++ ")"):
+
                world { wMessageBuffer = ((show targetEntity) ++ " evaded " ++ (show sourceEntity) ++ "'s attack!"):(wMessageBuffer world), wStdGen = newGen' }
 
 
@@ -41,24 +42,25 @@ damageEntity sourceEntity targetEntity damage world = world'
     ents = lEntities level
     
     world' = case targetEntity of
-      Monster {} -> if newTargetHP > 0
+      Monster {} -> if newTargetHP < 0
                     then
                       world { wMessageBuffer = ((show targetEntity) ++ " was killed by " ++ (show sourceEntity)):(wMessageBuffer world), 
                               wLevel = level { lEntities = M.delete (eCurrPos targetEntity) ents }
                             }
                     else
-                      world { wMessageBuffer = ((show  targetEntity) ++ " took " ++ (show damage) ++ "damage from " ++ (show sourceEntity)):(wMessageBuffer world), 
+                      world { wMessageBuffer = ((show  targetEntity) ++ " was dealt " ++ (show damage) ++ " damage by " ++ (show sourceEntity)):(wMessageBuffer world), 
                               wLevel = level { lEntities = M.insert (eCurrPos targetEntity) (targetEntity {eCurrHP = newTargetHP}) (M.delete (eCurrPos targetEntity) ents) }
                             }
                       
-      Hero {} -> if newTargetHP > 0
+      Hero {} -> if newTargetHP < 0
                  then
-                   world { wMessageBuffer = ((show  targetEntity) ++ " took " ++ (show damage) ++ " damage from " ++ (show sourceEntity)):(wMessageBuffer world), 
-                           wHero = targetEntity { eCurrHP = newTargetHP }
-                         }
-                 else
                    world { wMessageBuffer = ((show  targetEntity) ++ " was killed by " ++ (show sourceEntity) ++ "!" ):(wMessageBuffer world), 
                            wHero = targetEntity { eCurrHP = newTargetHP }
-                         }                   
+                         }  
+                 else
+                   world { wMessageBuffer = ((show  targetEntity) ++ " was dealt " ++ (show damage) ++ " damage by " ++ (show sourceEntity)):(wMessageBuffer world), 
+                           wHero = targetEntity { eCurrHP = newTargetHP }
+                         }
+                                    
       _ -> world
     

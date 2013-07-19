@@ -137,7 +137,7 @@ instance Show Entity where
       where
         outString = case e of
           Hero {} -> (show $ hName e)
-          Monster {} -> (show $ mRace e) ++ " " ++ (show $ mType e) ++ " [lvl: " ++ (show $ mLevel e) ++ "]"
+          Monster {} -> (show $ mRace e) ++ " " ++ (show $ mType e)
           Boss {} -> show $ bName e
           
 instance ShowLong Entity where
@@ -145,7 +145,8 @@ instance ShowLong Entity where
     where
       outString = case e of 
         Hero {} -> (show $ hName e) ++ " the " ++ (show $ hRace e) ++ " " ++ (show $ hClass e)
-        _ -> "TODO: ShowLong Entity for bosses and monsters."
+        Monster {} -> (show e) ++ " LVL:" ++ (show $ mLevel e) ++ " HP:(" ++ (show $ eCurrHP e) ++ "/" ++ (show $ eMaxHP e) ++ ")"
+        _ -> "TODO: ShowLong Entity for bosses ."
           
 -------------------------------------          
           

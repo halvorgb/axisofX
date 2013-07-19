@@ -38,7 +38,7 @@ main = do
 -- main game loop!
 gameLoop :: World -> Assets -> IO ()
 gameLoop world assets = do
-  if (null $ wLevels world) || ((eCurrHP $ wHero world) <= 0) -- check if complete. (future also check for death)
+  if (null $ wLevels world) || ((eCurrHP $ wHero world) < 0) -- check if complete. (future also check for death)
     then do
     GUI.delayedShutdown world assets
     else do

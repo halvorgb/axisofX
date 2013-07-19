@@ -227,7 +227,7 @@ drawVicinity world mainSurf font = do
     where -- tweak dat --V
       visibleEnts = take vicinityBufferSize $ getEntitiesFromViewFrame world $ getViewFrame world
 --      h = wHero world
-      entString = map show visibleEnts
+      entString = map showLong visibleEnts
       entSurf = createSurfaces font entString (Color 0 0 0)
       
       positions = createPositions vicinityBotPos (length visibleEnts) (-16)
