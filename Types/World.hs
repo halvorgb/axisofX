@@ -14,6 +14,7 @@ import Types.Tiles
 class ShowLong a where
   showLong  :: a -> String
 
+-- Level&World
 ---------------------------------------
 data Level = Level { lDepth :: Int,
                      lGold :: M.Map Position Int,
@@ -40,6 +41,7 @@ data World = World { wDepth :: Int,
 
 
 -- Entities:           
+-------------------------------------
 data Entity = Monster { mType :: MonsterType,
                         mRace :: Race,
                         mInventory :: Inventory,
@@ -73,6 +75,7 @@ data Entity = Monster { mType :: MonsterType,
                         hLevel :: Int,
                         hExperienceRemaining :: Int,
                         hReputation :: Reputation,
+                        hSkills :: [Skill],
                         
                         hCurrEnergy :: Int,
                         hMaxEnergy :: Int,
@@ -132,9 +135,11 @@ instance ShowLong Entity where
       outString = case e of 
         Hero {} -> (show $ hName e) ++ " the " ++ (show $ hRace e) ++ " " ++ (show $ hClass e)
         _ -> "TODO: ShowLong Entity for bosses and monsters."
+-------------------------------------          
           
-          
--- Races:          
+
+-- Races:
+-------------------------------------
 data Race = Race { rName :: String, -- Has to be unique for each race (not enforced)
                    rHitModifier :: Int,
                    rEvasionModifier :: Int,
@@ -152,10 +157,81 @@ data Race = Race { rName :: String, -- Has to be unique for each race (not enfor
                                       
                    rExperiencePenalty :: Float,
                    
-                   rContextFunc :: World -> World
+                   rContextFunc :: World -> World,
+                   
+                   rSkillMask :: [SkillMask]
                  }
 instance Show Race where
   show r = show $ rName r
 
 instance Eq Race where
   x == y = rName x == rName y
+-------------------------------------  
+  
+  
+-- Skills:
+-------------------------------------
+
+data SkillEffect = Final { seEffect :: Entity -> Entity, 
+                           seDelay :: Int
+                         } -- OneTime irreversible effect. Ex: instant damage
+                          -- Optional: Delay x turns before applying effect.
+                   
+                 | Temporary { seEffect :: Entity -> Entity, -- Question, is it possible to reverse this only given the function? probably need 2 functions.
+                               seReverseEffect :: Entity -> Entity,
+                               seDuration :: Int,
+                               seDelay :: Int
+                             } -- Overtime reversible effect, ex: debuff.
+                               -- Executed at start of druation, reversed at end of duration.
+                               -- Optional: Delay x turns before applying effect.
+
+                 | FinalOverTime { seEffect :: Entity -> Entity,
+                                   seTimeBetweenTicks :: Int,
+                                   seTickNumber :: Int,
+                                   seDelay :: Int
+                                 } -- Irreversible effect over time, Ex: hp loss over time.
+                                   -- Optional: Delay x turns before applying effect.
+                     
+data SkillTarget = Self
+                 | Other { stRange :: Int, 
+                           stHitMask :: HitMask}
+                 | Area  { stRange :: Int,
+                           stRadius :: Int,
+                           stHitMask :: HitMask
+                         }
+                 deriving(Eq)
+
+                      
+
+
+
+
+data Skill = Active { sName :: String,
+                      sDescription :: String,
+                      sEffect :: [SkillEffect], -- allow multiple effects?
+                      sTarget :: SkillTarget,
+                      sPrequisites :: [Skill],
+                      sSkillMask :: [SkillMask],
+                      sWeaponConstraints :: WeaponConstraints,
+                      
+                      sEnergyCost :: Int,
+                      sSpeedMultiplier :: Float,
+                      
+                      sCoolDown :: Int
+                     -- MORE
+                      
+                     }
+           | Sustained { sName :: String,
+                         sDescription :: String,
+                         sEffect :: [SkillEffect],
+                         sTarget :: SkillTarget,
+                         sPrequisites :: [Skill],
+                         sSkillMask :: [SkillMask],
+                         sWeaponConstraints :: WeaponConstraints,                         
+                         sEnergyUpkeep :: Int
+                         
+                         -- MORE
+                       }
+instance Eq Skill where
+  x == y = (sName x) == (sName y)
+-------------------------------------

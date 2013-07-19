@@ -28,8 +28,10 @@ data Class =
           cHitDie :: Dice,
           cEvadeDie :: Dice,
           cDamageBonus :: Int,
-          cMitigationBonus :: Int
+          cMitigationBonus :: Int,
           
+          cSkillMask :: [SkillMask],
+          cWeaponConstraints :: [WeaponConstraints]
           -- more attributes such as allowed weapons and skills.
         }
   deriving (Eq)

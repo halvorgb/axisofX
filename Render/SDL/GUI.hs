@@ -1,4 +1,4 @@
-module Render.SDL.GUI (setup, chooseProtagonist, update_, shutdown, getInput, loadAssets, Assets) where
+module Render.SDL.GUI (setup, chooseProtagonist, update_, shutdown, delayedShutdown, getInput, loadAssets, Assets) where
 
 import Graphics.UI.SDL as SDL
 import Render.SDL.Render as Render
@@ -7,6 +7,7 @@ import Render.SDL.Text as Text
 import Prelude hiding(Either(..))
 import Data.Maybe
 import System.Random
+import qualified Data.Char as C
 
 import Content.Names
 import Content.Races
@@ -53,10 +54,10 @@ update_ world (((_, background), tiles), font) = do
   -- Flip!
   SDL.flip mainSurf
 
-shutdown :: World -> Assets -> IO ()
-shutdown world assets@(((splashBG, background), tiles), font) = do
-  
-  let world' = world { wMessageBuffer = ("Press \"Q\" to quit the game."):(wMessageBuffer world) } in
+-- called if forced end to the game, Ex: player dies.
+delayedShutdown :: World -> Assets -> IO ()
+delayedShutdown world assets = do
+  let world' = world { wMessageBuffer = ("Press \"Q\", \"<M>-F4\" or the X to quit the game."):(wMessageBuffer world) } in
     update_ world' assets
     
   let quit e = case e of
@@ -69,18 +70,17 @@ shutdown world assets@(((splashBG, background), tiles), font) = do
           
   input <- (waitEventBlocking >>= quit)
   
-                
+  shutdown world assets
   
-  
-  
+-- Called when explicitly asked to close the game.
+shutdown :: World -> Assets -> IO ()
+shutdown world assets@(((splashBG, background), tiles), font) = do  
   mapM_ freeSurf tiles -- tiles
   freeSurface background -- bg
-  freeSurface splashBG
-  --freeSurface font
+  freeSurface splashBG -- bg
   
-  SDL.quit
-  
-  where
+  SDL.quit  
+    where
       freeSurf (_, s) = freeSurface s
   
 loadAssets :: IO Assets
@@ -124,8 +124,8 @@ getInput  = do
 
 
 -- bit ugly for this to be here...
-chooseProtagonist :: Assets -> IO (String, Class, Race)
-chooseProtagonist (((splashBG, _), _), font) = do
+chooseProtagonist :: World -> Assets -> IO (String, Class, Race)
+chooseProtagonist w a@(((splashBG, _), _), font) = do
   
   mainSurf <- getVideoSurface
   
@@ -147,7 +147,7 @@ chooseProtagonist (((splashBG, _), _), font) = do
   drawTextAtPos "Select a class:" klassTextPos mainSurf font
   SDL.flip mainSurf
   let klassOptionsPos = (256, 360)
-  klass <- chooseFromList classes klassOptionsPos mainSurf font
+  klass <- chooseFromList classes klassOptionsPos mainSurf font w a
   let klassPos = (256, 396)
   drawTextAtPos ("> " ++ (show klass)) klassPos mainSurf font
   
@@ -156,7 +156,7 @@ chooseProtagonist (((splashBG, _), _), font) = do
   drawTextAtPos "Select a race:" raceTextPos mainSurf font
   let raceOptionsPos = (256, 460)
   SDL.flip mainSurf
-  race <- chooseFromList races raceOptionsPos mainSurf font
+  race <- chooseFromList races raceOptionsPos mainSurf font w a
   
   return (name, klass, race)
 
@@ -164,11 +164,11 @@ chooseProtagonist (((splashBG, _), _), font) = do
 
 
 -- Used to pick classes and races.
-chooseFromList :: Show a => Eq a => [a] -> Position -> SDL.Surface -> FontAssets -> IO a
-chooseFromList list pos mainSurf font = do  
+chooseFromList :: Show a => Eq a => [a] -> Position -> SDL.Surface -> FontAssets -> World -> Assets -> IO a
+chooseFromList list pos mainSurf font w a = do  
   drawTextAtPos outStr pos mainSurf font
   SDL.flip mainSurf
-  choice <- getChoice lastChoice
+  choice <- getChoice lastChoice w a
   return $ fromJust $ lookup choice charToList
   
     where
@@ -177,17 +177,20 @@ chooseFromList list pos mainSurf font = do
       outStr = foldl (\str (c, s) -> str ++ (c:": " ++ s ++ "  " )) "" charToListString
       lastChoice = fst $ last charToList
       
--- Used  to get a char bounded [a..maxChar].
-getChoice :: Char -> IO Char
-getChoice maxChar = do
+-- Used  to get a char bounded [a..maxChar]. (world and assets are sent to handle quits)
+getChoice :: Char -> World -> Assets -> IO Char
+getChoice maxChar w a = do
   waitEventBlocking >>= getCharInput
     where
       getCharInput e = case e of
+        Quit -> do 
+          shutdown w a
+          return undefined -- HACK MUCH?
         (KeyDown (Keysym  _ _ c)) -> do 
-          if c <= maxChar
+          if (c <= maxChar) && (C.isAsciiLower c) -- exclude meta keys etc.
             then
             return c
-            else
+            else do
             waitEventBlocking >>= getCharInput
             
         _ -> waitEventBlocking >>= getCharInput

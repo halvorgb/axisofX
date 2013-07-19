@@ -26,13 +26,14 @@ main :: IO ()
 main = do
   assets <- loadAssets
   GUI.setup
-  
-  (name, race, klass) <- GUI.chooseProtagonist assets
-  
   world <- returnWorld
   
+  (name, race, klass) <- GUI.chooseProtagonist world assets
+  
 
-  let world' = createHero world name klass race
+  
+
+  let world' = createHero world  name klass race
 
   
   gameLoop world' assets
@@ -42,7 +43,7 @@ gameLoop :: World -> Assets -> IO ()
 gameLoop world assets = do
   if (null $ wLevels world) || ((eCurrHP $ wHero world) <= 0) -- check if complete. (future also check for death)
     then do
-    GUI.shutdown world assets
+    GUI.delayedShutdown world assets
     else do
     if (eNextMove $ wHero world) == 0  -- check if hero's turn.
       then do 

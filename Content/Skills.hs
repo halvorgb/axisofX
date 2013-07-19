@@ -1,6 +1,6 @@
 module Content.Skills where
 
-import Types.Skills
+import Types.World
 import Types.Items
 import Types.Common
 
@@ -21,6 +21,9 @@ anyWeapon =
                      wcType = anyType,
                      wcGrip = anyGrip
                     }
+
+
+
   
 
 

@@ -43,6 +43,8 @@ basePlayer = Hero { hName = "Broseph",
                     hLevel = 1,
                     hExperienceRemaining = 100,
                     hReputation = Asshole,
+                    hSkills = [],
+                    
                     eCurrPos = (0,0),
                     eOldPos = (0,0),
                     eCurrHP = 10,

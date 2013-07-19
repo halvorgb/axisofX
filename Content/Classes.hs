@@ -26,7 +26,10 @@ peasant = Class { cName = "Peasant",
                   cHitDie = Dice {dDie = (1,20), dMod = 0},
                   cEvadeDie = Dice {dDie = (1,20), dMod = 0},
                   cDamageBonus = 0,
-                  cMitigationBonus = 0
+                  cMitigationBonus = 0,
+                  
+                  cSkillMask = [],
+                  cWeaponConstraints = []
                                         
                                         
                 }

@@ -1,6 +1,7 @@
 module Content.Races where
 
 import Types.World
+import Types.Common
 
 vanilla :: World -> World
 vanilla w = w
@@ -26,7 +27,9 @@ human = Race { rName = "Human",
                
                rExperiencePenalty = 1.0,
                
-               rContextFunc = vanilla
+               rContextFunc = vanilla,
+               rSkillMask = []
+               
              }
         
 ogre = Race { rName = "Ogre",
@@ -46,5 +49,6 @@ ogre = Race { rName = "Ogre",
               
               rExperiencePenalty = 1.0,
               
-              rContextFunc = vanilla
+              rContextFunc = vanilla,
+              rSkillMask = []
             }

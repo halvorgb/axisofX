@@ -18,14 +18,7 @@ data WeaponQuality = JourneyMan
                                    wLegacy :: String }
                    deriving(Show, Eq)
                            
-data WeaponWeight  = Balanced | Heavy | Burdensome
-                   deriving(Show, Eq)
 
-data WeaponType    = Edged | Pointy | Blunt
-                   deriving(Show, Eq)
-
-data WeaponGrip    = OneHanded | TwoHanded
-                   deriving(Show, Eq)
 
 type WeaponRange   = Int
 
