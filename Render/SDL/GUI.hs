@@ -124,7 +124,11 @@ chooseSkill world assets = do
   -- Main set Skills as visible. call update!
   update_ world assets
   choice <- getChoice lastChoice world assets
-  return $ fromMaybe NoSkill $ lookup choice c2s  
+  if choice == Nothing 
+    then
+    return NoSkill
+    else
+    return $ fromMaybe NoSkill $ lookup (fromJust choice) c2s  
     where
       heroSkills = hSkills $ wHero world
       c2s = zip ['a'..'z'] heroSkills
@@ -195,7 +199,13 @@ chooseFromList list pos mainSurf font w a = do
   SDL.flip mainSurf
   
   choice <- getChoice lastChoice w a
-  return $ fromJust $ lookup choice charToList    
+  if choice == Nothing 
+    then
+    chooseFromList list pos mainSurf font w a
+    else
+    return $ fromJust $ lookup (fromJust choice) charToList
+
+  
     where
       charToList = zip ['a'..'z'] list
       charToListString = map (\(c, cls) -> (c, show cls)) charToList
@@ -203,7 +213,7 @@ chooseFromList list pos mainSurf font w a = do
       lastChoice = fst $ last charToList
       
 -- Used  to get a char bounded [a..maxChar]. (world and assets are sent to handle quits)
-getChoice :: Char -> World -> Assets -> IO Char
+getChoice :: Char -> World -> Assets -> IO (Maybe Char)
 getChoice maxChar w a = do
   waitEventBlocking >>= getCharInput
     where
@@ -211,12 +221,14 @@ getChoice maxChar w a = do
         Quit -> do 
           shutdown w a
           exitWith ExitSuccess
-        (KeyDown (Keysym  _ _ c)) -> do 
-          if (c <= maxChar) && (C.isAsciiLower c) -- exclude meta keys etc.
-            then
-            return c
-            else do
-            waitEventBlocking >>= getCharInput
+        (KeyDown (Keysym  k _ c)) -> do
+          case k of
+            SDLK_ESCAPE -> return Nothing
+            _ -> if (c <= maxChar) && (C.isAsciiLower c) -- exclude meta keys etc.
+                 then
+                   return (Just c)
+                 else do
+                   waitEventBlocking >>= getCharInput
             
         _ -> waitEventBlocking >>= getCharInput
              

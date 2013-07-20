@@ -191,6 +191,7 @@ class QuadrupleSkillQueue q where
   fourth :: q -> Skill
   
   addToQueue :: Skill -> Int -> q -> q
+  removeFromQueue :: Int -> q -> q
   clearQueue :: q
   
 data SkillQueue = SkillQueue Skill Skill Skill Skill
@@ -219,6 +220,14 @@ instance QuadrupleSkillQueue SkillQueue where
           NoSkill -> (SkillQueue fs sn s fo)
           _ -> (SkillQueue fs sn th s)
     _ -> undefined
+    
+  removeFromQueue i (SkillQueue fs sn th fo) = case i of
+    1 -> (SkillQueue NoSkill NoSkill NoSkill NoSkill)
+    2 -> (SkillQueue fs NoSkill NoSkill NoSkill)
+    3 -> (SkillQueue fs sn NoSkill NoSkill)
+    4 -> (SkillQueue fs sn th NoSkill)      
+    _ -> undefined
+
     
   clearQueue = (SkillQueue NoSkill NoSkill NoSkill NoSkill)
   
@@ -289,7 +298,11 @@ data Skill = Active { sName :: String,
            | NoSkill
              
 instance Eq Skill where
-  x == y = (sName x) == (sName y)
+  x == y = case x of
+    NoSkill -> case y of 
+      NoSkill -> True
+      _ -> False
+    _ -> (sName x) == (sName y)
 instance Show Skill where
   show x = case x of
     NoSkill -> "-"

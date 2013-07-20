@@ -257,7 +257,7 @@ drawScreen world mainSurf font = do
       messageBuffer = case wScreenShown world of
         Help -> helpText
         Inv -> ["Inventory TEMP"]
-        Skills -> "Select a skill!":(map (\(c,s) -> c:": " ++ (show s)) c2s)
+        Skills -> skillsText ++ (map (\(c,s) -> c:": " ++ (show s)) c2s)
         LevelUp -> ["LevelUp TEMP"]
         Console -> take consoleBufferSize $ wMessageBuffer world
       positions = 
