@@ -60,8 +60,14 @@ posIsClear coord world =
   (not $ isMonster coord $ wLevel world)
   &&
   (coord /= heroPos)
+  &&
+  (fst coord >= vfStart) && (fst coord >= vfEnd)
+  &&
+  (not $ isDoor coord $ wLevel world)
+  
   where
     heroPos = eCurrPos $ wHero world
+    (vfStart, vfEnd) = getViewFrame world
 
 
 

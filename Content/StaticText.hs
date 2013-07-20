@@ -2,7 +2,7 @@ module Content.StaticText where
 
 
 helpText :: [String]
-helpText = reverse 
+helpText =  
            [
             "Axis of X help:",            
             " ",

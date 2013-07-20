@@ -291,7 +291,9 @@ data Skill = Active { sName :: String,
 instance Eq Skill where
   x == y = (sName x) == (sName y)
 instance Show Skill where
-  show x = filter (/= '\"') $ show $ sShortName x
+  show x = case x of
+    NoSkill -> "-"
+    _       -> filter (/= '\"') $ show $ sShortName x
 instance ShowLong Skill where
   showLong x = filter (/= '\"') $ ((show $ sName x ) ++ " (" ++ (show $ sShortName x) ++ "): " ++ (show $ sDescription x))
 -------------------------------------
@@ -327,7 +329,7 @@ data Class =
           cMitigationBonus :: Int,
           
           cSkillMask :: [SkillMask],
-          cWeaponConstraints :: [WeaponConstraints]
+          cWeaponConstraints :: WeaponConstraints
           -- more attributes such as allowed weapons and skills.
         }
   deriving (Eq)

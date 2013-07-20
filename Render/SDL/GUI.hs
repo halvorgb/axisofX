@@ -1,4 +1,4 @@
-module Render.SDL.GUI (setup, chooseProtagonist, update_, shutdown, delayedShutdown, getInput, loadAssets, Assets) where
+module Render.SDL.GUI (setup, chooseProtagonist, chooseSkill, update_, shutdown, delayedShutdown, getInput, loadAssets, Assets) where
 
 import Graphics.UI.SDL as SDL
 import Render.SDL.Render as Render
@@ -118,6 +118,25 @@ getInput  = do
         _ -> getInput 
      
 
+-- Called after the player brings up the queue screen.
+chooseSkill :: World -> Assets -> IO Skill
+chooseSkill world assets = do
+  -- Main set Skills as visible. call update!
+  update_ world assets
+  choice <- getChoice lastChoice world assets
+  return $ fromMaybe NoSkill $ lookup choice c2s  
+    where
+      heroSkills = hSkills $ wHero world
+      c2s = zip ['a'..'z'] heroSkills
+      
+      lastChoice = fst $ last c2s
+  
+  
+  
+  
+  
+  
+
 
 
 
@@ -174,6 +193,7 @@ chooseFromList :: Show a => Eq a => [a] -> Position -> SDL.Surface -> FontAssets
 chooseFromList list pos mainSurf font w a = do  
   drawTextAtPos outStr pos mainSurf font
   SDL.flip mainSurf
+  
   choice <- getChoice lastChoice w a
   return $ fromJust $ lookup choice charToList    
     where

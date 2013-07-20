@@ -52,7 +52,7 @@ gameLoop world assets = do
         Exit -> handleExit (world' {wScreenShown = Console}) assets
         Wait -> gameLoop (handleWait (world' {wScreenShown = Console})) assets
         Dir dir -> gameLoop (handleDir (world' {wScreenShown = Console}) dir) assets
-        Queue i -> gameLoop (world' {wScreenShown = Skills}) assets
+        Queue i -> queueSkill i (world' {wScreenShown = Skills}) assets
         ExecuteSkills -> gameLoop (world' {wScreenShown = Console}) assets
       else do -- else: AI
       world' <- think world
@@ -156,3 +156,15 @@ nextLevel world
 -- Show different content in the context window.
 handleShow :: Screen -> World -> World
 handleShow screen  w = w { wScreenShown = screen }
+
+
+-- handles skill queue (duh), asks for input.
+queueSkill :: Int -> World -> Assets -> IO ()
+queueSkill n w a = do
+  skill <- chooseSkill w a
+  let w' = w { wHero = h { hSkillQueue = addToQueue skill n $ hSkillQueue h}, 
+               wScreenShown = Console
+             }
+  gameLoop w' a
+  where
+    h = wHero w

@@ -1,6 +1,7 @@
 module Content.Classes where
 
 import Content.StartingGear
+import Content.Skills
 
 import Types.Common
 import Types.World
@@ -31,7 +32,7 @@ peasant = Class { cName = "Peasant",
                   cMitigationBonus = 0,
                   
                   cSkillMask = anySkillMask,
-                  cWeaponConstraints = []
+                  cWeaponConstraints = anyWeapon
                                         
                                         
                 }
@@ -48,7 +49,7 @@ berserker = Class { cName = "Berserker",
                     cStartingWeapon = shortSword,
                     cStartingArmor = rags,
                     cStartingInventory = Inventory [] 0,
-                    cStartingSkills = [],
+                    cStartingSkills = [sweep],
                     
                     cStartingReputation = Asshole,
                     
@@ -58,7 +59,7 @@ berserker = Class { cName = "Berserker",
                     cMitigationBonus = 0,
                     
                     cSkillMask = anySkillMask,
-                    cWeaponConstraints = []
+                    cWeaponConstraints = anyWeapon
                                         
                                         
                 }

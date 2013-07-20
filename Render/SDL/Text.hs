@@ -14,6 +14,9 @@ fontFilePath = "assets/fonts/SourceSansPro-Regular.ttf"
 consoleBottomPos :: Position
 consoleBottomPos = (350, 572)
 
+consoleTopPos :: Position
+consoleTopPos = (350, 256)
+
 consoleBufferSize :: Int
 consoleBufferSize = 18
 
@@ -60,16 +63,16 @@ playerRepPos = (122, 186)
 
 ---
 skillQueueOnePos :: Position
-skillQueueOnePos = (366, 134)
+skillQueueOnePos = (362, 134)
 
 skillQueueTwoPos :: Position
-skillQueueTwoPos = (480, 134)
+skillQueueTwoPos = (476, 134)
 
 skillQueueThreePos :: Position
-skillQueueThreePos = (592, 134)
+skillQueueThreePos = (588, 134)
 
 skillQueueFourPos :: Position
-skillQueueFourPos = (704, 134)
+skillQueueFourPos = (700, 134)
 
 
 --
@@ -141,11 +144,14 @@ drawSkillQueue world mainSurf font = do
   where
     hero = wHero world
     
-    string = ["Hello"]
-    oneSurf = createSurfaces font string (Color 0 0 0)
-    twoSurf = createSurfaces font string (Color 0 0 0)
-    threeSurf = createSurfaces font string (Color 0 0 0)
-    fourSurf = createSurfaces font string (Color 0 0 0)
+    oneString = [show $ first $ hSkillQueue hero]
+    twoString = [show $ second $ hSkillQueue hero]    
+    threeString = [show $ third $ hSkillQueue hero]    
+    fourString = [show $ fourth $ hSkillQueue hero]    
+    oneSurf = createSurfaces font oneString (Color 0 0 0)
+    twoSurf = createSurfaces font twoString (Color 0 0 0)
+    threeSurf = createSurfaces font threeString (Color 0 0 0)
+    fourSurf = createSurfaces font fourString (Color 0 0 0)
   
 
 drawCharacterText :: World -> SDL.Surface -> Font -> IO ()
@@ -244,13 +250,20 @@ drawScreen world mainSurf font = do
       
   mapM_ (renderText mainSurf) preppedOutput
     where
+      heroSkills = hSkills $ wHero world
+      chars = ['a'..'z']
+      c2s = zip chars heroSkills
+      
       messageBuffer = case wScreenShown world of
         Help -> helpText
         Inv -> ["Inventory TEMP"]
-        Skills -> ["Skills TEMP"]
+        Skills -> "Select a skill!":(map (\(c,s) -> c:": " ++ (show s)) c2s)
         LevelUp -> ["LevelUp TEMP"]
-        Console -> take consoleBufferSize $ wMessageBuffer world
-      positions = createPositions consoleBottomPos (length messageBuffer) (-16)
+        Console -> take consoleBufferSize $ wMessageBuffer world
+      positions = 
+        case wScreenShown world of 
+          Console -> createPositions consoleBottomPos (length messageBuffer) (-16)
+          _       -> createPositions consoleTopPos (length messageBuffer) (16)
 
 drawConsoleText :: World -> SDL.Surface -> Font -> IO ()
 drawConsoleText world mainSurf font = do

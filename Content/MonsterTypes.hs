@@ -76,20 +76,20 @@ crossbowman =
                 mtSpeedMultiplier = 2.0,
                 
                 mtHitDie = baseMonsterHitDie,
-                mtEvadeDie = Dice {dDie = (1,10), dMod = 0},
+                mtEvadeDie = Dice {dDie = (1,10), dMod = (-10)},
                 mtDamageDie = baseMonsterDamageDie,
-                mtMitigation = 0,
+                mtMitigation = (-1),
                 -- TODO: edit so that the crossbowman seeks to be in 2-4 range, not just to flee!
                 mtBehaviorStack = [bhvCrossbowmanRangedAttack, bhvMove1AwayFromPlayer, bhvMeleeCombat, bhvWait]
               }
   
-  
+-- have these attributes as   
 crossbowRange :: (Int, Int)
 crossbowRange = (2, 4)
 
 bhvCrossbowmanRangedAttack :: World -> Entity -> Maybe World
 bhvCrossbowmanRangedAttack world monster
-  | not playerInRange = Nothing -- player isn't close enough, abort dat shit.
+  | not playerInRange = Nothing -- player isn't in range, abort dat shit.
   | otherwise = Just $ simpleCombat monster hero world -- actual function here.
   where
     hero = wHero world
