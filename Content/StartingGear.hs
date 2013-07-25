@@ -15,7 +15,8 @@ shortSword =
     wepDescription = "Dull Short Sword (dmg: 1d6, hitPenalty: (-0), spdMultiplier: 1.0), level 1 crafted by a Journeyman.",
     wepDamageDie = Dice { dDie = (1, 6), dMod = 0},
     wepHitBonus = 0,
-    wepSpeedMultiplier = 1.0
+    wepSpeedMultiplier = 1.0,
+    wepRange = 1
     }
 
 rags = Armor { aEvasion = 0,

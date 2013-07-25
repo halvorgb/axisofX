@@ -39,7 +39,8 @@ data Weapon =
     wepDescription :: String,
     wepDamageDie :: Dice,
     wepHitBonus :: Int,
-    wepSpeedMultiplier :: Float
+    wepSpeedMultiplier :: Float,
+    wepRange :: Int
      -- !
                 
     }

@@ -54,14 +54,15 @@ isWeapon coord lvl =
       ) resList
   where
     resList = fromMaybe [] $ M.lookup coord (lItems lvl)
-    
+
+-- Checks if position is clear, used by move functions.
 posIsClear :: Position -> World -> Bool
 posIsClear coord world =
   (not $ isMonster coord $ wLevel world)
   &&
   (coord /= heroPos)
   &&
-  (fst coord >= vfStart) && (fst coord >= vfEnd)
+  (fst coord > vfStart) && (fst coord < vfEnd)
   &&
   (not $ isDoor coord $ wLevel world)
   
@@ -69,6 +70,9 @@ posIsClear coord world =
     heroPos = eCurrPos $ wHero world
     (vfStart, vfEnd) = getViewFrame world
 
+
+getEntityFromPos :: Position -> World -> Maybe Entity
+getEntityFromPos coord w = M.lookup coord (lEntities $ wLevel w)
 
 
 -- removes entity from oldPos, adds to newPos, updates if the pos is the same.
@@ -100,7 +104,7 @@ checkVision w =
     
     stringBuffer = map (\m -> (show $ snd m) ++ " spotted!") markedEs
     
-    entMap' = foldl (\map (key,value) -> updateMap key value map) entMap markedEs
+    entMap' = foldl' (\map (key,value) -> updateMap key value map) entMap markedEs
     
 
 
@@ -118,7 +122,7 @@ getViewFrame world = (vFStart, maxVision)
 
 -- gets a list of all entities in view.
 getEntitiesFromViewFrame :: World -> (Int, Int) -> [Entity]
-getEntitiesFromViewFrame w (start,end) = foldl (\list pos -> (fromMaybe [] $ fmap (:[]) $ M.lookup pos ents) ++ list) [] coordinates
+getEntitiesFromViewFrame w (start,end) = foldl' (\list pos -> (fromMaybe [] $ fmap (:[]) $ M.lookup pos ents) ++ list) [] coordinates
   where
     ents = lEntities $ wLevel w
     coordinates = zip [start..end] $ repeat 0

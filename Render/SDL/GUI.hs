@@ -9,6 +9,7 @@ import Data.Maybe
 import System.Random
 import System.Exit
 import qualified Data.Char as C
+import Data.List
 
 import Content.Names
 import Content.Races
@@ -124,7 +125,9 @@ chooseSkill world assets = do
   -- Main set Skills as visible. call update!
   update_ world assets
   choice <- getChoice lastChoice world assets
-  if choice == Nothing 
+  
+  
+  if (null heroSkills) || choice == Nothing 
     then
     return NoSkill
     else
@@ -136,14 +139,6 @@ chooseSkill world assets = do
       lastChoice = fst $ last c2s
   
   
-  
-  
-  
-  
-
-
-
-
 
 ----------------
         
@@ -209,7 +204,7 @@ chooseFromList list pos mainSurf font w a = do
     where
       charToList = zip ['a'..'z'] list
       charToListString = map (\(c, cls) -> (c, show cls)) charToList
-      outStr = foldl (\str (c, s) -> str ++ (c:": " ++ s ++ "  " )) "" charToListString
+      outStr = foldl' (\str (c, s) -> str ++ (c:": " ++ s ++ "  " )) "" charToListString
       lastChoice = fst $ last charToList
       
 -- Used  to get a char bounded [a..maxChar]. (world and assets are sent to handle quits)

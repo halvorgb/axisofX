@@ -36,7 +36,7 @@ bhvMove1TowardsPlayer world monster = bhvMoveNTiles world monster distance
       else
         (-1,0)
 
--- moves 1 tile away from tile
+-- moves 1 tile away from player.
 bhvMove1AwayFromPlayer :: World -> Entity -> Maybe World
 bhvMove1AwayFromPlayer world monster = bhvMoveNTiles world monster distance
   where

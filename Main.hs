@@ -12,6 +12,7 @@ import Combat
 import Helpers
 import Logic
 import WorldBuilder
+import Skills
 
 import Types.World
 import Types.Common
@@ -53,7 +54,7 @@ gameLoop world assets = do
         Wait -> gameLoop (handleWait (world' {wScreenShown = Console})) assets
         Dir dir -> gameLoop (handleDir (world' {wScreenShown = Console}) dir) assets
         Queue i -> queueSkill i (world' {wScreenShown = Skills}) assets
-        ExecuteSkills -> gameLoop (world' {wScreenShown = Console}) assets
+        ExecuteSkills -> executeSkills (world' {wScreenShown = Console}) assets
       else do -- else: AI
       world' <- think world
       gameLoop world' assets
@@ -162,9 +163,23 @@ handleShow screen  w = w { wScreenShown = screen }
 queueSkill :: Int -> World -> Assets -> IO ()
 queueSkill n w a = do
   skill <- chooseSkill w a
-  let w' = w { wHero = h { hSkillQueue = addToQueue skill n $ hSkillQueue h}, 
-               wScreenShown = Console
-             }
+  
+  let w' = case skill of
+        NoSkill -> w { wHero = h { hSkillQueue = removeFromQueue n $ hSkillQueue h},                 
+                       wScreenShown = Console
+                     }
+        _ ->  w { wHero = h { hSkillQueue = addToQueue skill n $ hSkillQueue h}, 
+                  wScreenShown = Console
+                }
   gameLoop w' a
   where
     h = wHero w
+    
+
+-- executes queued skills. (need  to check for energy etc)
+executeSkills :: World -> Assets -> IO ()
+executeSkills w a = gameLoop (performSkills w) a  
+    
+   
+  
+  

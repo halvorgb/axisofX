@@ -95,12 +95,12 @@ think world = do
         _ -> False
         
       -- update the map for monsters whose turns are not yet up!
-      emap = foldl (\map m -> updateMap (eCurrPos m) m map) (lEntities lvl) monstersWAIT
+      emap = foldl' (\map m -> updateMap (eCurrPos m) m map) (lEntities lvl) monstersWAIT
       world' = world { wLevel = lvl {lEntities = emap }, wHero = h'}
       
       -- choose an action for the rest of the monsters, execute it, reset time until next move.
       monsters' = map (\m -> m {eNextMove = eSpeed m}) monstersAI
-      world'' =  foldl (\w m -> performAI m w) world' monsters'
+      world'' =  foldl' (\w m -> performAI m w) world' monsters'
 
       
        
@@ -110,6 +110,6 @@ prepare :: [Entity] -> [Entity]
 prepare e = map (\x -> x { eNextMove = eNextMove x - lowestRemaining }) e
   where
     -- 10000 is infinite in this case.
-    lowestRemaining = foldl (\x y -> min x $ eNextMove y) 10000 e
+    lowestRemaining = foldl' (\x y -> min x $ eNextMove y) 10000 e
 
 

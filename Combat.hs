@@ -63,4 +63,3 @@ damageEntity sourceEntity targetEntity damage world = world'
                          }
                                     
       _ -> world
-    

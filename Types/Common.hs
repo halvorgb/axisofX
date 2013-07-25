@@ -40,22 +40,20 @@ anySkillMask = enumFrom Brute
 class ShowLong a where
   showLong  :: a -> String
                                           
-                                          
 
-                       
+data Stat = Stat_HP | Stat_NRG | Stat_Hit | Stat_Dmg | Stat_Evd | Stat_Mit | Stat_Spd | Stat_Pos
+          deriving (Show, Eq)
+
 data SkillRange = SRWeaponRange
                 | SRConst Int
                 deriving (Eq)
-
-
 
 data WeaponConstraints = WeaponConstraints { wcWeight  :: [WeaponWeight],
                                              wcType    :: [WeaponType],
                                              wcGrip    :: [WeaponGrip]
                                            }
                          deriving (Eq)
-                                  
-                                  
+
 data WeaponWeight  = Balanced | Heavy | Burdensome
                    deriving(Show, Eq)
 

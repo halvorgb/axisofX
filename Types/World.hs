@@ -194,6 +194,8 @@ class QuadrupleSkillQueue q where
   removeFromQueue :: Int -> q -> q
   clearQueue :: q
   
+  toList :: q -> [Skill]
+  
 data SkillQueue = SkillQueue Skill Skill Skill Skill
 
 instance QuadrupleSkillQueue SkillQueue where
@@ -230,41 +232,50 @@ instance QuadrupleSkillQueue SkillQueue where
 
     
   clearQueue = (SkillQueue NoSkill NoSkill NoSkill NoSkill)
+   
+  toList (SkillQueue fs sn th fo) =
+    case fs of 
+      NoSkill -> []
+      _ -> case sn of
+        NoSkill -> [fs]
+        _ -> case th of
+          NoSkill -> [fs, sn]
+          _ -> case fo of
+            NoSkill -> [fs, sn, th]
+            _ -> [fs, sn, th, fo]
   
   
-
-data SkillEffect = Final { seEffect :: Entity -> Entity, 
-                           seDelay :: Int
-                         } -- OneTime irreversible effect. Ex: instant damage
-                          -- Optional: Delay x turns before applying effect.
+{-
+data SkillEffect = FinalConstant { seAffectedStat :: Stat,
+                                   seEffect :: Int,
+                                   seDelay :: Int
+                                 } -- OneTime irreversible effect. Ex: instant damage
+                                   -- Optional: Delay x turns before applying effect.
+                 | FinalScaling  { seAffectedStat :: Stat,
+                                   seScale :: Float,
+                                   seDelay :: Int
+                                 }
                    
-                 | Temporary { seEffect :: Entity -> Entity, -- Question, is it possible to reverse this only given the function? probably need 2 functions.
-                               seReverseEffect :: Entity -> Entity,
-                               seDuration :: Int,
-                               seDelay :: Int
+                 | Temporary     { seAffectedStat :: Stat,
+                                   seInt :: Int,
+                                   seDuration :: Int,
+                                   seDelay :: Int
                              } -- Overtime reversible effect, ex: debuff.
                                -- Executed at start of druation, reversed at end of duration.
                                -- Optional: Delay x turns before applying effect.
 
-                 | FinalOverTime { seEffect :: Entity -> Entity,
+                 | FinalOverTime { seAffectedStat :: Stat,
+                                   seEffect :: Int,
                                    seTimeBetweenTicks :: Int,
                                    seTickNumber :: Int,
                                    seDelay :: Int
                                  } -- Irreversible effect over time, Ex: hp loss over time.
                                    -- Optional: Delay x turns before applying effect.
-                     
-data SkillTarget = Self
-                 | Other { stRange :: SkillRange, 
-                           stHitMask :: HitMask}
-                 | Area  { stRange :: SkillRange,
-                           stRadius :: SkillRange,
-                           stHitMask :: HitMask
-                         }
-                 deriving(Eq)
+-}
+                   
 
-                      
-
-
+type SkillEffect  = (Entity -> Entity -> (Entity -> Entity))
+type SkillTarget  = (World -> [Entity])
 
 
 data Skill = Active { sName :: String,
@@ -275,6 +286,7 @@ data Skill = Active { sName :: String,
                       sPrequisites :: [Skill],
                       sSkillMask :: [SkillMask],
                       sWeaponConstraints :: WeaponConstraints,
+                      sHitMask :: HitMask,
                       
                       sEnergyCost :: Int,
                       sSpeedMultiplier :: Float,
@@ -283,6 +295,8 @@ data Skill = Active { sName :: String,
                      -- MORE
                       
                      }
+             
+             -- TODO: Sustained.
            | Sustained { sName :: String,
                          sShortName :: String,
                          sDescription :: String,
@@ -290,7 +304,9 @@ data Skill = Active { sName :: String,
                          sTarget :: SkillTarget,
                          sPrequisites :: [Skill],
                          sSkillMask :: [SkillMask],
-                         sWeaponConstraints :: WeaponConstraints,                         
+                         sWeaponConstraints :: WeaponConstraints,
+                         sHitMask :: HitMask,
+                         
                          sEnergyUpkeep :: Int
                          
                          -- MORE
@@ -303,10 +319,12 @@ instance Eq Skill where
       NoSkill -> True
       _ -> False
     _ -> (sName x) == (sName y)
+    
 instance Show Skill where
   show x = case x of
     NoSkill -> "-"
     _       -> filter (/= '\"') $ show $ sShortName x
+    
 instance ShowLong Skill where
   showLong x = filter (/= '\"') $ ((show $ sName x ) ++ " (" ++ (show $ sShortName x) ++ "): " ++ (show $ sDescription x))
 -------------------------------------
