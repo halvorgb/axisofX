@@ -27,8 +27,7 @@ performSkill w (i,s) =
     then
       w' { wMessageBuffer = skillMessage (FAIL NoTarget) s h h:wMessageBuffer w} -- Drain energy on fail? yes? Use Turn? For now YES. (change w' -> w to change to NO)
     else
-      
-      w''
+      w'' -- mesasges already generated.
   where
     l = wLevel w
     h = wHero w
@@ -46,23 +45,8 @@ performSkill w (i,s) =
 --    calculate world with updated nextMove and currEnergy (not used if out of energy.    
     w' = w { wHero = h { hCurrEnergy = hEnergy - energyCost, eNextMove = (eSpeed h) + speedCost } }
     
-    
     -- s is sent for constant parameters, foldl because there might be several effects.
-    w'' = foldl applyEffect w' $ zip3 effects (repeat targets) (repeat s)
-    {-
-    afflictedTargets :: [Entity]
-    afflictedTargets = map (\t -> 
-                             foldl' (\t_ f -> f t_) t fs
-                           ) targets
-
-                       -- return world after effects have been applied with a console message, either saying that the action was impossible or successful.
-    
-    
-    lEnts = lEntities l
-    
-    lEnts' = foldl' (\lE e -> updateMap (eCurrPos e) e lE) lEnts afflictedTargets
-
--}
+    w'' = foldl' applyEffect w' $ zip3 effects (repeat targets) (repeat s)
 
 applyEffect :: World -> (SkillEffect, [Entity], Skill) -> World
 applyEffect world (effect, targets, skill) = 

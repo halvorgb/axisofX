@@ -4,6 +4,8 @@ import qualified Graphics.UI.SDL.TTF.General as TTFG
 import Graphics.UI.SDL.TTF as TTF
 import Graphics.UI.SDL as SDL
 
+import Data.List
+
 import Helpers
 import Types.Common
 import Types.World
@@ -74,6 +76,11 @@ skillQueueThreePos = (588, 134)
 skillQueueFourPos :: Position
 skillQueueFourPos = (700, 134)
 
+skillQueueEnergyPos :: Position
+skillQueueEnergyPos = (434, 186)
+
+skillQueueSpeedPos :: Position
+skillQueueSpeedPos = (586, 186)
 
 --
 
@@ -118,7 +125,6 @@ drawGameText world mainSurf font = do
   drawCharacterText world mainSurf font
   drawBossText world mainSurf font
   drawScreen world mainSurf font
---  drawConsoleText world mainSurf font
   drawVicinity world mainSurf font
   drawSkillQueue world mainSurf font
 
@@ -139,7 +145,10 @@ drawSkillQueue world mainSurf font = do
   renderText mainSurf (skillQueueOnePos, head oneSurf)
   renderText mainSurf (skillQueueTwoPos, head twoSurf)  
   renderText mainSurf (skillQueueThreePos, head threeSurf)  
-  renderText mainSurf (skillQueueFourPos, head fourSurf)  
+  renderText mainSurf (skillQueueFourPos, head fourSurf)
+  
+  renderText mainSurf (skillQueueEnergyPos, head energySurf)
+  renderText mainSurf (skillQueueSpeedPos, head speedSurf)
   
   where
     hero = wHero world
@@ -152,6 +161,15 @@ drawSkillQueue world mainSurf font = do
     twoSurf = createSurfaces font twoString (Color 0 0 0)
     threeSurf = createSurfaces font threeString (Color 0 0 0)
     fourSurf = createSurfaces font fourString (Color 0 0 0)
+    
+    
+    energyCost = foldl' (+) 0 $ map (\(i,s) -> skillEnergyCost s hero i) $ zip [1..] $ toList $ hSkillQueue hero
+    energyString = [show energyCost]
+    energySurf = createSurfaces font energyString (Color 0 0 0)
+    
+    speedCost = foldl' (+) 0 $ map (\s -> skillSpeedCost s hero) $ toList $ hSkillQueue hero
+    speedString = [show speedCost]
+    speedSurf = createSurfaces font speedString (Color 0 0 0)
   
 
 drawCharacterText :: World -> SDL.Surface -> Font -> IO ()

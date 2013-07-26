@@ -151,10 +151,12 @@ entityAtDistance e1 distance e2 =
 -- (sEnergyCost + rBaseEnergyCost) * 2*nSkillQ -- TODO: improve this. (bring weapons, classes, possible hero buffs into the picture). (Should have a Hero stat that is recalculated on race/weapon/class/environment changes)
 skillEnergyCost :: Skill -> Entity -> Int -> Int
 skillEnergyCost s h n =
-  case h of
-    Hero {} -> ((sEnergyCost s) + (rBaseEnergyCost $ hRace h)) * round (1.25 * (fromIntegral n))
+  case s of
+    NoSkill -> 0
+    _ -> case h of
+      Hero {} -> ((sEnergyCost s) + (rBaseEnergyCost $ hRace h)) * round (1.25 * (fromIntegral n))
 
-    _ -> error "skillEnergyCost on non-hero."
+      _ -> error "skillEnergyCost on non-hero."
     
 
 
