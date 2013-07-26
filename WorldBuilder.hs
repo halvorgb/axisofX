@@ -18,9 +18,6 @@ import Content.Races
 import Content.MonsterTypes
 
 
-
-
-
 lengthBounds :: (Int, Int)
 lengthBounds = (100, 200) -- minimum and maximum length of a level
 nofLevels = 2 -- TODO: add more.
@@ -33,7 +30,7 @@ doorDistanceBounds = (20, 40) -- average door distance.
 
 
 
-returnWorld :: IO (World)
+returnWorld :: IO World
 returnWorld  = do
   gen <- getStdGen
   let world = generateWorld gen
@@ -44,7 +41,7 @@ generateWorld ::  StdGen -> World
 generateWorld gen = world
   where
     (levels, gen') = generateLevels gen nofLevels  []
-    world = baseWorld { wLevel = (levels !! 0), wLevels = levels, wStdGen = gen' }
+    world = baseWorld { wLevel = head levels, wLevels = levels, wStdGen = gen' }
 
 generateLevels :: StdGen -> Int -> [Level] -> ([Level], StdGen)
 generateLevels g nofLevels prevLevels
@@ -168,21 +165,21 @@ createMonster mt race inv level id position =
             }
   where
     mHitDie = (mtHitDie mt)
-      { dMod = (dMod $ mtHitDie mt)  +  (rHitModifier race) }
+      { dMod = dMod (mtHitDie mt)  +  rHitModifier race }
       
     mEvadeDie = (mtEvadeDie mt)
-      { dMod = (dMod $ mtEvadeDie mt)  + (rEvasionModifier race) }
+      { dMod = dMod (mtEvadeDie mt)  + rEvasionModifier race }
       
     mDamageDie = (mtDamageDie mt)
-      { dMod = (dMod $ mtDamageDie mt) + (rDamageModifier race) }
+      { dMod = dMod (mtDamageDie mt) + rDamageModifier race }
       
-    mMitigation = (mtMitigation mt) + (rMitigationModifier race)
+    mMitigation = mtMitigation mt + rMitigationModifier race
 
-    mHP = round $ (fromIntegral $ (rBaseHP race) + (level * (rBaseHPPerLevel race))) * (mtHPMultiplier mt)
+    mHP = round $ fromIntegral (rBaseHP race + (level * rBaseHPPerLevel race)) * mtHPMultiplier mt
        
     -- todo: experience.
     
-    mSpeed = round $ (fromIntegral $ rBaseSpeed race) * (mtSpeedMultiplier mt)
+    mSpeed = round $ fromIntegral (rBaseSpeed race) * mtSpeedMultiplier mt
     
 
 --------------------------------------
@@ -199,7 +196,7 @@ generateFloor g l = floorMap
 generateWall :: StdGen -> Int -> Int -> M.Map Position WallTile
 generateWall g l nofDoors =  wallMap
   where
-    doorCoords = zip (take nofDoors $ randomRs (1, (l-1)) g) $ replicate nofDoors 0
+    doorCoords = zip (take nofDoors $ randomRs (1, l - 1) g) $ replicate nofDoors 0
     wallMap = M.fromList $ zip doorCoords $ replicate nofDoors Door
     
     
