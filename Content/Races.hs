@@ -21,7 +21,7 @@ human = Race { rName = "Human",
                rBaseHP = 10,
                rBaseHPPerLevel = 2,
                
-               rBaseEnergy = 50,
+               rBaseEnergy = 100,
                rBaseEnergyPerLevel = 2,
                rBaseEnergyCost = 1,
                
@@ -43,7 +43,7 @@ ogre = Race { rName = "Ogre",
               rBaseHP = 20,
               rBaseHPPerLevel = 4,
               
-              rBaseEnergy = 40,
+              rBaseEnergy = 90,
               rBaseEnergyPerLevel = 2,
               rBaseEnergyCost = 1,
               

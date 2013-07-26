@@ -184,7 +184,7 @@ instance Eq Race where
   
 -- Skills:
 -------------------------------------
-data SkillResult = MISS | DMG Int | MIT | BUFF | FAT
+data SkillResult = MISS | SUCC | MIT | BUFF | FAT | FAIL
                  deriving (Eq, Show)
   
   
@@ -250,19 +250,16 @@ instance QuadrupleSkillQueue SkillQueue where
   
   
 
-data SkillEffect = FinalConstant { seFunc :: SkillEffectFunction,
-                                   seDelay :: Int
+data SkillEffect = FinalConstant { seFunc :: SkillEffectFunction
                                  } -- OneTime irreversible effect. Ex: instant damage
                                    -- Optional: Delay x turns before applying effect.
                  | FinalScaling  { seFunc :: SkillEffectFunction,
-                                   seScale :: Float,
-                                   seDelay :: Int
+                                   seScale :: Float
                                  }
                    
                  | Temporary     { seFunc :: SkillEffectFunction,
                                    seValue :: Int,
-                                   seDuration :: Int,
-                                   seDelay :: Int
+                                   seDuration :: Int
                              } -- Overtime reversible effect, ex: debuff.
                                -- Executed at start of druation, reversed at end of duration.
                                -- Optional: Delay x turns before applying effect.
@@ -270,16 +267,15 @@ data SkillEffect = FinalConstant { seFunc :: SkillEffectFunction,
                  | FinalOverTime { seFunc :: SkillEffectFunction,
                                    seValue :: Int,
                                    seTimeBetweenTicks :: Int,
-                                   seTickNumber :: Int,
-                                   seDelay :: Int
+                                   seTickNumber :: Int
                                  } -- Irreversible effect over time, Ex: hp loss over time.
                                    -- Optional: Delay x turns before applying effect.
                    
 
 
 
-                   -- s,      n_inQ,    hit,   evd,  dmg,    mit,  destEnt,   oldWorld, newWolrd
-type SkillEffectFunction = (Skill -> Int ->  Int -> Int -> Int -> Int -> Entity -> World -> World)                   
+                           -- s,     hit,   evd,  dmg,    mit,  destEnt,   oldWorld, newWolrd
+type SkillEffectFunction = (Skill ->  Int -> Int -> Int -> Int -> Entity -> World -> World)                   
 type SkillTarget  = (World -> [Entity])
 
 
@@ -287,7 +283,7 @@ data Skill = Active { sName :: String,
                       sShortName :: String,
                       sDescription :: String,
                       sEffect :: [SkillEffect], -- allow multiple effects?
-                      sTarget :: SkillTarget,
+                      sTarget :: SkillTarget,  -- ALWAYS have a target, if in doubt put hero as target.
                       sPrequisites :: [Skill],
                       sSkillMask :: [SkillMask],
                       sWeaponConstraints :: WeaponConstraints,

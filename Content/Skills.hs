@@ -7,6 +7,7 @@ import Types.Items
 import Types.Common
 
 import Helpers
+import Combat
 
 -- Some lists to make skill making easier.
 anyWeight :: [WeaponWeight]
@@ -37,22 +38,17 @@ onlyBurdensome =
 
 -- For skills that do a constant amount of damage, regardless of weapon worn.
 directHPLossFuncFactory :: Int -> SkillEffectFunction
-directHPLossFuncFactory damage skill numberInQueue hitVal evdVal _ mitigation destEnt world =
-  if energyCost > currentEnergy
+directHPLossFuncFactory damage skill hitVal evdVal _ mitigation destEnt world =
+  if hitVal > evdVal -- hit!
   then
-    world { wMessageBuffer = (skillMessage FAT skill hero destEnt):wMessageBuffer world}
+    let damageAfterMit = damage - mitigation
+    in if damageAfterMit > 0
+       then
+         damageEntity hero destEnt damageAfterMit $ world {wMessageBuffer = skillMessage SUCC skill hero destEnt:wMessageBuffer world }
+       else
+         world {wMessageBuffer = skillMessage MIT skill hero destEnt:wMessageBuffer world}
   else
-    let world' = world
-    in world'
-     
-        
-        --- PROBLEM: this will check for each and every entity if there is enough energy and potentially return a new world with updated energy/speed.
-        -- doesn't work for AOE spells.
-        -- SOLUTION: make these return a Maybe World, if said maybe is Nothing => return FAT message.
-        -- NOPE! that doesn't work either, have a separate check after targets have been acquired.
-        ---- If player has enough energy -> let world' with updated Energy/speed -> update said world' with this function (foldl')
-    
-    
+    world { wMessageBuffer = skillMessage MISS skill hero destEnt:wMessageBuffer world }    
   where
     hero = wHero world
     
@@ -106,7 +102,7 @@ sweep = Active  { sName = "Sweep",
                   sShortName = "Sweep",
                   sDescription = "Attacks every enemy in weapon range of the player.",
                   sEffect = 
-                    [ FinalConstant (directHPLossFuncFactory 1) 0 ],
+                    [ FinalConstant (directHPLossFuncFactory 10)],
 
                   sTarget = selectAOEWeaponRadius,
 

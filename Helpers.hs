@@ -156,7 +156,7 @@ entityAtDistance e1 distance e2 =
 skillEnergyCost :: Skill -> Entity -> Int -> Int
 skillEnergyCost s h n =
   case h of
-    Hero {} -> ((sEnergyCost s) + (rBaseEnergyCost $ hRace h)) * 2 * n
+    Hero {} -> ((sEnergyCost s) + (rBaseEnergyCost $ hRace h)) * round (1.25 * (fromIntegral n))
 
     _ -> error "skillEnergyCost on non-hero."
     
@@ -175,8 +175,9 @@ skillSpeedCost s h =
 skillMessage :: SkillResult -> Skill -> Entity -> Entity -> String
 skillMessage result skill sourceEnt destEnt =
   case result of
-    DMG damageDealt ->  (show sourceEnt) ++ " used " ++ show skill ++ " on " ++ show destEnt ++ ", dealing " ++ show damageDealt  ++ " damage."
+    SUCC -> (show sourceEnt) ++ " successfully used " ++ show skill ++ " on " ++ show destEnt ++ "!"
     MISS -> (show sourceEnt) ++ " tried to use " ++ show skill ++ " on " ++ show destEnt ++ ",  but missed."
     MIT ->  (show sourceEnt) ++ " tried to use " ++ show skill ++ " on " ++ show destEnt ++ ",  but to effect"
     FAT ->  (show sourceEnt) ++ " tried to use " ++ show skill ++ ", but didn't have enough energy."
+    FAIL -> (show sourceEnt) ++ " tried to use " ++ show skill ++ ", but failed! (No targets found)"
     _ -> "Placeholder message \\skillMessage"
