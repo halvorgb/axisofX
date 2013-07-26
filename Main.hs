@@ -39,11 +39,11 @@ main = do
 -- main game loop!
 gameLoop :: World -> Assets -> IO ()
 gameLoop world assets = do
-  if (null $ wLevels world) || ((eCurrHP $ wHero world) < 0) -- check if complete. (future also check for death)
+  if null (wLevels world) || (eCurrHP (wHero world) < 0) -- check if complete. (future also check for death)
     then do
     GUI.delayedShutdown world assets
     else do
-    if (eNextMove $ wHero world) == 0  -- check if hero's turn.
+    if eNextMove (wHero world) == 0  -- check if hero's turn.
       then do 
       let world' = checkVision world
       GUI.update_ world' assets
@@ -66,12 +66,12 @@ gameLoop world assets = do
       -- if an enemy is encountered: attack it,
 handleDir :: World -> Direction -> World
 handleDir w dir
-  | (dir == Left) && ((fst $ eCurrPos h) == firstInFrame) = 
+  | dir == Left && fst (eCurrPos h) == firstInFrame = 
     w { 
       wMessageBuffer = "You can't go there! No turn used.":mBuffer 
       }-- left corner, does not use a turn.
     
-  | ((dir == Right) && ((fst $ coord) > (lSize lvl -1))) =  
+  | dir == Right && fst coord > lSize lvl - 1 =  
       nextLevel w -- Right edge of map, does not use a turn, possible issue. Perhaps load next level here.
 
   | isDoor coord lvl = 
@@ -96,7 +96,7 @@ handleDir w dir
                   }
       }-- Simple combat (using movement keys)
       
-  | (dir == Right) && ((fst $ eCurrPos h) == lastInFrame) && (lastInFrame < lSize lvl) = 
+  | dir == Right && fst (eCurrPos h) == lastInFrame && lastInFrame < lSize lvl = 
       w { 
         wHero = h { 
            eOldPos = eCurrPos h,
@@ -121,7 +121,7 @@ handleDir w dir
     
     mBuffer = wMessageBuffer w
     
-    newEnergy = max 0 $ (hCurrEnergy h) - 1
+    newEnergy = max 0 $ hCurrEnergy h - 1
 
 -- simply passes the time.
 handleWait :: World -> World
@@ -146,7 +146,7 @@ nextLevel world
   | null $ tail $ wLevels world =
     world { wLevels = [] }  -- just set wLevels to [] and check for that in the main Loop... (ugly.)
   | otherwise = 
-      world { wLevel =  (wLevels world) !! 1, 
+      world { wLevel =  wLevels world !! 1, 
               wLevels = tail $ wLevels world, 
               wHero = hero { eCurrPos = (0,0),
                              eOldPos = (0,0), 
