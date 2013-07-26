@@ -18,16 +18,10 @@ performSkills w =
     
 
 performSkill :: World -> (Int, Skill) -> World
-performSkill w (i,s) =
-  if energyCost > hEnergy
-  then
-    w { wMessageBuffer = skillMessage FAT s h h:wMessageBuffer w}
-  else
-    if null targets
-    then
-      w' { wMessageBuffer = skillMessage (FAIL NoTarget) s h h:wMessageBuffer w} -- Drain energy on fail? yes? Use Turn? For now YES. (change w' -> w to change to NO)
-    else
-      w'' -- mesasges already generated.
+performSkill w (i,s)
+  | energyCost > hEnergy = w { wMessageBuffer = skillMessage FAT s h h:wMessageBuffer w}
+  | null targets = w' { wMessageBuffer = skillMessage (FAIL NoTarget) s h h:wMessageBuffer w} -- Drain energy on fail? yes? Use Turn? For now YES. (change w' -> w to change to NO)
+  | otherwise = w''
   where
     l = wLevel w
     h = wHero w
@@ -40,10 +34,10 @@ performSkill w (i,s) =
     effects = sEffect s    
     -- find all targets, attempt to apply skill effects on said targets. with a fold.
     targets :: [Entity]
-    targets = (sTarget s) w
+    targets = sTarget s w
     
 --    calculate world with updated nextMove and currEnergy (not used if out of energy.    
-    w' = w { wHero = h { hCurrEnergy = hEnergy - energyCost, eNextMove = (eSpeed h) + speedCost } }
+    w' = w { wHero = h { hCurrEnergy = hEnergy - energyCost, eNextMove = eSpeed h + speedCost } }
     
     -- s is sent for constant parameters, foldl because there might be several effects.
     w'' = foldl' applyEffect w' $ zip3 effects (repeat targets) (repeat s)
