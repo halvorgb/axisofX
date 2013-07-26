@@ -80,17 +80,13 @@ data Dice =
   deriving(Eq)
           
 instance Show Dice where
-  show d =
-    if modifier > 0
-    then
-      (show nofDie) ++ "d" ++ (show maxDice) ++ " + " ++ (show modifier)
-    else
-      if modifier < 0
-      then
-        (show nofDie) ++ "d" ++ (show maxDice) ++ " - " ++ (show $ abs modifier)
-      else
-        (show nofDie) ++ "d" ++ (show maxDice)
-        
-    where
-      (nofDie, maxDice) = dDie d
-      modifier = dMod d
+  show d
+     | modifier > 0 =  
+       show nofDie ++ "d" ++ show maxDice ++ " + " ++ show modifier
+     | modifier < 0 = 
+       show nofDie ++ "d" ++ show maxDice ++ " - " ++ show (abs modifier)
+     | otherwise =
+         show nofDie ++ "d" ++ show maxDice
+     where
+       (nofDie, maxDice) = dDie d
+       modifier = dMod d

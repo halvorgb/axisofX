@@ -127,7 +127,7 @@ instance Eq Entity where
       Boss {} -> True -- only one boss
       _ -> False
     Monster {} -> case y of
-      Monster {} -> (mID x) == (mID y)
+      Monster {} -> mID x == mID y
       _ -> False
       
 
@@ -136,16 +136,16 @@ instance Show Entity where
     show e = filter (/= '\"') outString -- remove them silly "'s.
       where
         outString = case e of
-          Hero {} -> (show $ hName e)
-          Monster {} -> (show $ mRace e) ++ " " ++ (show $ mType e)
+          Hero {} -> show $ hName e
+          Monster {} -> show (mRace e) ++ " " ++ show (mType e)
           Boss {} -> show $ bName e
           
 instance ShowLong Entity where
   showLong e = filter (/= '\"') outString -- remove "
     where
       outString = case e of 
-        Hero {} -> (show $ hName e) ++ " the " ++ (show $ hRace e) ++ " " ++ (show $ hClass e)
-        Monster {} -> (show e) ++ " LVL:" ++ (show $ mLevel e) ++ " HP:(" ++ (show $ eCurrHP e) ++ "/" ++ (show $ eMaxHP e) ++ ")"
+        Hero {} -> show (hName e) ++ " the " ++ show (hRace e) ++ " " ++ show (hClass e)
+        Monster {} -> show e ++ " LVL:" ++ show (mLevel e) ++ " HP:(" ++ show (eCurrHP e) ++ "/" ++ show (eMaxHP e) ++ ")"
         _ -> "TODO: ShowLong Entity for bosses ."
           
 -------------------------------------          
@@ -212,33 +212,33 @@ instance QuadrupleSkillQueue SkillQueue where
   fourth (SkillQueue _ _ _ s) = s
   
   addToQueue s i (SkillQueue fs sn th fo) = case i of
-    1 -> (SkillQueue s sn th fo)
+    1 -> SkillQueue s sn th fo
     2 -> case fs of
-      NoSkill -> (SkillQueue s sn th fo)
-      _ -> (SkillQueue fs s th fo)
+      NoSkill -> SkillQueue s sn th fo
+      _ -> SkillQueue fs s th fo
     3 -> case fs of
-      NoSkill -> (SkillQueue s sn th fo)
+      NoSkill -> SkillQueue s sn th fo
       _ -> case sn of
-        NoSkill -> (SkillQueue fs s th fo)
-        _ -> (SkillQueue fs sn s fo)
+        NoSkill -> SkillQueue fs s th fo
+        _ -> SkillQueue fs sn s fo
     4 -> case fs of
-      NoSkill -> (SkillQueue s sn th fo)
+      NoSkill -> SkillQueue s sn th fo
       _ -> case sn of
-        NoSkill -> (SkillQueue fs s th fo)
+        NoSkill -> SkillQueue fs s th fo
         _ -> case th of
-          NoSkill -> (SkillQueue fs sn s fo)
-          _ -> (SkillQueue fs sn th s)
+          NoSkill -> SkillQueue fs sn s fo
+          _ -> SkillQueue fs sn th s
     _ -> error "addToQueue index out of bounds."
     
   removeFromQueue i (SkillQueue fs sn th fo) = case i of
-    1 -> (SkillQueue NoSkill NoSkill NoSkill NoSkill)
-    2 -> (SkillQueue fs NoSkill NoSkill NoSkill)
-    3 -> (SkillQueue fs sn NoSkill NoSkill)
-    4 -> (SkillQueue fs sn th NoSkill)      
+    1 -> SkillQueue NoSkill NoSkill NoSkill NoSkill
+    2 -> SkillQueue fs NoSkill NoSkill NoSkill
+    3 -> SkillQueue fs sn NoSkill NoSkill
+    4 -> SkillQueue fs sn th NoSkill  
     _ -> error "removeFromQueue index out of bounds"
 
     
-  clearQueue = (SkillQueue NoSkill NoSkill NoSkill NoSkill)
+  clearQueue = SkillQueue NoSkill NoSkill NoSkill NoSkill
    
   toList (SkillQueue fs sn th fo) =
     case fs of 
@@ -322,7 +322,7 @@ instance Eq Skill where
     NoSkill -> case y of 
       NoSkill -> True
       _ -> False
-    _ -> (sName x) == (sName y)
+    _ -> sName x == sName y
     
 instance Show Skill where
   show x = case x of
@@ -330,7 +330,7 @@ instance Show Skill where
     _       -> filter (/= '\"') $ show $ sShortName x
     
 instance ShowLong Skill where
-  showLong x = filter (/= '\"') $ ((show $ sName x ) ++ " (" ++ (show $ sShortName x) ++ "): " ++ (show $ sDescription x))
+  showLong x = filter (/= '\"')  (show (sName x) ++ " (" ++ show (sShortName x) ++ "): " ++ show (sDescription x))
 -------------------------------------
 
 -- Classes:
@@ -384,7 +384,7 @@ data MonsterType =
                 -- levelConstraints :: (Int, Int),                
                 -- RaceConstraints?
                 
-                mtBehaviorStack :: [(World -> Entity -> Maybe World)],
+                mtBehaviorStack :: [World -> Entity -> Maybe World],
                 
                 mtHitDie :: Dice,
                 mtEvadeDie :: Dice,
@@ -395,5 +395,5 @@ data MonsterType =
 instance Show MonsterType where
   show mt = show $ mtName mt
 instance Eq MonsterType where
-  x == y = (mtName x) == (mtName y)
+  x == y = mtName x == mtName y
 -------------------------------------
