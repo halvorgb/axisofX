@@ -90,7 +90,7 @@ selectEntitiesFromRadius pos rad w =
 --    positions = pos - rad, pos - (rad-1), ..., pos, ..., pos + (rad-1), pos + rad
     (vFmin, vFmax) = getViewFrame w
     positions = 
-      map (\l -> (fst pos + l, 0)) [(max vFmin (-rad))..(min vFmax rad)]
+      map (\l -> (fst pos + l, 0)) [(0-rad)..(min vFmax rad)]
       
       
 
@@ -101,7 +101,7 @@ selectAOEWeaponRadius w =
   selectEntitiesFromRadius (eCurrPos h) wepR w
   where
     h = wHero w
-    wepR  = wepRange $  hWield h
+    wepR = wepRange $  hWield h
 
 
 

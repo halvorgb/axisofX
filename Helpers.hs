@@ -65,8 +65,12 @@ posIsClear coord world =
   (fst coord > vfStart) && (fst coord < vfEnd)
   &&
   (not $ isDoor coord $ wLevel world)
+  &&
+  (fst coord < levelLength)
   
   where
+    level = wLevel world
+    levelLength = lSize level
     heroPos = eCurrPos $ wHero world
     (vfStart, vfEnd) = getViewFrame world
 
@@ -189,9 +193,21 @@ skillMessage result skill sourceEnt destEnt =
 moveHero :: Position -> World -> Maybe World
 moveHero desiredPosition world = 
   if posIsClear desiredPosition world
-  then 
-    Just world { wHero = h { eOldPos = eCurrPos h, eCurrPos = desiredPosition } }
-  else
+  then -- pos is free.
+    if (fst desiredPosition < slackMin) -- cant move out of bounds to the left.
+    then
+      Nothing
+    else
+      let wrapLength = fst desiredPosition - slackMax
+          h' = h { eOldPos = eCurrPos h, eCurrPos = desiredPosition }
+          world' = world { wHero = h' }
+      in if wrapLength > 0 -- if the level needs to wrap!
+         then
+           Just world' { wHero = h' { hMovementSlack = (slackMin + wrapLength, slackMax + wrapLength) } }
+         else -- nothing special, just move.
+           Just world'
+  else -- position isn't free.
     Nothing  
   where
     h = wHero world
+    (slackMin, slackMax) = hMovementSlack h

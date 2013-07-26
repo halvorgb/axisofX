@@ -40,7 +40,7 @@ peasant = Class { cName = "Peasant",
 berserker = Class { cName = "Berserker",
                     
                     cExpReqMultiplier = 1.2,
-                    cStartingHPMultiplier = 1.5,
+                    cStartingHPMultiplier = 10,
                     cHPPerLevelMultiplier = 1.5,
                     cStartingEnergyMultiplier = 1.0,
                     cEnergyPerLevelMultiplier = 1.0,
