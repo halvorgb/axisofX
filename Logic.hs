@@ -46,20 +46,20 @@ createHero w n r c  =
     inventory = cStartingInventory c   
     -- todo: experience    
     reputation = cStartingReputation c    
-    energy = round $ (fromIntegral $ (rBaseEnergy r)) * (cStartingEnergyMultiplier c)    
+    energy = round $ fromIntegral (rBaseEnergy r) * cStartingEnergyMultiplier c
     skills = cStartingSkills c
-    hp = round $ (fromIntegral $ (rBaseHP r)) * (cStartingHPMultiplier c)
+    hp = round $ fromIntegral (rBaseHP r) * cStartingHPMultiplier c
     
     armor = cStartingArmor c
     weapon = cStartingWeapon c
     
-    hitDie = (cHitDie c) { dMod = (dMod $ cHitDie c) + (rHitModifier r) + (wepHitBonus weapon) }
-    evdDie = (cEvadeDie c) { dMod = (dMod $ cEvadeDie c) + (rEvasionModifier r) + (aEvasion armor)}
-    mitigationMod = (cMitigationBonus c) + (rMitigationModifier r)
-    damageMod = (cDamageBonus c) + (rDamageModifier r)
+    hitDie = (cHitDie c) { dMod = dMod (cHitDie c) + rHitModifier r + wepHitBonus weapon }
+    evdDie = (cEvadeDie c) { dMod = dMod (cEvadeDie c) + rEvasionModifier r + aEvasion armor}
+    mitigationMod = cMitigationBonus c + rMitigationModifier r
+    damageMod = cDamageBonus c + rDamageModifier r
     
-    dmgDie = (wepDamageDie weapon) { dMod = (dMod $ wepDamageDie weapon) + damageMod}
-    mitigation = mitigationMod + (aMitigation armor)
+    dmgDie = (wepDamageDie weapon) { dMod = dMod (wepDamageDie weapon) + damageMod}
+    mitigation = mitigationMod + aMitigation armor
     
     
     
@@ -72,7 +72,7 @@ think world = do
       h = wHero world
       lvl = wLevel world
       
-      e = h:(getEntitiesFromViewFrame world $ getViewFrame world) -- every entity in view       
+      e = h:getEntitiesFromViewFrame world (getViewFrame world) -- every entity in view       
       
       e' = prepare e -- subtracts the lowest eNextMove value from every entity,
       -- always yielding 1 with 0.
@@ -83,7 +83,7 @@ think world = do
                                _ -> False
                            ) e'
       
-      e'' =  filter (\x -> (eNextMove x == 0))  e' -- the monsters whose turns are up!
+      e'' =  filter (\x -> eNextMove x == 0)  e' -- the monsters whose turns are up!
       -- monsters whose turns are now
       monstersAI    = filter monsterFilter e''
       -- monsters whose turns are not up yet.
@@ -100,7 +100,7 @@ think world = do
       
       -- choose an action for the rest of the monsters, execute it, reset time until next move.
       monsters' = map (\m -> m {eNextMove = eSpeed m}) monstersAI
-      world'' =  foldl' (\w m -> performAI m w) world' monsters'
+      world'' =  foldl' (flip performAI) world' monsters'
 
       
        
