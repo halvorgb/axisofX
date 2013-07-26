@@ -184,6 +184,10 @@ instance Eq Race where
   
 -- Skills:
 -------------------------------------
+data SkillResult = MISS | DMG Int | MIT | BUFF | FAT
+                 deriving (Eq, Show)
+  
+  
 class QuadrupleSkillQueue q where
   first :: q -> Skill
   second :: q -> Skill
@@ -221,14 +225,14 @@ instance QuadrupleSkillQueue SkillQueue where
         _ -> case th of
           NoSkill -> (SkillQueue fs sn s fo)
           _ -> (SkillQueue fs sn th s)
-    _ -> undefined
+    _ -> error "addToQueue index out of bounds."
     
   removeFromQueue i (SkillQueue fs sn th fo) = case i of
     1 -> (SkillQueue NoSkill NoSkill NoSkill NoSkill)
     2 -> (SkillQueue fs NoSkill NoSkill NoSkill)
     3 -> (SkillQueue fs sn NoSkill NoSkill)
     4 -> (SkillQueue fs sn th NoSkill)      
-    _ -> undefined
+    _ -> error "removeFromQueue index out of bounds"
 
     
   clearQueue = (SkillQueue NoSkill NoSkill NoSkill NoSkill)
@@ -245,36 +249,37 @@ instance QuadrupleSkillQueue SkillQueue where
             _ -> [fs, sn, th, fo]
   
   
-{-
-data SkillEffect = FinalConstant { seAffectedStat :: Stat,
-                                   seEffect :: Int,
+
+data SkillEffect = FinalConstant { seFunc :: SkillEffectFunction,
                                    seDelay :: Int
                                  } -- OneTime irreversible effect. Ex: instant damage
                                    -- Optional: Delay x turns before applying effect.
-                 | FinalScaling  { seAffectedStat :: Stat,
+                 | FinalScaling  { seFunc :: SkillEffectFunction,
                                    seScale :: Float,
                                    seDelay :: Int
                                  }
                    
-                 | Temporary     { seAffectedStat :: Stat,
-                                   seInt :: Int,
+                 | Temporary     { seFunc :: SkillEffectFunction,
+                                   seValue :: Int,
                                    seDuration :: Int,
                                    seDelay :: Int
                              } -- Overtime reversible effect, ex: debuff.
                                -- Executed at start of druation, reversed at end of duration.
                                -- Optional: Delay x turns before applying effect.
 
-                 | FinalOverTime { seAffectedStat :: Stat,
-                                   seEffect :: Int,
+                 | FinalOverTime { seFunc :: SkillEffectFunction,
+                                   seValue :: Int,
                                    seTimeBetweenTicks :: Int,
                                    seTickNumber :: Int,
                                    seDelay :: Int
                                  } -- Irreversible effect over time, Ex: hp loss over time.
                                    -- Optional: Delay x turns before applying effect.
--}
                    
 
-type SkillEffect  = (Entity -> Entity -> (Entity -> Entity))
+
+
+                   -- s,      n_inQ,    hit,   evd,  dmg,    mit,  destEnt,   oldWorld, newWolrd
+type SkillEffectFunction = (Skill -> Int ->  Int -> Int -> Int -> Int -> Entity -> World -> World)                   
 type SkillTarget  = (World -> [Entity])
 
 
@@ -351,7 +356,6 @@ data Class =
           cStartingArmor :: Armor,
           cStartingInventory :: Inventory,
           cStartingSkills :: [Skill],
-            
           cStartingReputation :: Reputation,
           
           cHitDie :: Dice,

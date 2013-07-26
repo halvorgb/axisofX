@@ -10,7 +10,7 @@ import Types.World
 
 -- select random element from list, undefined on empty lists.
 randomListMember :: [a] -> StdGen -> (a, StdGen)
-randomListMember [] _ = undefined
+randomListMember [] _ = error "Attempted to pick random member of an empty list in function \"randomListMember\""
 randomListMember as gen = (a, newGen)
   where
     (index, newGen) = randomR (0, (length as) - 1) gen

@@ -148,3 +148,35 @@ entityAtDistance e1 distance e2 =
     e1Pos = eCurrPos e1
     e2Pos = eCurrPos e2
     
+    
+-- Some functions used in Skills and Content.Skills
+
+-- skill, weapon, race, nSkilLQueue.
+-- (sEnergyCost + rBaseEnergyCost) * 2*nSkillQ -- TODO: improve this. (bring weapons, classes, possible hero buffs into the picture). (Should have a Hero stat that is recalculated on race/weapon/class/environment changes)
+skillEnergyCost :: Skill -> Entity -> Int -> Int
+skillEnergyCost s h n =
+  case h of
+    Hero {} -> ((sEnergyCost s) + (rBaseEnergyCost $ hRace h)) * 2 * n
+
+    _ -> error "skillEnergyCost on non-hero."
+    
+
+
+-- skill and hero. Should also improve this by including environment changes etc.
+skillSpeedCost :: Skill -> Entity -> Int
+skillSpeedCost s h =
+  case h of
+    Hero {} -> round $ ( (fromIntegral $ eSpeed h) * (wepSpeedMultiplier $ hWield h) * (sSpeedMultiplier s) )   
+    _ -> error "skillSpeedCost on non-hero"
+    
+
+
+-- mesasge creation.
+skillMessage :: SkillResult -> Skill -> Entity -> Entity -> String
+skillMessage result skill sourceEnt destEnt =
+  case result of
+    DMG damageDealt ->  (show sourceEnt) ++ " used " ++ show skill ++ " on " ++ show destEnt ++ ", dealing " ++ show damageDealt  ++ " damage."
+    MISS -> (show sourceEnt) ++ " tried to use " ++ show skill ++ " on " ++ show destEnt ++ ",  but missed."
+    MIT ->  (show sourceEnt) ++ " tried to use " ++ show skill ++ " on " ++ show destEnt ++ ",  but to effect"
+    FAT ->  (show sourceEnt) ++ " tried to use " ++ show skill ++ ", but didn't have enough energy."
+    _ -> "Placeholder message \\skillMessage"

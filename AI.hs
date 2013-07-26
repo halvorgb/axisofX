@@ -14,7 +14,7 @@ performAI monster world = selectBehavior behaviorStack world monster
     behaviorStack = mBehaviorStack monster
     
 selectBehavior :: [World -> Entity -> Maybe World] -> World -> Entity -> World
-selectBehavior [] w m = undefined -- this should never happen, include wait in behaviorstack to fix.
+selectBehavior [] w m = error "No behaviors found in a monster's behaviorstack. To fix, ensure wait is at the end of every behaviorstack."
 selectBehavior (f:fs) w m = case f w m of
   Nothing -> selectBehavior fs w m
   Just w' -> w'

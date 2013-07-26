@@ -18,19 +18,30 @@ performSkills w =
 
 performSkill :: World -> (Int, Skill) -> World
 performSkill w (i,s) =
-  w { wLevel = l { lEntities = lEnts' }}    
+  if energyCost > hEnergy
+  then
+    w { wMessageBuffer = skillMessage FAT s h h:wMessageBuffer w}
+  else
+    w
+--  w { wLevel = l { lEntities = lEnts' }}    
   where
     l = wLevel w
+    h = wHero w
+    
+    energyCost = skillEnergyCost s h i
+    hEnergy = hCurrEnergy h
+    
     fs :: [SkillEffect]
     fs = sEffect s    
     -- find all targets, attempt to apply skill effects on said targets. with a fold.
     targets :: [Entity]
     targets = (sTarget s) w
-    
+    {-
     afflictedTargets :: [Entity]
     afflictedTargets = map (\t -> 
                              foldl' (\t_ f -> f t_) t fs
-                           ) targets    
+                           ) targets
+
                        -- return world after effects have been applied with a console message, either saying that the action was impossible or successful.
     
     
@@ -38,30 +49,11 @@ performSkill w (i,s) =
     
     lEnts' = foldl' (\lE e -> updateMap (eCurrPos e) e lE) lEnts afflictedTargets
 
-
+-}
 
 affectEntity :: Entity -> [SkillEffect] -> World -> World
 affectEntity e effect w = w
   where
     lol = undefined
 
-
-
-
-performSkillEffect :: Entity -> Entity -> SkillEffect -> World -> World
-preformSkillEffect sourceEnt destEnt effect world = world
-  where
-    stat = seAffectedStat effect
-    newStatValue = case stat of
-      Stat_HP  -> undefined
-      Stat_NRG -> undefined
-      Stat_Hit -> undefined
-      Stat_Dmg -> undefined
-      Stat_Mit -> undefined
-      Stat_Spd -> undefined
-      Stat_Pos -> undefiend
-      
-
-
-      
     
