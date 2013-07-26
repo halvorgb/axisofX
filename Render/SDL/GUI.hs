@@ -219,7 +219,7 @@ getChoice maxChar w a = do
         (KeyDown (Keysym  k _ c)) -> do
           case k of
             SDLK_ESCAPE -> return Nothing
-            _ -> if (c <= maxChar) && (C.isAsciiLower c) -- exclude meta keys etc.
+            _ -> if c <= maxChar && C.isAsciiLower c -- exclude meta keys etc.
                  then
                    return (Just c)
                  else do

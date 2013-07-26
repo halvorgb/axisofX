@@ -33,8 +33,8 @@ human = Race { rName = "Human",
              }
         
 ogre = Race { rName = "Ogre",
-              rHitModifier = (-1),
-              rEvasionModifier = (-5),
+              rHitModifier = -1,
+              rEvasionModifier = -5,
               rDamageModifier = 3,
               rMitigationModifier = 4,
               

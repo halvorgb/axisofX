@@ -63,7 +63,7 @@ leapFuncFactory distance skill _ _ _ _ destEnt world =
     Nothing     -> world  { wMessageBuffer = skillMessage (FAIL CantReach) skill hero destEnt:wMessageBuffer world }
   where
     hero = wHero world
-    desiredPosition = (eCurrPos hero) |+| (distance, 0)
+    desiredPosition = eCurrPos hero |+| (distance, 0)
     
 
 -- TODO: Scaling functions (with damage die etc.)
@@ -82,15 +82,15 @@ selectEntityFuncFactory dir w = [h]
 
 selectEntitiesFromRadius :: Position -> Int -> World -> [Entity]
 selectEntitiesFromRadius pos rad w =
-  concat $ map (\p -> case  (getEntityFromPos p w) of
-                   Nothing -> []
-                   Just e -> [e]
-               ) positions
+  concatMap (\p -> case getEntityFromPos p w of
+                Nothing -> []
+                Just e -> [e]
+            ) positions
   where   
 --    positions = pos - rad, pos - (rad-1), ..., pos, ..., pos + (rad-1), pos + rad
     (vFmin, vFmax) = getViewFrame w
     positions = 
-      map (\l -> (fst pos + l, 0)) [(0-rad)..(min vFmax rad)]
+      map (\l -> (fst pos + l, 0)) [(negate rad)..(min vFmax rad)]
       
       
 
