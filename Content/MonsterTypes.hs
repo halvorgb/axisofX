@@ -30,7 +30,7 @@ bhvMove1TowardsPlayer world monster = bhvMoveNTiles world monster distance
     hero = wHero world
     oldPos = eCurrPos monster
     distance  =
-      if (fst $ eCurrPos hero) > (fst oldPos)
+      if fst (eCurrPos hero) > fst oldPos
       then
         (1,0)
       else
@@ -43,7 +43,7 @@ bhvMove1AwayFromPlayer world monster = bhvMoveNTiles world monster distance
     hero = wHero world
     oldPos = eCurrPos monster
     distance  =
-      if (fst $ eCurrPos hero) > (fst oldPos)
+      if fst (eCurrPos hero) > fst oldPos
       then
         (-1,0)
       else
@@ -76,9 +76,9 @@ crossbowman =
                 mtSpeedMultiplier = 2.0,
                 
                 mtHitDie = baseMonsterHitDie,
-                mtEvadeDie = Dice {dDie = (1,10), dMod = (-10)},
+                mtEvadeDie = Dice {dDie = (1,10), dMod = -10},
                 mtDamageDie = baseMonsterDamageDie,
-                mtMitigation = (-1),
+                mtMitigation = -1,
                 -- TODO: edit so that the crossbowman seeks to be in 2-4 range, not just to flee!
                 mtBehaviorStack = [bhvCrossbowmanRangedAttack, bhvMove1AwayFromPlayer, bhvMeleeCombat, bhvWait]
               }
