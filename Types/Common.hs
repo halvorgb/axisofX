@@ -5,7 +5,7 @@ import System.Random
 type Position = (Int, Int)
 
 
-data Input = Dir Direction | Exit | Wait | NoInput | Show Screen
+data Input = Dir Direction | Exit | Wait | Rest | NoInput | Show Screen
            | Queue Int | ExecuteSkills
            deriving (Eq, Show)
 

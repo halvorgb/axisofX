@@ -107,6 +107,7 @@ getInput  = do
             (SDLK_s, _) -> return Wait
             (SDLK_d, _) -> return (Dir Right)
             (SDLK_q, _) -> return Exit
+            (SDLK_r, _) -> return Rest
             
             (SDLK_1, _) -> return (Queue 1)
             (SDLK_2, _) -> return (Queue 2)

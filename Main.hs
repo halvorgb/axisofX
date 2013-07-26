@@ -52,6 +52,7 @@ gameLoop world assets = do
         Show screen -> gameLoop (handleShow screen world') assets
         Exit -> handleExit (world' {wScreenShown = Console}) assets
         Wait -> gameLoop (handleWait (world' {wScreenShown = Console})) assets
+        Rest -> gameLoop (handleRest (world' {wScreenShown = Console})) assets
         Dir dir -> gameLoop (handleDir (world' {wScreenShown = Console}) dir) assets
         Queue i -> queueSkill i (world' {wScreenShown = Skills}) assets
         ExecuteSkills -> executeSkills (world' {wScreenShown = Console}) assets
@@ -157,6 +158,20 @@ nextLevel world
 -- Show different content in the context window.
 handleShow :: Screen -> World -> World
 handleShow screen  w = w { wScreenShown = screen }
+
+
+-- Rests the player, fails if enemies are nearby.
+handleRest :: World -> World
+handleRest w = 
+  if null enemiesInView -- Safe to rest?
+  then
+    w { wHero = h { hCurrEnergy = hMaxEnergy h}, wMessageBuffer = "You feel rested. TODO: Pass time!":wMessageBuffer w}
+  else
+    w { wMessageBuffer = "You can't rest while enemies are nearby!":wMessageBuffer w}
+  where
+    h = wHero w
+    enemiesInView = getEntitiesFromViewFrame w $ getViewFrame w
+  
 
 
 -- handles skill queue (duh), asks for input.
