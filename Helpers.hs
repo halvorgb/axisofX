@@ -58,16 +58,15 @@ isWeapon coord lvl =
 -- Checks if position is clear, used by move functions.
 posIsClear :: Position -> World -> Bool
 posIsClear coord world =
-  (not $ isMonster coord $ wLevel world)
+  not (isMonster coord $ wLevel world)
   &&
   (coord /= heroPos)
   &&
   (fst coord > vfStart) && (fst coord < vfEnd)
   &&
-  (not $ isDoor coord $ wLevel world)
+  not (isDoor coord $ wLevel world)
   &&
   (fst coord < levelLength)
-  
   where
     level = wLevel world
     levelLength = lSize level
@@ -93,7 +92,7 @@ checkVision w =
     wLevel = l {
        lEntities = entMap'
        },
-    wMessageBuffer = stringBuffer ++ (wMessageBuffer w)
+    wMessageBuffer = stringBuffer ++ wMessageBuffer w
     }
   where
     l = wLevel w
@@ -101,9 +100,9 @@ checkVision w =
     visibleEs = getEntitiesFromViewFrame w $ getViewFrame w
     
     -- entities that haven't been announced yet.
-    newEs = filter (\e -> not $ mSpotted e) visibleEs
+    newEs = filter (not . mSpotted) visibleEs
     markedEs = map (\e -> (eCurrPos e, e {mSpotted = True})) newEs
-    stringBuffer = map (\m -> (show $ snd m) ++ " spotted!") markedEs
+    stringBuffer = map (\m -> show (snd m) ++ " spotted!") markedEs
     entMap' = foldl' (\map (key,value) -> updateMap key value map) entMap markedEs
     
 
@@ -117,12 +116,13 @@ getViewFrame world = (vFStart, maxVision)
     lvl = wLevel world
     h = wHero world
     vFStart = fst $ hMovementSlack h
-    vFMax = hViewDistance h + (snd $ hMovementSlack h)
+    vFMax = hViewDistance h + snd (hMovementSlack h)
     maxVision = fromMaybe vFMax $ find (\x -> isDoor (x, 0) lvl) [vFStart..vFMax]
 
 -- gets a list of all entities in view.
 getEntitiesFromViewFrame :: World -> (Int, Int) -> [Entity]
-getEntitiesFromViewFrame w (start,end) = foldl' (\list pos -> (fromMaybe [] $ fmap (:[]) $ M.lookup pos ents) ++ list) [] coordinates
+getEntitiesFromViewFrame w (start,end) = 
+  foldl' (\list pos -> maybeToList (M.lookup pos ents) ++ list) [] coordinates
   where
     ents = lEntities $ wLevel w
     coordinates = zip [start..end] $ repeat 0
@@ -143,7 +143,7 @@ entityInRange e1 (minRange, maxRange) e2 =
 
 entityAtDistance :: Entity -> Int -> Entity -> Bool
 entityAtDistance e1 distance e2 = 
-  (e1Pos |+| (distance, 0) == e2Pos) || (e1Pos |+| ((-distance), 0) == e2Pos)
+  (e1Pos |+| (distance, 0) == e2Pos) || (e1Pos |+| (-distance, 0) == e2Pos)
   where
     e1Pos = eCurrPos e1
     e2Pos = eCurrPos e2
@@ -158,7 +158,7 @@ skillEnergyCost s h n =
   case s of
     NoSkill -> 0
     _ -> case h of
-      Hero {} -> ((sEnergyCost s) + (rBaseEnergyCost $ hRace h)) * round (1.25 * (fromIntegral n))
+      Hero {} -> (sEnergyCost s + rBaseEnergyCost (hRace h)) * round (1.25 * fromIntegral n)
 
       _ -> error "skillEnergyCost on non-hero."
     
@@ -168,7 +168,7 @@ skillEnergyCost s h n =
 skillSpeedCost :: Skill -> Entity -> Int
 skillSpeedCost s h =
   case h of
-    Hero {} -> round $ ( (fromIntegral $ eSpeed h) * (wepSpeedMultiplier $ hWield h) * (sSpeedMultiplier s) )   
+    Hero {} -> round (fromIntegral (eSpeed h) * wepSpeedMultiplier (hWield h) * sSpeedMultiplier s)   
     _ -> error "skillSpeedCost on non-hero"
     
 
@@ -177,14 +177,14 @@ skillSpeedCost s h =
 skillMessage :: SkillResult -> Skill -> Entity -> Entity -> String
 skillMessage result skill sourceEnt destEnt =
   case result of
-    SUCC -> (show sourceEnt) ++ " successfully used " ++ show skill ++ " on " ++ show destEnt ++ "!"
-    MISS -> (show sourceEnt) ++ " tried to use " ++ show skill ++ " on " ++ show destEnt ++ ",  but missed."
-    MIT ->  (show sourceEnt) ++ " tried to use " ++ show skill ++ " on " ++ show destEnt ++ ",  but to effect"
-    FAT ->  (show sourceEnt) ++ " tried to use " ++ show skill ++ ", but didn't have enough energy."
+    SUCC -> show sourceEnt ++ " successfully used " ++ show skill ++ " on " ++ show destEnt ++ "!"
+    MISS -> show sourceEnt ++ " tried to use " ++ show skill ++ " on " ++ show destEnt ++ ",  but missed."
+    MIT ->  show sourceEnt ++ " tried to use " ++ show skill ++ " on " ++ show destEnt ++ ",  but to effect"
+    FAT ->  show sourceEnt ++ " tried to use " ++ show skill ++ ", but didn't have enough energy."
     FAIL failureCode -> 
       case failureCode of
-        NoTarget -> (show sourceEnt) ++ " tried to use " ++ show skill ++ ", but failed! (No targets found)"
-        CantReach -> (show sourceEnt) ++ " tried to use " ++ show skill ++ ", but failed! (Couldn't reach dest.)"
+        NoTarget -> show sourceEnt ++ " tried to use " ++ show skill ++ ", but failed! (No targets found)"
+        CantReach -> show sourceEnt ++ " tried to use " ++ show skill ++ ", but failed! (Couldn't reach dest.)"
     _ -> "Placeholder message \\skillMessage"
     
     
@@ -194,7 +194,7 @@ moveHero :: Position -> World -> Maybe World
 moveHero desiredPosition world = 
   if posIsClear desiredPosition world
   then -- pos is free.
-    if (fst desiredPosition < slackMin) -- cant move out of bounds to the left.
+    if fst desiredPosition < slackMin -- cant move out of bounds to the left.
     then
       Nothing
     else
