@@ -184,7 +184,10 @@ instance Eq Race where
   
 -- Skills:
 -------------------------------------
-data SkillResult = MISS | SUCC | MIT | BUFF | FAT | FAIL
+data SkillResult = MISS | SUCC | MIT | BUFF | FAT | FAIL FailureCode
+                 deriving (Eq, Show)
+                          
+data FailureCode = NoTarget | CantReach
                  deriving (Eq, Show)
   
   

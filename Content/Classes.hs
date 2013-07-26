@@ -49,7 +49,7 @@ berserker = Class { cName = "Berserker",
                     cStartingWeapon = shortSword,
                     cStartingArmor = rags,
                     cStartingInventory = Inventory [] 0,
-                    cStartingSkills = [sweep],
+                    cStartingSkills = [sweep, leap],
                     
                     cStartingReputation = Asshole,
                     

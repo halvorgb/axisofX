@@ -94,16 +94,12 @@ checkVision w =
   where
     l = wLevel w
     entMap = lEntities l
-    
     visibleEs = getEntitiesFromViewFrame w $ getViewFrame w
     
     -- entities that haven't been announced yet.
     newEs = filter (\e -> not $ mSpotted e) visibleEs
-    
     markedEs = map (\e -> (eCurrPos e, e {mSpotted = True})) newEs
-    
     stringBuffer = map (\m -> (show $ snd m) ++ " spotted!") markedEs
-    
     entMap' = foldl' (\map (key,value) -> updateMap key value map) entMap markedEs
     
 
@@ -179,5 +175,21 @@ skillMessage result skill sourceEnt destEnt =
     MISS -> (show sourceEnt) ++ " tried to use " ++ show skill ++ " on " ++ show destEnt ++ ",  but missed."
     MIT ->  (show sourceEnt) ++ " tried to use " ++ show skill ++ " on " ++ show destEnt ++ ",  but to effect"
     FAT ->  (show sourceEnt) ++ " tried to use " ++ show skill ++ ", but didn't have enough energy."
-    FAIL -> (show sourceEnt) ++ " tried to use " ++ show skill ++ ", but failed! (No targets found)"
+    FAIL failureCode -> 
+      case failureCode of
+        NoTarget -> (show sourceEnt) ++ " tried to use " ++ show skill ++ ", but failed! (No targets found)"
+        CantReach -> (show sourceEnt) ++ " tried to use " ++ show skill ++ ", but failed! (Couldn't reach dest.)"
     _ -> "Placeholder message \\skillMessage"
+    
+    
+
+-- Moves hero, returns nothing if the tile is occupied.
+moveHero :: Position -> World -> Maybe World
+moveHero desiredPosition world = 
+  if posIsClear desiredPosition world
+  then 
+    Just world { wHero = h { eOldPos = eCurrPos h, eCurrPos = desiredPosition } }
+  else
+    Nothing  
+  where
+    h = wHero world

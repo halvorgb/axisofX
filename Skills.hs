@@ -25,7 +25,7 @@ performSkill w (i,s) =
   else
     if null targets
     then
-      w' { wMessageBuffer = skillMessage FAIL s h h:wMessageBuffer w} -- Drain energy on fail? yes? Use Turn? For now YES. (change w' -> w to change to NO)
+      w' { wMessageBuffer = skillMessage (FAIL NoTarget) s h h:wMessageBuffer w} -- Drain energy on fail? yes? Use Turn? For now YES. (change w' -> w to change to NO)
     else
       
       w''

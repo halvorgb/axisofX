@@ -56,8 +56,15 @@ directHPLossFuncFactory damage skill hitVal evdVal _ mitigation destEnt world =
 
     
 
-movementFuncFactory :: Int -> (Entity -> Entity)
-movementFuncFactory n = (\e -> e {eCurrPos = eOldPos e |+| (n,0),  eOldPos = eCurrPos e})
+leapFuncFactory :: Int -> SkillEffectFunction
+leapFuncFactory distance skill _ _ _ _ destEnt world =
+  case moveHero desiredPosition world of
+    Just world' -> world' { wMessageBuffer = skillMessage SUCC skill hero destEnt:wMessageBuffer world }
+    Nothing     -> world  { wMessageBuffer = skillMessage (FAIL CantReach) skill hero destEnt:wMessageBuffer world }
+  where
+    hero = wHero world
+    desiredPosition = (eCurrPos hero) |+| (distance, 0)
+    
 
 -- TODO: Scaling functions (with damage die etc.)
 -- TODO: Functions that do an effect with modified dies.
@@ -81,8 +88,9 @@ selectEntitiesFromRadius pos rad w =
                ) positions
   where   
 --    positions = pos - rad, pos - (rad-1), ..., pos, ..., pos + (rad-1), pos + rad
+    (vFmin, vFmax) = getViewFrame w
     positions = 
-      map (\l -> (fst pos + l, 0)) [(-rad)..rad]
+      map (\l -> (fst pos + l, 0)) [(max vFmin (-rad))..(min vFmax rad)]
       
       
 
@@ -102,7 +110,7 @@ sweep = Active  { sName = "Sweep",
                   sShortName = "Sweep",
                   sDescription = "Attacks every enemy in weapon range of the player.",
                   sEffect = 
-                    [ FinalConstant (directHPLossFuncFactory 10)],
+                    [ FinalConstant $ directHPLossFuncFactory 100 ],
 
                   sTarget = selectAOEWeaponRadius,
 
@@ -113,16 +121,26 @@ sweep = Active  { sName = "Sweep",
                   sWeaponConstraints = anyWeapon,                  
                   sHitMask = Enemies,
                   
-                  sEnergyCost = 8,
+                  sEnergyCost = 2,
                   sSpeedMultiplier = 1.5,
                   sCoolDown = 15
                 }
 
-{-       
+
 leap = Active { sName = "Leap",
                 sShortName = "Leap",
                 sDescription = "Leaps forward, skipping one tile. Must land on free tile.",
                 
                 sEffect = 
-                  [Final {seEffect = 
--}
+                  [ FinalConstant $ leapFuncFactory 2 ],
+                sTarget = selectHero,
+                
+                sPrequisites = [],
+                sSkillMask = [Brute],
+                sWeaponConstraints = anyWeapon,
+                sHitMask = All,
+                
+                sEnergyCost = 5,
+                sSpeedMultiplier = 2,
+                sCoolDown = 1000000
+              }
