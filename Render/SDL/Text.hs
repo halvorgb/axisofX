@@ -136,7 +136,7 @@ drawBossText world mainSurf font = do
   renderText mainSurf (bossNamePos, head nameSurf)
   where
     boss = wBoss world
-    nameString = [(show boss)]
+    nameString = [show boss]
     
     nameSurf = createSurfaces font nameString (Color 0 0 0)
   
@@ -211,7 +211,7 @@ drawCharacterText world mainSurf font = do
 
   where
     hero = wHero world
-    nameString = [(showLong hero)]
+    nameString = [showLong hero]
     nameSurf = createSurfaces font nameString (Color 0 0 0)
     
     hpString = [show $ eCurrHP hero]
@@ -275,13 +275,13 @@ drawScreen world mainSurf font = do
       messageBuffer = case wScreenShown world of
         Help -> helpText
         Inv -> ["Inventory TEMP"]
-        Skills -> skillsText ++ (map (\(c,s) -> c:": " ++ (show s)) c2s)
+        Skills -> skillsText ++ map (\(c,s) -> c:": " ++ show s) c2s
         LevelUp -> ["LevelUp TEMP"]
         Console -> take consoleBufferSize $ wMessageBuffer world
       positions = 
         case wScreenShown world of 
           Console -> createPositions consoleBottomPos (length messageBuffer) (-16)
-          _       -> createPositions consoleTopPos (length messageBuffer) (16)
+          _       -> createPositions consoleTopPos (length messageBuffer) 16
 
 drawConsoleText :: World -> SDL.Surface -> Font -> IO ()
 drawConsoleText world mainSurf font = do
@@ -297,7 +297,7 @@ drawConsoleText world mainSurf font = do
     positions = createPositions consoleBottomPos (length messageBuffer) (-16)
     
 
-renderText :: SDL.Surface -> (Position, IO (SDL.Surface)) -> IO ()
+renderText :: SDL.Surface -> (Position, IO SDL.Surface) -> IO ()
 renderText mainSurf ((x, y), textSurf) = do
   textSurf' <- textSurf
   SDL.blitSurface textSurf' Nothing mainSurf $ Just (SDL.Rect x y 0 0)

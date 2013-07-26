@@ -58,18 +58,17 @@ update_ world (((_, background), tiles), font) = do
 -- called if forced end to the game, Ex: player dies.
 delayedShutdown :: World -> Assets -> IO ()
 delayedShutdown world assets = do
-  let world' = world { wMessageBuffer = ("Press \"Q\", \"<M>-F4\" or the X to quit the game."):(wMessageBuffer world) } in
+  let world' = world { wMessageBuffer = "Press \"Q\", \"<M>-F4\" or the X to quit the game.":wMessageBuffer world } in
     update_ world' assets
-    
   let quit e = case e of
         Quit -> return ()
         (KeyDown (Keysym key _ _)) -> do
           case key of
             SDLK_q -> return ()
-            _ -> (waitEventBlocking >>= quit)
-        _ -> (waitEventBlocking >>= quit)
+            _ -> waitEventBlocking >>= quit
+        _ -> waitEventBlocking >>= quit
           
-  input <- (waitEventBlocking >>= quit)
+  input <- waitEventBlocking >>= quit
   
   shutdown world assets
   
@@ -128,7 +127,7 @@ chooseSkill world assets = do
   choice <- getChoice lastChoice world assets
   
   
-  if (null heroSkills) || choice == Nothing 
+  if null heroSkills || isNothing choice
     then
     return NoSkill
     else
@@ -176,7 +175,7 @@ chooseProtagonist w a@(((splashBG, _), _), font) = do
   let klassOptionsPos = (256, 360)
   klass <- chooseFromList classes klassOptionsPos mainSurf font w a
   let klassPos = (256, 396)
-  drawTextAtPos ("> " ++ (show klass)) klassPos mainSurf font
+  drawTextAtPos ("> " ++ show klass) klassPos mainSurf font
   
   
   let raceTextPos = (256, 428)
@@ -195,7 +194,7 @@ chooseFromList list pos mainSurf font w a = do
   SDL.flip mainSurf
   
   choice <- getChoice lastChoice w a
-  if choice == Nothing 
+  if isNothing choice
     then
     chooseFromList list pos mainSurf font w a
     else
