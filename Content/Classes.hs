@@ -8,7 +8,7 @@ import Types.World
 import Types.Items
 
 
-classes = [peasant, berserker]
+classes = [berserker]
 
 peasant = Class { cName = "Peasant",
                   
