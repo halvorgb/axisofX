@@ -122,10 +122,9 @@ getInput  = do
 -- Called after the player brings up the queue screen.
 chooseSkill :: World -> Assets -> IO Skill
 chooseSkill world assets = do
-  -- Main set Skills as visible. call update!
+  -- Main already set Skills as visible. call update!
   update_ world assets
   choice <- getChoice lastChoice world assets
-  
   
   if null heroSkills || isNothing choice
     then
@@ -146,10 +145,7 @@ chooseSkill world assets = do
         ---
         -- selecing name/class/race
         
-
-
-
--- bit ugly for this to be here...
+-- bit ugly for this to be here...?
 chooseProtagonist :: World -> Assets -> IO (String, Class, Race)
 chooseProtagonist w a@(((splashBG, _), _), font) = do
   
@@ -157,7 +153,6 @@ chooseProtagonist w a@(((splashBG, _), _), font) = do
   
   -- draw BG:
   let sourceRect = Just (SDL.Rect 0 0 800 600)
-
   let destRect = Just (SDL.Rect 0 0 0 0)
   SDL.blitSurface splashBG sourceRect mainSurf destRect
   
@@ -165,9 +160,7 @@ chooseProtagonist w a@(((splashBG, _), _), font) = do
   nameGen <- getStdGen
   let name = randomName nameGen
   let welcomePos = (256, 296)
-  
   drawTextAtPos ("Welcome to Axis of X,  your name is " ++ name ++ ".") welcomePos mainSurf font
-  
   
   let klassTextPos = (256, 328)
   drawTextAtPos "Select a class:" klassTextPos mainSurf font
@@ -198,9 +191,7 @@ chooseFromList list pos mainSurf font w a = do
     then
     chooseFromList list pos mainSurf font w a
     else
-    return $ fromJust $ lookup (fromJust choice) charToList
-
-  
+    return $ fromJust $ lookup (fromJust choice) charToList  
     where
       charToList = zip ['a'..'z'] list
       charToListString = map (\(c, cls) -> (c, show cls)) charToList

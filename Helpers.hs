@@ -66,7 +66,7 @@ posIsClear coord world =
   &&
   not (isDoor coord $ wLevel world)
   &&
-  (fst coord < levelLength)
+  (fst coord < levelLength - 1)
   where
     level = wLevel world
     levelLength = lSize level
