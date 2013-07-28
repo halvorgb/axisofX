@@ -54,9 +54,10 @@ bhvMove1AwayFromPlayer world monster = bhvMoveNTiles world monster distance
 --------------------------------------
 fighter = 
   MonsterType { mtName = "Fighter",
-                mtExpRewardMultiplier = 1.0,
-                mtHPMultiplier = 1.0,
-                mtSpeedMultiplier = 1.0,
+                mtExpReward = 10,
+                mtBaseHP = 10,
+                mtHPPerLevel = 5,
+                mtBaseSpeed = 10,
                 
                 mtHitDie = baseMonsterHitDie,
                 mtEvadeDie = baseMonsterEvadeDie,
@@ -71,9 +72,10 @@ fighter =
 --------------------------------------
 crossbowman = 
   MonsterType { mtName = "Crossbowman",
-                mtExpRewardMultiplier = 1.0,
-                mtHPMultiplier = 0.5,
-                mtSpeedMultiplier = 2.0,
+                mtExpReward = 10,
+                mtBaseHP = 2,
+                mtHPPerLevel = 1,
+                mtBaseSpeed = 15,
                 
                 mtHitDie = baseMonsterHitDie,
                 mtEvadeDie = Dice {dDie = (1,10), dMod = -10},

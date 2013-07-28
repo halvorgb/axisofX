@@ -12,12 +12,11 @@ classes = [berserker]
 
 peasant = Class { cName = "Peasant",
                   
-                  cExpReqMultiplier = 1.0,
-                  cStartingHPMultiplier = 1.0,
-                  cHPPerLevelMultiplier = 1.0,
-                  cStartingEnergyMultiplier = 1.0,
-                  cEnergyPerLevelMultiplier = 1.0,
-
+                  cExpReq = 100,
+                  cBaseHP = 10,
+                  cHPPerLevel = 2,
+                  cBaseEnergy = 100,
+                  cEnergyPerLevel = 5,
                   
                   cStartingWeapon = shortSword,
                   cStartingArmor = rags,
@@ -39,11 +38,11 @@ peasant = Class { cName = "Peasant",
 
 berserker = Class { cName = "Berserker",
                     
-                    cExpReqMultiplier = 1.2,
-                    cStartingHPMultiplier = 10,
-                    cHPPerLevelMultiplier = 1.5,
-                    cStartingEnergyMultiplier = 1.0,
-                    cEnergyPerLevelMultiplier = 1.0,
+                    cExpReq = 120,
+                    cBaseHP = 100,
+                    cHPPerLevel = 10,
+                    cBaseEnergy = 100,
+                    cEnergyPerLevel = 10,
                     
                   
                     cStartingWeapon = shortSword,

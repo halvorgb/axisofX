@@ -158,8 +158,7 @@ skillEnergyCost s h n =
   case s of
     NoSkill -> 0
     _ -> case h of
-      Hero {} -> (sEnergyCost s + rBaseEnergyCost (hRace h)) * round (1.25 * fromIntegral n)
-
+      Hero {} -> sEnergyCost s * round (1.25 * fromIntegral n)
       _ -> error "skillEnergyCost on non-hero."
     
 

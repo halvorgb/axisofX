@@ -175,11 +175,13 @@ createMonster mt race inv level id position =
       
     mMitigation = mtMitigation mt + rMitigationModifier race
 
-    mHP = round $ fromIntegral (rBaseHP race + (level * rBaseHPPerLevel race)) * mtHPMultiplier mt
+    mHP = 
+      round $ fromIntegral (mtBaseHP mt + (level * mtHPPerLevel mt)) * rHPMultiplier race
        
     -- todo: experience.
     
-    mSpeed = round $ fromIntegral (rBaseSpeed race) * mtSpeedMultiplier mt
+    mSpeed = 
+      round $ fromIntegral (mtBaseSpeed mt) * rSpeedMultiplier race
     
 
 --------------------------------------

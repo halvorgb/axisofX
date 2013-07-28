@@ -16,16 +16,10 @@ human = Race { rName = "Human",
                rDamageModifier = 0,
                rMitigationModifier = 0,
                
-               rBaseSpeed = 10,
-               
-               rBaseHP = 10,
-               rBaseHPPerLevel = 2,
-               
-               rBaseEnergy = 100,
-               rBaseEnergyPerLevel = 2,
-               rBaseEnergyCost = 1,
-               
-               rExperiencePenalty = 1.0,
+               rSpeedMultiplier = 1.0,
+               rHPMultiplier = 1.0,
+               rEnergyMultiplier = 1.0,
+               rExperienceMultiplier = 1.0,               
                
                rContextFunc = vanilla,
                rSkillMask = []
@@ -38,16 +32,11 @@ ogre = Race { rName = "Ogre",
               rDamageModifier = 3,
               rMitigationModifier = 4,
               
-              rBaseSpeed = 20,
+              rSpeedMultiplier = 1.0,
+              rHPMultiplier = 2.0,
+              rEnergyMultiplier = 2.0,
+              rExperienceMultiplier = 2.0,               
               
-              rBaseHP = 20,
-              rBaseHPPerLevel = 4,
-              
-              rBaseEnergy = 90,
-              rBaseEnergyPerLevel = 2,
-              rBaseEnergyCost = 1,
-              
-              rExperiencePenalty = 1.0,
               
               rContextFunc = vanilla,
               rSkillMask = []
