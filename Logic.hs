@@ -46,9 +46,11 @@ createHero w n r c  =
     inventory = cStartingInventory c   
     -- todo: experience    
     reputation = cStartingReputation c    
-    energy = round $ fromIntegral (rBaseEnergy r) * cStartingEnergyMultiplier c
+    energy = 
+      round $ fromIntegral (cBaseEnergy c) * rEnergyMultiplier r
     skills = cStartingSkills c
-    hp = round $ fromIntegral (rBaseHP r) * cStartingHPMultiplier c
+    hp = 
+      round $ fromIntegral (cBaseHP c) * rHPMultiplier r
     
     armor = cStartingArmor c
     weapon = cStartingWeapon c

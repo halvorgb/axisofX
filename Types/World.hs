@@ -1,3 +1,4 @@
+
 module Types.World where
 
 import qualified Data.Map as M
@@ -159,16 +160,11 @@ data Race = Race { rName :: String, -- Has to be unique for each race (not enfor
                    rDamageModifier :: Int,
                    rMitigationModifier :: Int,
                    
-                   rBaseSpeed :: Int,
-                   
-                   rBaseHP :: Int,
-                   rBaseHPPerLevel :: Int,
-                   
-                   rBaseEnergy :: Int,
-                   rBaseEnergyPerLevel :: Int,
-                   rBaseEnergyCost :: Int,
+                   rSpeedMultiplier :: Float,
+                   rHPMultiplier :: Float,
+                   rEnergyMultiplier :: Float,
                                       
-                   rExperiencePenalty :: Float,
+                   rExperienceMultiplier :: Float,
                    
                    rContextFunc :: World -> World,
                    
@@ -273,9 +269,6 @@ data SkillEffect = FinalConstant { seFunc :: SkillEffectFunction
                                    seTickNumber :: Int
                                  } -- Irreversible effect over time, Ex: hp loss over time.
                                    -- Optional: Delay x turns before applying effect.
-                   
-
-
 
                            -- s,     hit,   evd,  dmg,    mit,  destEnt,   oldWorld, newWolrd
 type SkillEffectFunction = (Skill ->  Int -> Int -> Int -> Int -> Entity -> World -> World)                   
@@ -345,12 +338,13 @@ data Reputation = Malevolent | Malicous | Hard
 
 data Class = 
   Class { cName :: String,
-          cExpReqMultiplier :: Float, 
-          cStartingHPMultiplier :: Float,
-          cHPPerLevelMultiplier :: Float,
-          cStartingEnergyMultiplier :: Float,
-          cEnergyPerLevelMultiplier :: Float,
-            
+          cExpReq :: Int, 
+          cBaseHP :: Int,
+          cHPPerLevel :: Int,
+          
+          cBaseEnergy :: Int,
+          cEnergyPerLevel :: Int,
+          
           cStartingWeapon :: Weapon,
           cStartingArmor :: Armor,
           cStartingInventory :: Inventory,
@@ -376,10 +370,12 @@ instance Show Class where
 -------------------------------------
 data MonsterType =
   MonsterType { mtName :: String,
-                mtExpRewardMultiplier :: Float,
-                mtHPMultiplier :: Float,
+                mtExpReward :: Int,
                 
-                mtSpeedMultiplier :: Float,
+                mtBaseHP :: Int,
+                mtHPPerLevel :: Int,
+                
+                mtBaseSpeed :: Int,
 --                mtSkills = [Skills],
                 -- levelConstraints :: (Int, Int),                
                 -- RaceConstraints?
