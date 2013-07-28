@@ -177,7 +177,12 @@ skillSpeedCost s h =
 skillMessage :: SkillResult -> Skill -> Entity -> Entity -> String
 skillMessage result skill sourceEnt destEnt =
   case result of
-    SUCC -> show sourceEnt ++ " successfully used " ++ show skill ++ " on " ++ show destEnt ++ "!"
+    SUCC -> 
+      if sourceEnt == destEnt  -- self skill, no need to pritn target!
+      then
+        show sourceEnt ++ " successfully used " ++ show skill ++ "!"
+      else
+        show sourceEnt ++ " successfully used " ++ show skill ++ " on " ++ show destEnt ++ "!"
     MISS -> show sourceEnt ++ " tried to use " ++ show skill ++ " on " ++ show destEnt ++ ",  but missed."
     MIT ->  show sourceEnt ++ " tried to use " ++ show skill ++ " on " ++ show destEnt ++ ",  but to effect"
     FAT ->  show sourceEnt ++ " tried to use " ++ show skill ++ ", but didn't have enough energy."
