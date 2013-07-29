@@ -307,11 +307,9 @@ renderText mainSurf ((x, y), textSurf) = do
   
   
 
-createSurfaces :: Font -> [String] -> Color-> [IO SDL.Surface]
-createSurfaces font texts color = do
-  surfs
-    where
-      surfs = map (\t -> renderTextBlended font t color) texts
+createSurfaces :: Font -> [String] -> Color -> [IO SDL.Surface]
+createSurfaces font texts color = map (\t -> renderTextBlended font t color) texts
+
 
 
 
