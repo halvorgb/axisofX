@@ -32,7 +32,7 @@ ogre = Race { rName = "Ogre",
               rDamageModifier = 3,
               rMitigationModifier = 4,
               
-              rSpeedMultiplier = 1.0,
+              rSpeedMultiplier = 3.0,
               rHPMultiplier = 2.0,
               rEnergyMultiplier = 2.0,
               rExperienceMultiplier = 2.0,               

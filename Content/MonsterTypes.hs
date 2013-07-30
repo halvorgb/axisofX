@@ -75,7 +75,7 @@ crossbowman =
                 mtExpReward = 10,
                 mtBaseHP = 2,
                 mtHPPerLevel = 1,
-                mtBaseSpeed = 15,
+                mtBaseSpeed = 12,
                 
                 mtHitDie = baseMonsterHitDie,
                 mtEvadeDie = Dice {dDie = (1,10), dMod = -10},

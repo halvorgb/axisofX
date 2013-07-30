@@ -36,7 +36,9 @@ createHero w n r c  =
          eHitDie = hitDie,
          eDamageDie = dmgDie,
          eEvadeDie = evdDie,
-         eMitigation = mitigation
+         eMitigation = mitigation,
+         
+         eSpeed = speed
          }
     }
                       
@@ -63,12 +65,14 @@ createHero w n r c  =
     dmgDie = (wepDamageDie weapon) { dMod = dMod (wepDamageDie weapon) + damageMod}
     mitigation = mitigationMod + aMitigation armor
     
+    speed =
+      round $ fromIntegral (cBaseSpeed c) * rSpeedMultiplier r
     
     
 
 -- Finds which entities whose turns are up, performs AI, those entities whose turns are not up have updated their eNextMove values. Returns a new World with these changes.
 think :: World -> IO World
-think world = do
+think world =
   return world''
     where
       h = wHero world
@@ -98,10 +102,14 @@ think world = do
         
       -- update the map for monsters whose turns are not yet up!
       emap = foldl' (\map m -> updateMap (eCurrPos m) m map) (lEntities lvl) monstersWAIT
-      world' = world { wLevel = lvl {lEntities = emap }, wHero = h'}
+
       
-      -- choose an action for the rest of the monsters, execute it, reset time until next move.
+      -- update map for monsters whose turns are up
       monsters' = map (\m -> m {eNextMove = eSpeed m}) monstersAI
+      emap' = foldl' (\map m -> updateMap (eCurrPos m) m map) emap monsters'
+      
+      world' = world { wLevel = lvl {lEntities = emap' }, wHero = h'}
+      -- perform AI.
       world'' =  foldl' (flip performAI) world' monsters'
 
       
@@ -109,9 +117,12 @@ think world = do
 
 -- find the lowest timeRemaining, subtract it from all.
 prepare :: [Entity] -> [Entity]
-prepare e = map (\x -> x { eNextMove = eNextMove x - lowestRemaining }) e
+prepare entities = map (\x -> x { eNextMove = eNextMove x - lowestRemaining }) entities
   where
     -- 10000 is infinite in this case.
-    lowestRemaining = foldl' (\x y -> min x $ eNextMove y) 10000 e
-
+    lowestRemaining = eNextMove $ foldl1' (\x y -> 
+                                            if eNextMove x > eNextMove y 
+                                            then y
+                                            else x
+                                          ) entities
 

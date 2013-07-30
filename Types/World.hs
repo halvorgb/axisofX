@@ -146,7 +146,7 @@ instance ShowLong Entity where
     where
       outString = case e of 
         Hero {} -> show (hName e) ++ " the " ++ show (hRace e) ++ " " ++ show (hClass e)
-        Monster {} -> show e ++ " LVL:" ++ show (mLevel e) ++ " HP:(" ++ show (eCurrHP e) ++ "/" ++ show (eMaxHP e) ++ ")"
+        Monster {} -> show e ++ " LVL:" ++ show (mLevel e) ++ " HP:" ++ show (eCurrHP e) ++ "/" ++ show (eMaxHP e) -- ++ " SPD:" ++ show (eSpeed e) ++ " NM: " ++ show (eNextMove e)
         _ -> "TODO: ShowLong Entity for bosses ."
           
 -------------------------------------          
@@ -339,6 +339,7 @@ data Reputation = Malevolent | Malicous | Hard
 data Class = 
   Class { cName :: String,
           cExpReq :: Int, 
+          cBaseSpeed :: Int,
           cBaseHP :: Int,
           cHPPerLevel :: Int,
           

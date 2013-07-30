@@ -4,6 +4,8 @@ module Combat where
 
 import Random
 import Helpers
+import Messages
+
 import Types.Common
 import Types.World
 
@@ -28,10 +30,10 @@ simpleCombat sourceEntity targetEntity world = world'
                   then
                     damageEntity sourceEntity targetEntity damage $ world { wStdGen = newGen'' }
                   else
-                    world { wMessageBuffer = (show targetEntity ++ " shrugged off "++ show sourceEntity  ++ "'s attack!"):wMessageBuffer world, wStdGen = newGen'' }
+                    mitMessage sourceEntity targetEntity world
              else
+               missMessage sourceEntity targetEntity world
 
-               world { wMessageBuffer = (show targetEntity ++ " evaded " ++ show sourceEntity ++ "'s attack!"):wMessageBuffer world, wStdGen = newGen' }
 
 
 damageEntity :: Entity -> Entity -> Int -> World -> World
@@ -44,22 +46,19 @@ damageEntity sourceEntity targetEntity damage world = world'
     world' = case targetEntity of
       Monster {} -> if newTargetHP < 0
                     then
-                      world { wMessageBuffer = (show targetEntity ++ " was killed by " ++ show sourceEntity):wMessageBuffer world, 
-                              wLevel = level { lEntities = M.delete (eCurrPos targetEntity) ents }
-                            }
+                      killMessage sourceEntity targetEntity $ 
+                      world {wLevel = level { lEntities = M.delete (eCurrPos targetEntity) ents } }
+
                     else
-                      world { wMessageBuffer = (show targetEntity ++ " was dealt " ++ show damage ++ " damage by " ++ show sourceEntity):wMessageBuffer world, 
-                              wLevel = level { lEntities = M.insert (eCurrPos targetEntity) (targetEntity {eCurrHP = newTargetHP}) (M.delete (eCurrPos targetEntity) ents) }
-                            }
+                      damageMessage sourceEntity damage targetEntity $ 
+                      world {wLevel = level { lEntities = M.insert (eCurrPos targetEntity) (targetEntity {eCurrHP = newTargetHP}) (M.delete (eCurrPos targetEntity) ents) } }
                       
       Hero {} -> if newTargetHP < 0
                  then
-                   world { wMessageBuffer = (show  targetEntity ++ " was killed by " ++ show sourceEntity ++ "!" ):wMessageBuffer world, 
-                           wHero = targetEntity { eCurrHP = newTargetHP }
-                         }  
+                   killMessage sourceEntity targetEntity $
+                   world {wHero = targetEntity { eCurrHP = newTargetHP }}
                  else
-                   world { wMessageBuffer = (show  targetEntity ++ " was dealt " ++ show damage ++ " damage by " ++ show sourceEntity):wMessageBuffer world, 
-                           wHero = targetEntity { eCurrHP = newTargetHP }
-                         }
-                                    
-      _ -> world
+                   damageMessage sourceEntity damage targetEntity $
+                   world {wHero = targetEntity { eCurrHP = newTargetHP }}
+      
+      _ -> error "Unknown target in damageEntity"

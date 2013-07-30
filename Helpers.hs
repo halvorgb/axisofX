@@ -86,6 +86,7 @@ updateMap oldPos m entityMap = M.insert mPos m $ M.delete oldPos entityMap
 
 
 -- CheckVision: Purpose: announce newly spotted monsters and bosses in the messageBuffer.
+    -- Given the vision frame, is it necessarry to display the messages?
 checkVision :: World -> World
 checkVision w =
   w {
@@ -169,27 +170,6 @@ skillSpeedCost s h =
   case h of
     Hero {} -> round (fromIntegral (eSpeed h) * wepSpeedMultiplier (hWield h) * sSpeedMultiplier s)   
     _ -> error "skillSpeedCost on non-hero"
-    
-
-
--- mesasge creation.
-skillMessage :: SkillResult -> Skill -> Entity -> Entity -> String
-skillMessage result skill sourceEnt destEnt =
-  case result of
-    SUCC -> 
-      if sourceEnt == destEnt  -- self skill, no need to pritn target!
-      then
-        show sourceEnt ++ " successfully used " ++ show skill ++ "!"
-      else
-        show sourceEnt ++ " successfully used " ++ show skill ++ " on " ++ show destEnt ++ "!"
-    MISS -> show sourceEnt ++ " tried to use " ++ show skill ++ " on " ++ show destEnt ++ ",  but missed."
-    MIT ->  show sourceEnt ++ " tried to use " ++ show skill ++ " on " ++ show destEnt ++ ",  but to effect"
-    FAT ->  show sourceEnt ++ " tried to use " ++ show skill ++ ", but didn't have enough energy."
-    FAIL failureCode -> 
-      case failureCode of
-        NoTarget -> show sourceEnt ++ " tried to use " ++ show skill ++ ", but failed! (No targets found)"
-        CantReach -> show sourceEnt ++ " tried to use " ++ show skill ++ ", but failed! (Couldn't reach dest.)"
-    _ -> "Placeholder message \\skillMessage"
     
     
 

@@ -7,6 +7,7 @@ import Types.Items
 import Types.Common
 
 import Helpers
+import Messages
 import Combat
 
 -- Some lists to make skill making easier.
