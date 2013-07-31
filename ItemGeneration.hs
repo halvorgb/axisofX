@@ -7,35 +7,37 @@ import Types.Common
 
 import Content.Names
 
-generateWeapon :: StdGen -> (Item, StdGen)
-generateWeapon gen = undefined
-
-
-generateWeaponStats :: WeaponWeight -> WeaponType -> WeaponGrip -> Int -> StdGen -> (Weapon, StdGen)
-generateWeaponStats wpWeight wpType wpGrip wpLevel gen =
-  ( Weapon {
-       wepQuality = wpQuality,
-       wepWeight = wpWeight,
-       wepType = wpType,
-       wepGrip = wpGrip,
-       wepLevel = wpLevel',
-       
-       wepDamageDie = calcDmgDie wpGrip wpType wpWeight wpLevel',
-       wepHitBonus = calcHitBonus wpGrip wpType wpWeight,
-       wepSpeedMultiplier = calcSpeedMult wpGrip wpType wpWeight,
-       wepRange = calcRange wpGrip wpType wpWeight
-       }, 
-    
-    gen' )
-                 
+generateWeapon :: Int -> StdGen -> (Weapon, StdGen)
+generateWeapon wpLevel gen = (generateWeaponStats wpWeight wpType wpGrip wpLevel' wpQuality, gen'''')
+                                    
   where
-    (wpQuality, gen') = generateWeaponQuality wpType wpGrip gen
+    (wpWeight, gen') = random gen
+    (wpType, gen'') = random gen'
+    (wpGrip, gen''') = random gen''
+    (wpQuality, gen'''') = generateWeaponQuality wpType wpGrip gen'''
     
     wpLevel' =
       case wpQuality of 
         JourneyMan -> wpLevel
         Master { } -> wpLevel + 4
         GrandMaster { } -> wpLevel + 8
+
+
+generateWeaponStats :: WeaponWeight -> WeaponType -> WeaponGrip -> Int -> WeaponQuality -> Weapon
+generateWeaponStats wpWeight wpType wpGrip wpLevel wpQuality =
+  Weapon {
+    wepQuality = wpQuality,
+    wepWeight = wpWeight,
+    wepType = wpType,
+    wepGrip = wpGrip,
+    wepLevel = wpLevel,
+    
+    wepName = getName wpGrip wpType wpWeight,
+    wepDamageDie = calcDmgDie wpGrip wpType wpWeight wpLevel,
+    wepHitBonus = calcHitBonus wpGrip wpType wpWeight,
+    wepSpeedMultiplier = calcSpeedMult wpGrip wpType wpWeight,
+    wepRange = calcRange wpGrip wpType wpWeight
+    }
 
 generateWeaponQuality :: WeaponType -> WeaponGrip -> StdGen -> (WeaponQuality, StdGen)
 generateWeaponQuality wepType wepGrip gen
@@ -153,6 +155,52 @@ calcSpeedMult _ _ wpWeight =
     Balanced -> 1.0
     Heavy -> 1.25
     Burdensome -> 1.5
+
+
+getName :: WeaponGrip -> WeaponType -> WeaponWeight -> String
+getName wpGrip wpType wpWeight =
+  case wpType of
+    Edged ->
+      case wpGrip of
+        OneHanded ->
+          case wpWeight of
+            Balanced -> "Short Sword"
+            Heavy -> "Long Sword"
+            Burdensome -> "Battle Axe"
+        
+        TwoHanded ->
+          case wpWeight of 
+            Balanced -> "Flamberge"
+            Heavy -> "Claymore"
+            Burdensome -> "Executioner's Sword"
+    
+    Pointy ->
+      case wpGrip of
+        OneHanded ->
+          case wpWeight of
+            Balanced -> "Stiletto"
+            Heavy -> "Rapier"
+            Burdensome -> "Spear"
+        
+        TwoHanded ->
+          case wpWeight of 
+            Balanced -> "Half Pike"
+            Heavy -> "Pike"
+            Burdensome -> "Trident"
+    
+    Blunt ->
+      case wpGrip of
+        OneHanded ->
+          case wpWeight of
+            Balanced -> "Club"
+            Heavy -> "War Hammer"
+            Burdensome -> "Flail"
+        
+        TwoHanded ->
+          case wpWeight of 
+            Balanced -> "Staff"
+            Heavy -> "Bec de Corbin"
+            Burdensome -> "Meteor Hammer"
 
     
     

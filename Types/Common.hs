@@ -55,14 +55,44 @@ data WeaponConstraints = WeaponConstraints { wcWeight  :: [WeaponWeight],
                          deriving (Eq)
 
 data WeaponWeight  = Balanced | Heavy | Burdensome
-                   deriving(Show, Eq)
+                   deriving(Show, Bounded, Enum, Eq)
 
+instance Random WeaponWeight where
+  random g = case randomR (fromEnum (minBound :: WeaponWeight), fromEnum (maxBound :: WeaponWeight)) g of
+    (r, g') -> (toEnum r, g')
+    
+  randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
+    (r, g') -> (toEnum r, g')
+  
 data WeaponType    = Edged | Pointy | Blunt
-                   deriving(Show, Eq)
+                   deriving(Show, Bounded, Enum, Eq)
+                           
+instance Random WeaponType where
+  random g = case randomR (fromEnum (minBound :: WeaponType), fromEnum (maxBound :: WeaponType)) g of
+    (r, g') -> (toEnum r, g')
+    
+  randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
+    (r, g') -> (toEnum r, g')
+
 
 data WeaponGrip    = OneHanded | TwoHanded
-                   deriving(Show, Eq)
-                       
+                   deriving(Show, Bounded, Enum, Eq)
+                           
+instance Random WeaponGrip where
+  random g = case randomR (fromEnum (minBound :: WeaponGrip), fromEnum (maxBound :: WeaponGrip)) g of
+    (r, g') -> (toEnum r, g')
+    
+  randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
+    (r, g') -> (toEnum r, g')
+
+
+{-
++instance Random MonsterType where
++    random g = case randomR (fromEnum (minBound :: MonsterType), fromEnum (maxBound :: MonsterType)) g of
++                 (r, g') -> (toEnum r, g')
++    randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
++                        (r, g') -> (toEnum r, g')
+-}                       
                     
                     
 --Dice:
