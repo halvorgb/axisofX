@@ -36,7 +36,6 @@ data Weapon =
     
     
     -- "proper" stats:
-    wepDescription :: String,
     wepDamageDie :: Dice,
     wepHitBonus :: Int,
     wepSpeedMultiplier :: Float,
@@ -44,7 +43,16 @@ data Weapon =
      -- !
                 
     }
-  deriving(Show, Eq)
+  deriving (Eq)
+instance Show Weapon where
+  show w =
+    case wepQuality w of
+      JourneyMan -> 
+        "nondescript weapon"
+      Master title -> 
+        title
+      GrandMaster title legacy ->
+        title
 
 -- Items: Inventory
 type Gold = Int

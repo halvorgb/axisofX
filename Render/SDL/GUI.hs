@@ -158,7 +158,7 @@ chooseProtagonist w a@(((splashBG, _), _), font) = do
   
   -- name = random!
   nameGen <- getStdGen
-  let name = randomName nameGen
+  let name = randomHeroName nameGen
   let welcomePos = (256, 296)
   drawTextAtPos ("Welcome to Axis of X,  your name is " ++ name ++ ".") welcomePos mainSurf font
   
