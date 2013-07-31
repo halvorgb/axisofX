@@ -147,7 +147,7 @@ instance ShowLong Entity where
     where
       outString = case e of 
         Hero {} -> show (hName e) ++ " the " ++ show (hRace e) ++ " " ++ show (hClass e)
-        Monster {} -> show e ++ " LVL:" ++ show (mLevel e) ++ " HP:" ++ show (eCurrHP e) ++ "/" ++ show (eMaxHP e) ++ "evd: " ++ show (eEvadeDie e)
+        Monster {} -> show e ++ " LVL:" ++ show (mLevel e) ++ " HP:" ++ show (eCurrHP e) ++ "/" ++ show (eMaxHP e)
         _ -> "TODO: ShowLong Entity for bosses ."
           
 -------------------------------------          

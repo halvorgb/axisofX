@@ -18,16 +18,17 @@ import qualified Data.Map as M
 simpleCombat :: Entity -> Entity -> World -> World
 simpleCombat sourceEntity targetEntity world =
   if sourceHitRoll >= targetEvadeRoll
-             then -- hit: roll for damage!
-               let (sourceDamageRoll, newGen'') = rollDie (eDamageDie sourceEntity) newGen'
-                   damage = sourceDamageRoll - eMitigation targetEntity
-               in if damage > 0                 
-                  then
-                    damageEntity sourceEntity targetEntity damage $ world { wStdGen = newGen'' }
-                  else
-                    mitMessage sourceEntity targetEntity world'
-             else
-               missMessage sourceEntity targetEntity world'
+  then -- hit: roll for damage!
+    let (sourceDamageRoll, newGen'') = rollDie (eDamageDie sourceEntity) newGen'
+        damage = sourceDamageRoll - eMitigation targetEntity
+    in if damage > 0                 
+       then
+         damageEntity sourceEntity targetEntity damage $ world { wStdGen = newGen'' }
+       else
+         mitMessage sourceEntity targetEntity world'
+  else
+    missMessage sourceEntity targetEntity world'
+    
   where
     oldGen = wStdGen world
     (sourceHitRoll, newGen) = rollDie (eHitDie sourceEntity) oldGen
