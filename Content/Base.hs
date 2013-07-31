@@ -22,7 +22,8 @@ baseWorld = World { wDepth = 0,
                     wMessageBuffer = ["Welcome to Axis of X!"],
                     wStdGen = undefined,
                     wBoss = lastBoss,
-                    wScreenShown = Console
+                    wScreenShown = Console,
+                    wTimeElapsed = 0
                 }
 
 

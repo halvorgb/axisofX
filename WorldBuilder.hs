@@ -79,7 +79,7 @@ generateMonsters g nofMonsters l levelDepth wallMap = monsterMap
     
     mIDs = [0..]
     
-    generatorList = makeGeneratorList g nofMonsters
+    (generatorList, _) = makeGeneratorList g nofMonsters
     
     zippedList = zip3 mIDs randCoords generatorList
     

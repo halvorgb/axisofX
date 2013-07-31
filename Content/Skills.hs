@@ -115,7 +115,6 @@ sweep = Active  { sName = "Sweep",
 
                   sTarget = selectAOEWeaponRadius,
 
-                            
                   sPrequisites = [],
                   sSkillMask = [Brute],
                   

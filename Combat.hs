@@ -16,13 +16,8 @@ import qualified Data.Map as M
 -- Simple combat, just attack rolls and defense rolls.
 --- will be used by the hero when moving into an enemy. when the skill queue system is in place.
 simpleCombat :: Entity -> Entity -> World -> World
-simpleCombat sourceEntity targetEntity world = world'
-  where
-    oldGen = wStdGen world
-    (sourceHitRoll, newGen) = rollDie (eHitDie sourceEntity) oldGen
-    (targetEvadeRoll, newGen') = rollDie (eEvadeDie targetEntity) newGen
-    
-    world' = if sourceHitRoll >= targetEvadeRoll
+simpleCombat sourceEntity targetEntity world =
+  if sourceHitRoll >= targetEvadeRoll
              then -- hit: roll for damage!
                let (sourceDamageRoll, newGen'') = rollDie (eDamageDie sourceEntity) newGen'
                    damage = sourceDamageRoll - eMitigation targetEntity
@@ -30,10 +25,15 @@ simpleCombat sourceEntity targetEntity world = world'
                   then
                     damageEntity sourceEntity targetEntity damage $ world { wStdGen = newGen'' }
                   else
-                    mitMessage sourceEntity targetEntity world
+                    mitMessage sourceEntity targetEntity world'
              else
-               missMessage sourceEntity targetEntity world
-
+               missMessage sourceEntity targetEntity world'
+  where
+    oldGen = wStdGen world
+    (sourceHitRoll, newGen) = rollDie (eHitDie sourceEntity) oldGen
+    (targetEvadeRoll, newGen') = rollDie (eEvadeDie targetEntity) newGen
+    
+    world' = world { wStdGen = newGen' }
 
 
 damageEntity :: Entity -> Entity -> Int -> World -> World

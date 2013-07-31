@@ -12,7 +12,7 @@ import Combat
 import Helpers
 import Logic
 import WorldBuilder
-import Skills
+import Player
 
 import Types.World
 import Types.Common
@@ -67,15 +67,15 @@ gameLoop world assets = do
       -- if an enemy is encountered: attack it,
 handleDir :: World -> Direction -> World
 handleDir w dir
-  | dir == Left && fst (eCurrPos h) == firstInFrame = 
+  | dir == Left && fst (eCurrPos h) == firstInFrame = -- left corner, does not use a turn.
     w { 
       wMessageBuffer = "You can't go there! No turn used.":mBuffer 
-      }-- left corner, does not use a turn.
+      }
     
-  | dir == Right && fst coord > lSize lvl - 1 =  
-      nextLevel w -- Right edge of map, does not use a turn, possible issue. Perhaps load next level here.
+  | dir == Right && fst coord > lSize lvl - 1 =  -- Right edge of map, does not use a turn, possible issue. Perhaps load next level here.
+      nextLevel $ w { wTimeElapsed = newTime }  
 
-  | isDoor coord lvl = 
+  | isDoor coord lvl = -- Destroys the door, uses a turn.
     w {
       wLevel = lvl { 
          lWallTiles = M.delete coord $ lWallTiles lvl
@@ -85,19 +85,21 @@ handleDir w dir
         eNextMove = eSpeed h,
         hCurrEnergy = newEnergy
         },
+      wTimeElapsed = newTime,
       wMessageBuffer = "Opened door!":mBuffer
-      } -- Destroys the door, uses a turn.
+      }
 
-  | isMonster coord lvl =
+  | isMonster coord lvl = -- Simple combat (using movement keys)
       (simpleCombat h (fromJust $ M.lookup coord (lEntities lvl)) w)
       {
         wHero = h {eOldPos = eCurrPos h,
                    eNextMove = eSpeed h,
                    hCurrEnergy = newEnergy
-                  }
-      }-- Simple combat (using movement keys)
+                  },
+        wTimeElapsed = newTime
+      }
       
-  | dir == Right && fst (eCurrPos h) == lastInFrame && lastInFrame < lSize lvl = 
+  | dir == Right && fst (eCurrPos h) == lastInFrame && lastInFrame < lSize lvl = -- If at right side of frame 
       w { 
         wHero = h { 
            eOldPos = eCurrPos h,
@@ -105,11 +107,14 @@ handleDir w dir
            eNextMove = eSpeed h,
            hCurrEnergy = newEnergy,
            hMovementSlack = (firstInFrame+1, lastInFrame+1)
-           }        
-        } -- If at right side of frame 
+           },
+        wTimeElapsed = newTime   
+        }
       
-  | otherwise =  
-        w { wHero = h { eOldPos = eCurrPos h, eCurrPos = coord, eNextMove = eSpeed h, hCurrEnergy = newEnergy} } -- simple movement, no wrapping. 
+  | otherwise = -- simple movement, no wrapping. 
+        w { wHero = h { eOldPos = eCurrPos h, eCurrPos = coord, eNextMove = eSpeed h, hCurrEnergy = newEnergy}, 
+            wTimeElapsed = newTime
+          } 
   where 
     h              = wHero w
     lvl            = wLevel w
@@ -123,6 +128,7 @@ handleDir w dir
     mBuffer = wMessageBuffer w
     
     newEnergy = max 0 $ hCurrEnergy h - 1
+    newTime = wTimeElapsed w + fromIntegral (eSpeed h)
 
 -- simply passes the time.
 handleWait :: World -> World
@@ -132,6 +138,7 @@ handleWait w =
        eOldPos = eCurrPos h,
        eNextMove = eSpeed h
        }, 
+    wTimeElapsed = fromIntegral (eSpeed h) + wTimeElapsed w,
     wMessageBuffer = "Waiting!":wMessageBuffer w
     }
   where
@@ -166,12 +173,14 @@ handleRest :: World -> World
 handleRest w = 
   if null enemiesInView -- Safe to rest?
   then
-    w { wHero = h { hCurrEnergy = hMaxEnergy h}, wMessageBuffer = "You feel rested. TODO: Pass time!":wMessageBuffer w}
+    w { wHero = h { hCurrEnergy = hMaxEnergy h}, wMessageBuffer = "You wake up from your rest brimming with energy.":wMessageBuffer w, wTimeElapsed = newTime}
   else
     w { wMessageBuffer = "You can't rest while enemies are nearby!":wMessageBuffer w}
   where
     h = wHero w
     enemiesInView = getEntitiesFromViewFrame w $ getViewFrame w
+    
+    newTime = wTimeElapsed w + fromIntegral((hMaxEnergy h - hCurrEnergy h) * eSpeed h)
   
 
 

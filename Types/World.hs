@@ -28,7 +28,8 @@ data World = World { wDepth :: Int,
                      wMessageBuffer :: [String],
                      wStdGen :: StdGen,
                      wBoss :: Entity,
-                     wScreenShown :: Screen
+                     wScreenShown :: Screen,
+                     wTimeElapsed :: Integer
                    }
              
            deriving (Show)
@@ -146,7 +147,7 @@ instance ShowLong Entity where
     where
       outString = case e of 
         Hero {} -> show (hName e) ++ " the " ++ show (hRace e) ++ " " ++ show (hClass e)
-        Monster {} -> show e ++ " LVL:" ++ show (mLevel e) ++ " HP:" ++ show (eCurrHP e) ++ "/" ++ show (eMaxHP e) -- ++ " SPD:" ++ show (eSpeed e) ++ " NM: " ++ show (eNextMove e)
+        Monster {} -> show e ++ " LVL:" ++ show (mLevel e) ++ " HP:" ++ show (eCurrHP e) ++ "/" ++ show (eMaxHP e) ++ "evd: " ++ show (eEvadeDie e)
         _ -> "TODO: ShowLong Entity for bosses ."
           
 -------------------------------------          

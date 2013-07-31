@@ -22,8 +22,8 @@ rollDie dice gen = (result, lastGen)
     (nofDie, maxDice) = dDie dice
     modifier = dMod dice
     
-    generators = makeGeneratorList gen nofDie
-    lastGen = last generators
+    (generators, lastGen) = makeGeneratorList gen nofDie
+
     
     roll = foldl (+) modifier $ map (fst . randomR (1, maxDice)) generators
     
@@ -31,11 +31,13 @@ rollDie dice gen = (result, lastGen)
     
 
 -- splits a generator into n generators.
-makeGeneratorList :: StdGen -> Int -> [StdGen]
-makeGeneratorList _ 0 = []
-makeGeneratorList gen n = gen1:makeGeneratorList  gen2 (n-1)
+makeGeneratorList :: StdGen -> Int -> ([StdGen], StdGen)
+makeGeneratorList gen n = makeGeneratorList' ([], gen) n
+    
+makeGeneratorList' :: ([StdGen], StdGen) -> Int -> ([StdGen], StdGen)
+makeGeneratorList' g 0 = g
+makeGeneratorList' (genList, gen) n = makeGeneratorList' (gen1:genList, gen2) (n-1)
   where
     (gen1, gen2) = split gen
-    
     
     

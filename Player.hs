@@ -1,4 +1,4 @@
-module Skills(performSkills) where
+module Player(performSkills) where
 
 import Data.List
 
@@ -8,6 +8,7 @@ import Helpers
 import Random
 import Messages
 
+-- performSkills [Skill] and helper functions.
 performSkills :: World -> World
 performSkills w =
   foldl' performSkill w indexedSkills
@@ -38,7 +39,7 @@ performSkill w (i,s)
     targets = sTarget s w
     
 --    calculate world with updated nextMove and currEnergy (not used if out of energy.    
-    w' = w { wHero = h { hCurrEnergy = hEnergy - energyCost, eNextMove = eSpeed h + speedCost } }
+    w' = w { wHero = h { hCurrEnergy = hEnergy - energyCost, eNextMove = eSpeed h + speedCost }, wTimeElapsed = fromIntegral speedCost + wTimeElapsed w }
     
     -- s is sent for constant parameters, foldl because there might be several effects.
     w'' = foldl' applyEffect w' $ zip3 effects (repeat targets) (repeat s)
@@ -62,9 +63,8 @@ applyEffect world (effect, targets, skill) =
 
 
 applyEffectToTarget :: World -> (SkillEffect, Skill, Int, Int, Entity) -> World
-applyEffectToTarget world (effect, skill, dmg, hit, targetEntity) =
-  func skill dmg evdRoll dmg mit targetEntity w'
-  
+applyEffectToTarget world (effect, skill, dmgRoll, hitRoll, targetEntity) =
+  func skill hitRoll evdRoll dmgRoll mit targetEntity w'
   where
     (evdRoll, g') = rollDie (eEvadeDie targetEntity) (wStdGen world)
     mit = eMitigation targetEntity
@@ -73,4 +73,3 @@ applyEffectToTarget world (effect, skill, dmg, hit, targetEntity) =
       
     
     func = seFunc effect
-    

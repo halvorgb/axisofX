@@ -65,29 +65,35 @@ playerRepPos = (122, 186)
 
 ---
 skillQueueOnePos :: Position
-skillQueueOnePos = (362, 134)
+skillQueueOnePos = (362, 182)
 
 skillQueueTwoPos :: Position
-skillQueueTwoPos = (476, 134)
+skillQueueTwoPos = (476, 182)
 
 skillQueueThreePos :: Position
-skillQueueThreePos = (588, 134)
+skillQueueThreePos = (588, 182)
 
 skillQueueFourPos :: Position
-skillQueueFourPos = (700, 134)
+skillQueueFourPos = (700, 182)
 
 skillQueueEnergyPos :: Position
-skillQueueEnergyPos = (434, 186)
+skillQueueEnergyPos = (434, 232)
 
 skillQueueSpeedPos :: Position
-skillQueueSpeedPos = (586, 186)
+skillQueueSpeedPos = (557, 232)
 
 --
+statusTimePos :: Position
+statusTimePos = (480, 103)
+
 
 
 
 bossNamePos :: Position
-bossNamePos = (48, 226)
+bossNamePos = (48, 258)
+
+
+
   
 vicinityBufferSize :: Int
 vicinityBufferSize = 15
@@ -95,7 +101,7 @@ vicinityBufferSize = 15
 vicinityBotPos :: Position
 vicinityBotPos = (40, 572)
 
-
+                 
 
 
 
@@ -124,12 +130,21 @@ drawGameText :: World -> SDL.Surface -> Font -> IO ()
 drawGameText world mainSurf font = do
   drawCharacterText world mainSurf font
   drawBossText world mainSurf font
-  drawScreen world mainSurf font
   drawVicinity world mainSurf font
+  
+  drawWorldStatus world mainSurf font
   drawSkillQueue world mainSurf font
+  drawScreen world mainSurf font
 
   
 
+drawWorldStatus :: World -> SDL.Surface -> Font -> IO ()
+drawWorldStatus world mainSurf font =
+  renderText mainSurf (statusTimePos, head timeSurf)
+    where
+      timeString = [show $ wTimeElapsed world]
+      timeSurf = createSurfaces font timeString (Color 0 0 0)
+      
 
 drawBossText :: World -> SDL.Surface -> Font -> IO ()
 drawBossText world mainSurf font = do
