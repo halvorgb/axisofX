@@ -177,7 +177,7 @@ handleRest w =
     then
       w { wMessageBuffer = "You're already at maximum energy!":wMessageBuffer w }
     else
-      w { wHero = h { hCurrEnergy = hMaxEnergy h}, wMessageBuffer = "You wake up from your rest brimming with energy.":wMessageBuffer w, wTimeElapsed = newTime}
+      w { wHero = h { hCurrEnergy = hMaxEnergy h, eNextMove = fromIntegral newTime}, wMessageBuffer = "You wake up from your rest brimming with energy.":wMessageBuffer w, wTimeElapsed = newTime}
   else
     w { wMessageBuffer = "You can't rest while enemies are nearby!":wMessageBuffer w}
   where

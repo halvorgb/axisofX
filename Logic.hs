@@ -75,10 +75,11 @@ think :: World -> IO World
 think world =
   return world''
     where
+      b = wBoss world
       h = wHero world
       lvl = wLevel world
       
-      e = h:getEntitiesFromViewFrame world (getViewFrame world) -- every entity in view       
+      e = b:h:getEntitiesFromViewFrame world (getViewFrame world) -- every entity in view       
       
       e' = prepare e -- subtracts the lowest eNextMove value from every entity,
       -- always yielding 1 with 0.
@@ -89,11 +90,23 @@ think world =
                                _ -> False
                            ) e'
       
+      b' = fromJust $ find (\x -> case x of
+                               Boss { } -> True
+                               _ -> False
+                           ) e'
+      
+      
+      -- feed boss every entity that has been skipped.
+      (skippedEnts, deletedSkippedMap) = getAndDeleteSkippedEntities world $ getViewFrame world
+      
+      -- eat skipped entities, move forward boss if it is his turn.
+      bossWorld = bossAI skippedEnts $ world { wBoss = b'}      
+      
       e'' =  filter (\x -> eNextMove x == 0)  e' -- the monsters whose turns are up!
       -- monsters whose turns are now
       monstersAI    = filter monsterFilter e''
       -- monsters whose turns are not up yet.
-      monstersWAIT  = (e' \\ [h']) \\ monstersAI
+      monstersWAIT  = ((e' \\ [b']) \\[h']) \\ monstersAI
       
       monsterFilter :: Entity -> Bool
       monsterFilter x = case x of
@@ -101,14 +114,14 @@ think world =
         _ -> False
         
       -- update the map for monsters whose turns are not yet up!
-      emap = foldl' (\map m -> updateMap (eCurrPos m) m map) (lEntities lvl) monstersWAIT
+      emap = foldl' (\map m -> updateMap (eCurrPos m) m map) deletedSkippedMap monstersWAIT
 
       
       -- update map for monsters whose turns are up
       monsters' = map (\m -> m {eNextMove = eSpeed m}) monstersAI
       emap' = foldl' (\map m -> updateMap (eCurrPos m) m map) emap monsters'
       
-      world' = world { wLevel = lvl {lEntities = emap' }, wHero = h'}
+      world' = bossWorld { wLevel = lvl {lEntities = emap' }, wHero = h'}
       -- perform AI.
       world'' =  foldl' (flip performAI) world' monsters'
 

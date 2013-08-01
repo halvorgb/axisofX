@@ -88,9 +88,19 @@ statusTimePos = (480, 103)
 
 
 
-
+--
 bossNamePos :: Position
 bossNamePos = (48, 258)
+
+bossDistancePos :: Position
+bossDistancePos = (104, 280)
+
+bossKillsPos :: Position
+bossKillsPos = (172, 301)
+
+bossSpeedPos :: Position
+bossSpeedPos = (178, 280)
+
 
 
 
@@ -149,11 +159,24 @@ drawWorldStatus world mainSurf font =
 drawBossText :: World -> SDL.Surface -> Font -> IO ()
 drawBossText world mainSurf font = do
   renderText mainSurf (bossNamePos, head nameSurf)
+  
+  renderText mainSurf (bossDistancePos, head distanceSurf)  
+  renderText mainSurf (bossSpeedPos, head speedSurf)  
+  renderText mainSurf (bossKillsPos, head killSurf)  
   where
     boss = wBoss world
-    nameString = [show boss]
     
+    nameString = [show boss]
     nameSurf = createSurfaces font nameString (Color 0 0 0)
+    
+    distanceString = [show $ fst (eCurrPos $ wHero world) - fst (eCurrPos boss)]
+    distanceSurf = createSurfaces font distanceString (Color 0 0 0)
+    
+    speedString = [show $ eSpeed boss]
+    speedSurf = createSurfaces font speedString (Color 0 0 0)
+    
+    killString = [show $ bRivalKills boss]
+    killSurf = createSurfaces font killString (Color 0 0 0)
   
 drawSkillQueue :: World -> SDL.Surface -> Font -> IO ()
 drawSkillQueue world mainSurf font = do
