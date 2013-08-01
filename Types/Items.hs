@@ -52,13 +52,15 @@ instance Show Weapon where
       outStr = 
         case wepQuality w of
           JourneyMan -> 
-            "Level " ++ show (wepLevel w) ++ " " ++ show (wepName w) ++ "(dmg: " ++ show (wepDamageDie w) ++ ", hitBonus: " ++ show (wepHitBonus w) ++ ", speedMult: " ++ show (wepSpeedMultiplier w) ++ ", range: " ++ show (wepRange w) ++ ")"
+            "Level " ++ show (wepLevel w) ++ " " ++ show (wepName w) ++ "\n" ++ 
+            "(dmg: " ++ show (wepDamageDie w) ++ ", hitBonus: " ++ show (wepHitBonus w) ++ ", speedMult: " ++ show (wepSpeedMultiplier w) ++ ", range: " ++ show (wepRange w) ++ ")"
             
           Master title ->
-            show title ++ ", the level " ++ show (wepLevel w) ++ " " ++ show (wepName w) ++ "(dmg: " ++ show (wepDamageDie w) ++ ", hitBonus: " ++ show (wepHitBonus w) ++ ", speedMult: " ++ show (wepSpeedMultiplier w) ++ ", range: " ++ show (wepRange w) ++ ")"
+            show title ++ ", the level " ++ show (wepLevel w) ++ " " ++ show (wepName w) ++ "\n" ++ 
+            "(dmg: " ++ show (wepDamageDie w) ++ ", hitBonus: " ++ show (wepHitBonus w) ++ ", speedMult: " ++ show (wepSpeedMultiplier w) ++ ", range: " ++ show (wepRange w) ++ ")"
 
           GrandMaster title legacy ->
-            show title ++ " - " ++ show legacy ++ ", the level " ++ show (wepLevel w) ++ " " ++ show (wepName w) ++ "(dmg: " ++ show (wepDamageDie w) ++ ", hitBonus: " ++ show (wepHitBonus w) ++ ", speedMult: " ++ show (wepSpeedMultiplier w) ++ ", range: " ++ show (wepRange w) ++ ")"            
+            show title ++ " - " ++ show legacy ++ ", the level " ++ show (wepLevel w) ++ " " ++ show (wepName w) ++ "\n" ++ "(dmg: " ++ show (wepDamageDie w) ++ ", hitBonus: " ++ show (wepHitBonus w) ++ ", speedMult: " ++ show (wepSpeedMultiplier w) ++ ", range: " ++ show (wepRange w) ++ ")"            
 
 
 

@@ -97,6 +97,8 @@ getInput  = do
         Quit -> return Exit
         (KeyDown (Keysym key _ char)) -> do
           case (key, char) of
+            (_, '@') -> return (Show Inv)
+            (_, '?') -> return (Show Help)            
             (SDLK_z, _) -> return (Show Skills)
             (SDLK_x, _) -> return (Show Inv)
             (SDLK_c, _) -> return (Show Help)
@@ -113,7 +115,6 @@ getInput  = do
             (SDLK_3, _) -> return (Queue 3)
             (SDLK_4, _) -> return (Queue 4)
             (SDLK_RETURN, _) -> return ExecuteSkills
-            (_, '?') -> return (Show Help)
             (SDLK_ESCAPE, _) -> return (Show Console)
             _ -> getInput 
         _ -> getInput 

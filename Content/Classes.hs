@@ -47,7 +47,7 @@ berserker = Class { cName = "Berserker",
                     cEnergyPerLevel = 10,
                     
                   
-                    cStartingWeapon = shortSword,
+                    cStartingWeapon = bestMaul,
                     cStartingArmor = rags,
                     cStartingInventory = Inventory [] 0,
                     cStartingSkills = [sweep, leap],

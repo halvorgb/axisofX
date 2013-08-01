@@ -109,12 +109,13 @@ legacyPrefix =
 
 legacySuffix =
   [
-    "virgins",
-    "widows",
-    "heroes",
-    "fools",
-    "yeastmongers",
-    "nobles"
+    "Virgins",
+    "Widows",
+    "Heroes",
+    "Fools",
+    "Yeastmongers",
+    "Nobles",
+    "Boats"
   ]
 
 randomWeaponLegacy :: StdGen -> (String, StdGen)

@@ -289,7 +289,11 @@ drawScreen world mainSurf font = do
       
       messageBuffer = case wScreenShown world of
         Help -> helpText
-        Inv -> ["Inventory TEMP"]
+        Inv -> 
+          ["Wielding:"] ++ (lines $ show $ hWield $ wHero world) ++ [" ", "Wearing:"] ++ (lines $ show $ hWear $ wHero world)
+          
+          
+          
         Skills -> skillsText ++ map (\(c,s) -> c:": " ++ show s) c2s
         LevelUp -> ["LevelUp TEMP"]
         Console -> take consoleBufferSize $ wMessageBuffer world

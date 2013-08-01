@@ -165,7 +165,7 @@ getName wpGrip wpType wpWeight =
         OneHanded ->
           case wpWeight of
             Balanced -> "Short Sword"
-            Heavy -> "Long Sword"
+            Heavy -> "Hatchet"
             Burdensome -> "Battle Axe"
         
         TwoHanded ->
@@ -198,7 +198,7 @@ getName wpGrip wpType wpWeight =
         
         TwoHanded ->
           case wpWeight of 
-            Balanced -> "Staff"
+            Balanced -> "Great Club"
             Heavy -> "Bec de Corbin"
             Burdensome -> "Meteor Hammer"
 

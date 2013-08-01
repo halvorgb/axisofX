@@ -84,16 +84,7 @@ instance Random WeaponGrip where
     
   randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
     (r, g') -> (toEnum r, g')
-
-
-{-
-+instance Random MonsterType where
-+    random g = case randomR (fromEnum (minBound :: MonsterType), fromEnum (maxBound :: MonsterType)) g of
-+                 (r, g') -> (toEnum r, g')
-+    randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
-+                        (r, g') -> (toEnum r, g')
--}                       
-                    
+            
                     
 --Dice:
 type NOFDie = Int
