@@ -173,14 +173,18 @@ handleRest :: World -> World
 handleRest w = 
   if null enemiesInView -- Safe to rest?
   then
-    w { wHero = h { hCurrEnergy = hMaxEnergy h}, wMessageBuffer = "You wake up from your rest brimming with energy.":wMessageBuffer w, wTimeElapsed = newTime}
+    if hMaxEnergy h == hCurrEnergy h
+    then
+      w { wMessageBuffer = "You're already at maximum energy!":wMessageBuffer w }
+    else
+      w { wHero = h { hCurrEnergy = hMaxEnergy h}, wMessageBuffer = "You wake up from your rest brimming with energy.":wMessageBuffer w, wTimeElapsed = newTime}
   else
     w { wMessageBuffer = "You can't rest while enemies are nearby!":wMessageBuffer w}
   where
     h = wHero w
     enemiesInView = getEntitiesFromViewFrame w $ getViewFrame w
     
-    newTime = wTimeElapsed w + fromIntegral((hMaxEnergy h - hCurrEnergy h) * eSpeed h)
+    newTime = 500 + wTimeElapsed w + fromIntegral((hMaxEnergy h - hCurrEnergy h) * 2)
   
 
 
