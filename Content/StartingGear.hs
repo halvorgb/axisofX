@@ -10,7 +10,7 @@ shortSword =
   generateWeaponStats Balanced Edged OneHanded 1 JourneyMan
   
 bestMaul =
-  generateWeaponStats Balanced Blunt TwoHanded 9 $ GrandMaster { wTitle = "Face Surgeon", wLegacy = "Savior of Widows" }
+  generateWeaponStats Balanced Blunt TwoHanded 9 GrandMaster { wTitle = "Face Surgeon", wLegacy = "Savior of Widows" }
 
 
 rags = Armor { aEvasion = 0,

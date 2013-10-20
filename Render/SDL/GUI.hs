@@ -62,7 +62,7 @@ delayedShutdown world assets = do
     update_ world' assets
   let quit e = case e of
         Quit -> return ()
-        (KeyDown (Keysym key _ _)) -> do
+        (KeyDown (Keysym key _ _)) ->
           case key of
             SDLK_q -> return ()
             _ -> waitEventBlocking >>= quit
@@ -90,12 +90,12 @@ loadAssets = do
   return (imageAssets, fontAsset)
 
 getInput ::  IO Input
-getInput  = do
+getInput  =
   waitEventBlocking >>= handleInput
     where
       handleInput e = case e of
         Quit -> return Exit
-        (KeyDown (Keysym key _ char)) -> do
+        (KeyDown (Keysym key _ char)) ->
           case (key, char) of
             (_, '@') -> return (Show Inv)
             (_, '?') -> return (Show Help)            
@@ -201,14 +201,14 @@ chooseFromList list pos mainSurf font w a = do
       
 -- Used  to get a char bounded [a..maxChar]. (world and assets are sent to handle quits)
 getChoice :: Char -> World -> Assets -> IO (Maybe Char)
-getChoice maxChar w a = do
+getChoice maxChar w a =
   waitEventBlocking >>= getCharInput
     where
       getCharInput e = case e of
-        Quit -> do 
+        Quit -> do
           shutdown w a
           exitWith ExitSuccess
-        (KeyDown (Keysym  k _ c)) -> do
+        (KeyDown (Keysym  k _ c)) ->
           case k of
             SDLK_ESCAPE -> return Nothing
             _ -> if c <= maxChar && C.isAsciiLower c -- exclude meta keys etc.

@@ -86,7 +86,7 @@ calcDmgDie wpGrip wpType wpWeight wpLevel =
         Heavy      -> Dice (1, 8) dmgMod
         Burdensome -> Dice (1, 10) dmgMod 
   where
-    dmgMod = (mod 2 wpLevel) - 1
+    dmgMod = mod 2 wpLevel - 1
       
             
 

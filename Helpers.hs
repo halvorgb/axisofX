@@ -131,7 +131,7 @@ getEntitiesFromViewFrame w (start,end) =
 
 getAndDeleteSkippedEntities :: World -> (Int, Int) -> ([Entity], M.Map Position Entity)
 getAndDeleteSkippedEntities w (start, _) =
-  foldl' (\(l, e) pos -> ((maybeToList (M.lookup pos e) ++ l), M.delete pos e)) ([], ents) coordinates
+  foldl' (\(l, e) pos -> (maybeToList (M.lookup pos e) ++ l, M.delete pos e)) ([], ents) coordinates
   where
     ents = lEntities $ wLevel w
     coordinates = zip [(-200)..(start-1)] $ repeat 0

@@ -38,26 +38,24 @@ main = do
 
 -- main game loop!
 gameLoop :: World -> Assets -> IO ()
-gameLoop world assets = do
-  if null (wLevels world) || (eCurrHP (wHero world) < 0) -- check if game ending.
-     -- Future: check boss distance
-    then do
-    GUI.delayedShutdown world assets
-    else do
-    if eNextMove (wHero world) == 0  -- check if hero's turn.
-      then do 
-      let world' = checkVision world
-      GUI.update_ world' assets
-      input <- GUI.getInput
-      case input of 
-        Show screen -> gameLoop (handleShow screen world') assets
-        Exit -> handleExit (world' {wScreenShown = Console}) assets
-        Wait -> gameLoop (handleWait (world' {wScreenShown = Console})) assets
-        Rest -> gameLoop (handleRest (world' {wScreenShown = Console})) assets
-        Dir dir -> gameLoop (handleDir (world' {wScreenShown = Console}) dir) assets
-        Queue i -> queueSkill i (world' {wScreenShown = Skills}) assets
-        ExecuteSkills -> executeSkills (world' {wScreenShown = Console}) assets
-      else do -- else: AI
+gameLoop world assets
+  | null (wLevels world) || 
+    (eCurrHP (wHero world) < 0) || 
+    fst (eCurrPos (wBoss world)) > fst (eCurrPos (wHero world)) = -- game end
+      GUI.delayedShutdown world assets
+  | eNextMove (wHero world) == 0 = do -- player's turn
+    let world' = checkVision world
+    GUI.update_ world' assets
+    input <- GUI.getInput
+    case input of 
+      Show screen -> gameLoop (handleShow screen world') assets
+      Exit -> handleExit (world' {wScreenShown = Console}) assets
+      Wait -> gameLoop (handleWait (world' {wScreenShown = Console})) assets
+      Rest -> gameLoop (handleRest (world' {wScreenShown = Console})) assets
+      Dir dir -> gameLoop (handleDir (world' {wScreenShown = Console}) dir) assets
+      Queue i -> queueSkill i (world' {wScreenShown = Skills}) assets
+      ExecuteSkills -> executeSkills (world' {wScreenShown = Console}) assets
+  | otherwise = do -- ai's turn
       world' <- think world
       gameLoop world' assets
 
